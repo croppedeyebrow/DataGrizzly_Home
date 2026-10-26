@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "revisionId": "c0040001-0004-4004-8004-000000000022",
+  "entryId": "c0040001-0004-4004-8004-000000000021",
+  "createdAt": "2026-10-20T00:00:00Z",
+  "title": "예시: 기획 기록",
+  "canonicalUrl": "https://example.com/logs/example-planning",
+  "example": true,
+  "metadata": {
+    "type": "log",
+    "projectId": "c0040001-0004-4004-8004-000000000001",
+    "stage": "planning",
+    "displayOrder": 0
+  },
+  "blocks": [
+    {
+      "id": "c0041001-0004-4004-8004-000000000021",
+      "type": "callout",
+      "tone": "warning",
+      "text": "이 문서는 가상 예시이며 실제 성과가 아니다."
+    },
+    {
+      "id": "c0041001-0004-4004-8004-000000000022",
+      "type": "paragraph",
+      "text": "작성 시각은 구현과 검증보다 늦다. 읽는 순서는 첫 번째다."
+    },
+    {
+      "id": "c0041001-0004-4004-8004-000000000023",
+      "type": "related",
+      "entryId": "c0040001-0004-4004-8004-000000000001"
+    }
+  ]
+}

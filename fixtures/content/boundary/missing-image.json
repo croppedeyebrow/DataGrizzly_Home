@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "revisionId": "c0042001-0004-4004-8004-000000000031",
+  "entryId": "c0042001-0004-4004-8004-000000000003",
+  "createdAt": "2026-10-26T04:02:00Z",
+  "title": "예시 경계: 없는 이미지",
+  "canonicalUrl": "https://example.com/boundary/missing-image",
+  "example": true,
+  "metadata": { "type": "note" },
+  "blocks": [
+    {
+      "id": "c0042001-0004-4004-8004-000000000032",
+      "type": "image",
+      "alt": "없는 예시 그림",
+      "url": "https://example.com/fixtures/media/absent-example.svg"
+    }
+  ]
+}

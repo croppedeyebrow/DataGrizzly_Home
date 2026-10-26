@@ -2,7 +2,7 @@
 
 - 확정일: 2026-10-25 (Asia/Seoul)
 - 프로젝트 루트: `C:\Dev\sideproject\My_Web`
-- 상태: **M0-03 공개 웹 주소와 환경 이름 분류까지 확인. API·DB와 다른 경로의 깨끗한 설치는 미실행. Git 재현은 보류**
+- 상태: **M0-04 예시 콘텐츠 fixture 통과. 공개 페이지에는 연결하지 않음. API와 DB는 미실행**
 - 원칙: 기존 설치를 우선 재사용하고, 프로젝트 의존성은 yarn.lock·Gradle Wrapper·빌드 파일로 정확히 고정한다.
 - Git: 사용자 요청에 따라 초기화·설정·커밋·원격 연결을 수행하지 않음
 
@@ -96,7 +96,6 @@ PostgreSQL 16은 현재 지원되는 메이저 버전이다. 설치된 16.10은 
 
 ## 다음 작업
 
-1. C: 여유 15 GiB 이상에서 M0-03.04 다른 경로 재빌드를 실행한다.
-2. 그 다음이 M0-04다. 디스크 하한 아래에서는 시작하지 않는다.
-3. 재현 설치는 `corepack yarn install --immutable`을 사용한다.
-4. Git 관련 S03·S04는 사용자가 설정할 때까지 보류한다. 저장소가 생기면 `scripts/check.ps1`이 `git diff --check`를 실행한다.
+1. M1-01 공통 UI를 구현한다. 예시 fixture는 아직 공개 페이지에 연결하지 않는다.
+2. 재현 설치는 `corepack yarn install --immutable`을 사용한다.
+3. API와 DB는 S13·S14 전이다.

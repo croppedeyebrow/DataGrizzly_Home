@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "revisionId": "c0042001-0004-4004-8004-000000000011",
+  "entryId": "c0042001-0004-4004-8004-000000000001",
+  "createdAt": "2026-10-26T04:00:00Z",
+  "title": "예시 경계: 표",
+  "canonicalUrl": "https://example.com/boundary/table",
+  "example": true,
+  "metadata": { "type": "note" },
+  "blocks": [
+    {
+      "id": "c0042001-0004-4004-8004-000000000012",
+      "type": "callout",
+      "tone": "note",
+      "text": "공개 예시 목록에 넣지 않는 렌더링 경계다."
+    },
+    {
+      "id": "c0042001-0004-4004-8004-000000000013",
+      "type": "table",
+      "caption": "예시 경계 표",
+      "header": ["열", "값"],
+      "rows": [["상태", "경계"]]
+    }
+  ]
+}

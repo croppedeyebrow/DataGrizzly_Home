@@ -51,7 +51,7 @@ PC에 PostgreSQL 16.10이 `127.0.0.1:5432`로 설치되어 있다는 S00 기록�
 - `BROWSER_PUBLIC`: 브라우저 번들에 들어갈 수 있는 이름. `PUBLIC_` 변수는 정의하지 않았다.
 - `SERVER_ONLY`: 이후 CMS가 프로세스 환경으로 읽을 `DB_URL`, `DB_USER`, `DB_PASSWORD`. 공개 웹은 읽지 않는다.
 
-`.gitignore`는 `.env`와 `node_modules`, `dist`를 제외한다. Git 초기화와 커밋은 하지 않았다. S03·S04는 계속 보류다.
+`.gitignore`는 `.env`와 `node_modules`, `dist`를 제외한다. 2026-10-26 다른 경로 빌드에서는 커밋하지 않았다.
 
 `node scripts/check-m0-env.mjs`는 `apps/web/dist`에서 `DB_PASSWORD`와 토큰 형태를 찾고, `apps/web` 소스의 사용자 프로필 절대 경로를 찾는다. 이번 빌드 결과는 둘 다 없었다. 검사 스크립트는 임시 파일에 넣은 `DB_PASSWORD`는 검출했다.
 
@@ -70,6 +70,23 @@ PC에 PostgreSQL 16.10이 `127.0.0.1:5432`로 설치되어 있다는 S00 기록�
 
 ## 다른 경로에서의 재빌드
 
-기존 `node_modules`와 `dist` 없이 다른 디렉터리에서 잠금 파일만으로 설치하는 절차는 실행하지 않았다. 검사 시작 시 C: 여유는 13.47 GiB, 검사 종료 시 12.4 GiB였다. 15 GiB 아래에서는 의존성 트리를 새로 만들지 않는다. 저장소 안의 `node_modules`는 173.2 MiB로 그대로였고, 줄어든 용량은 이 저장소 크기와 맞지 않는다.
+2026-10-26에 원본 `C:\Dev\sideproject\My_Web`의 `node_modules`는 남기고, `C:\Dev\sideproject\_m003_clean`으로 소스와 `yarn.lock`만 복사했다. 복사에서 `node_modules`, `dist`, `.astro`, `.git`은 빠졌다. 복사 직후 그 폴더에는 `node_modules`와 `dist`가 없었고 `yarn.lock`은 있었다. C: 여유는 시작 20.64 GiB, 설치 후 20.42 GiB였다.
 
-같은 작업 디렉터리의 기존 설치 위에서는 `corepack yarn install --immutable`과 정적 빌드가 통과했다.
+```powershell
+robocopy C:\Dev\sideproject\My_Web C:\Dev\sideproject\_m003_clean /E /XD node_modules dist .astro .git
+Set-Location C:\Dev\sideproject\_m003_clean
+corepack yarn install --immutable
+corepack yarn workspace @datagrizzly/web build
+node .\scripts\check-m0-env.mjs
+corepack yarn workspace @datagrizzly/web preview --host 127.0.0.1 --port 4321
+```
+
+| 명령 | 종료 코드 | 결과 |
+|---|---:|---|
+| `robocopy` | 1 | 파일 복사 완료. 이 코드는 복사 성공이다 |
+| `corepack yarn install --immutable` | 0 | peer dependency 경고 YN0086 |
+| `corepack yarn workspace @datagrizzly/web build` | 0 | `output: "static"`, 페이지 1개. 출력 경로는 `_m003_clean\apps\web\dist` |
+| `node .\scripts\check-m0-env.mjs` | 0 | `DB_PASSWORD`와 사용자 프로필 절대 경로 없음 |
+| preview `http://127.0.0.1:4321/` | HTTP 200 | 제목 DataGrizzly와 골격 문장. 확인 후 프로세스를 종료했고 4321 수신은 없었다 |
+
+`npm.cmd --version`은 10.9.9이고 `package-lock.json`은 없었다. 설치는 Yarn만 사용했다. 확인이 끝난 뒤 `_m003_clean`은 삭제했다. 삭제 후 C: 여유는 20.63 GiB이고, 원본 `node_modules`는 그대로다. API와 DB는 실행하지 않았다.

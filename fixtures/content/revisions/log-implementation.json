@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "revisionId": "c0040001-0004-4004-8004-000000000032",
+  "entryId": "c0040001-0004-4004-8004-000000000031",
+  "createdAt": "2026-10-01T00:00:00Z",
+  "title": "예시: 구현 기록",
+  "canonicalUrl": "https://example.com/logs/example-implementation",
+  "example": true,
+  "metadata": {
+    "type": "log",
+    "projectId": "c0040001-0004-4004-8004-000000000001",
+    "stage": "implementation",
+    "displayOrder": 1
+  },
+  "blocks": [
+    {
+      "id": "c0041001-0004-4004-8004-000000000031",
+      "type": "callout",
+      "tone": "warning",
+      "text": "이 문서는 가상 예시이며 실제 성과가 아니다."
+    },
+    {
+      "id": "c0041001-0004-4004-8004-000000000032",
+      "type": "paragraph",
+      "text": "작성 시각이 세 기록 중 가장 이르다. 읽는 순서는 두 번째다."
+    },
+    {
+      "id": "c0041001-0004-4004-8004-000000000033",
+      "type": "related",
+      "entryId": "c0040001-0004-4004-8004-000000000001"
+    }
+  ]
+}

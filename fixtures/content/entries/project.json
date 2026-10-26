@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "entryId": "c0040001-0004-4004-8004-000000000001",
+  "slug": "example-memo-desk",
+  "type": "project",
+  "version": 1,
+  "draftRevisionId": "c0040001-0004-4004-8004-000000000012",
+  "publishedRevisionId": "c0040001-0004-4004-8004-000000000011",
+  "updatedAt": "2026-10-26T00:00:00Z",
+  "example": true
+}

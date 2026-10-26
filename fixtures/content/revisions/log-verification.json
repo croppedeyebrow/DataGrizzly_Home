@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "revisionId": "c0040001-0004-4004-8004-000000000042",
+  "entryId": "c0040001-0004-4004-8004-000000000041",
+  "createdAt": "2026-10-10T00:00:00Z",
+  "title": "예시: 검증 기록",
+  "canonicalUrl": "https://example.com/logs/example-verification",
+  "example": true,
+  "metadata": {
+    "type": "log",
+    "projectId": "c0040001-0004-4004-8004-000000000001",
+    "stage": "verification",
+    "displayOrder": 2
+  },
+  "blocks": [
+    {
+      "id": "c0041001-0004-4004-8004-000000000041",
+      "type": "callout",
+      "tone": "warning",
+      "text": "이 문서는 가상 예시이며 실제 성과가 아니다."
+    },
+    {
+      "id": "c0041001-0004-4004-8004-000000000042",
+      "type": "paragraph",
+      "text": "작성 시각은 가운데다. 읽는 순서는 세 번째다."
+    },
+    {
+      "id": "c0041001-0004-4004-8004-000000000043",
+      "type": "related",
+      "entryId": "c0040001-0004-4004-8004-000000000001"
+    }
+  ]
+}

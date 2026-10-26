@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "revisionId": "c0042001-0004-4004-8004-000000000051",
+  "entryId": "c0042001-0004-4004-8004-000000000005",
+  "createdAt": "2026-10-26T04:04:00Z",
+  "title": "예시 경계: 잘못된 참조",
+  "canonicalUrl": "https://example.com/boundary/bad-reference",
+  "example": true,
+  "metadata": {
+    "type": "log",
+    "projectId": "c0040099-0004-4004-8004-000000000099",
+    "stage": "planning",
+    "displayOrder": 0
+  },
+  "blocks": [
+    {
+      "id": "c0042001-0004-4004-8004-000000000052",
+      "type": "paragraph",
+      "text": "이 과정은 공개 예시 프로젝트에 연결되지 않는다."
+    },
+    {
+      "id": "c0042001-0004-4004-8004-000000000053",
+      "type": "related",
+      "entryId": "c0040099-0004-4004-8004-000000000098"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "dataset": "public-example",
+  "projectId": "c0040001-0004-4004-8004-000000000001",
+  "public": [
+    {
+      "role": "project",
+      "entry": "entries/project.json",
+      "revision": "revisions/project.json"
+    },
+    {
+      "role": "log",
+      "entry": "entries/log-planning.json",
+      "revision": "revisions/log-planning.json"
+    },
+    {
+      "role": "log",
+      "entry": "entries/log-implementation.json",
+      "revision": "revisions/log-implementation.json"
+    },
+    {
+      "role": "log",
+      "entry": "entries/log-verification.json",
+      "revision": "revisions/log-verification.json"
+    },
+    {
+      "role": "note",
+      "entry": "entries/note.json",
+      "revision": "revisions/note.json"
+    },
+    {
+      "role": "paper",
+      "entry": "entries/paper.json",
+      "revision": "revisions/paper.json"
+    },
+    {
+      "role": "news",
+      "entry": "entries/news.json",
+      "revision": "revisions/news.json"
+    }
+  ],
+  "boundary": [
+    { "file": "boundary/long-title.json", "expect": "long-title" },
+    { "file": "boundary/long-code.json", "expect": "long-code" },
+    { "file": "boundary/table.json", "expect": "table" },
+    { "file": "boundary/math.json", "expect": "math" },
+    { "file": "boundary/missing-image.json", "expect": "media-missing" },
+    { "file": "boundary/empty-body.json", "expect": "empty-body" },
+    { "file": "boundary/bad-reference.json", "expect": "unknown-project" }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "revisionId": "c0040001-0004-4004-8004-000000000052",
+  "entryId": "c0040001-0004-4004-8004-000000000051",
+  "createdAt": "2026-10-26T01:00:00Z",
+  "title": "예시: 읽는 순서와 날짜",
+  "canonicalUrl": "https://example.com/notes/example-reading-order",
+  "example": true,
+  "metadata": { "type": "note" },
+  "blocks": [
+    {
+      "id": "c0041001-0004-4004-8004-000000000051",
+      "type": "callout",
+      "tone": "warning",
+      "text": "이 문서는 가상 예시이며 실제 성과가 아니다."
+    },
+    {
+      "id": "c0041001-0004-4004-8004-000000000052",
+      "type": "paragraph",
+      "text": "프로젝트에 속하지 않는 학습 예시다. 날짜 정렬과 화면 순서는 다른 필드다."
+    }
+  ]
+}

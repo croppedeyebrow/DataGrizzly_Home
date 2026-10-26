@@ -31,6 +31,8 @@ JSON Schema와 앵커 중복·표 열 수 검사는 문서 구조만 본다. pro
 
 블록 편집기 제품은 아직 정하지 않았다. 선택한 편집기는 이 스키마의 블록만 내보내야 한다. 수식은 TeX 문자열, 코드는 실행하지 않는 텍스트다. MDX와 script 블록은 없다.
 
+F03의 sourceUrl, authors, publicationDate, eventDate와 F02의 commitUrl은 schemaVersion 1 metadata에 없다. M0-04는 출처와 날짜를 블록 앵커로 둔다. 그 값을 metadata 필드로 옮기면 schemaVersion 2가 필요하다. 이번 단계에서는 올리지 않는다.
+
 ## 아직 아닌 것
 
 API 서버, 인증 제공자, DB 제약, Rust 검증 바이너리는 이 계약의 구현이 아니다.

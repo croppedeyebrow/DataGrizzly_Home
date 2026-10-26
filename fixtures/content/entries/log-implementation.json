@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "entryId": "c0040001-0004-4004-8004-000000000031",
+  "slug": "example-implementation",
+  "type": "log",
+  "version": 1,
+  "draftRevisionId": "c0040001-0004-4004-8004-000000000033",
+  "publishedRevisionId": "c0040001-0004-4004-8004-000000000032",
+  "updatedAt": "2026-10-01T00:00:00Z",
+  "example": true
+}

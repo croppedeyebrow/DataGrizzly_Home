@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "entryId": "c0040001-0004-4004-8004-000000000021",
+  "slug": "example-planning",
+  "type": "log",
+  "version": 1,
+  "draftRevisionId": "c0040001-0004-4004-8004-000000000023",
+  "publishedRevisionId": "c0040001-0004-4004-8004-000000000022",
+  "updatedAt": "2026-10-20T00:00:00Z",
+  "example": true
+}

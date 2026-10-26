@@ -56,7 +56,7 @@ Manifest: releaseId, schemaVersion, chunkerVersion, indexVersion, hashes.
 
 ## v5.0 확정 변경
 
-[[SCOPE_v5]]를적용합니다. 검색은PostgreSQL공개검색행+KotlinAPI이며RustCLI가발행텍스트를추출합니다. 별도C++검색/추론서버는없습니다. Go는선택입니다. S19/M0-03은현재설치된공개웹만초기검증하고DB는M2전S14에서확인합니다. 실행 절차는 `docs/setup/local-run.md`에 있다. 2026-10-25 확인은 공개 웹 미리보기까지이며 API와 DB는 실행하지 않았다.
+[[SCOPE_v5]]를적용합니다. 검색은PostgreSQL공개검색행+KotlinAPI이며RustCLI가발행텍스트를추출합니다. 별도C++검색/추론서버는없습니다. Go는선택입니다. S19/M0-03은현재설치된공개웹만초기검증하고DB는M2전S14에서확인합니다. 실행 절차는 `docs/setup/local-run.md`에 있다. 2026-10-26에 다른 경로의 잠금 파일 빌드와 미리보기가 통과했다. API와 DB는 실행하지 않았다.
 
 ## v5.0 자료 워크플로 반영
 

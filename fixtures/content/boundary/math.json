@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "revisionId": "c0042001-0004-4004-8004-000000000021",
+  "entryId": "c0042001-0004-4004-8004-000000000002",
+  "createdAt": "2026-10-26T04:01:00Z",
+  "title": "예시 경계: 수식",
+  "canonicalUrl": "https://example.com/boundary/math",
+  "example": true,
+  "metadata": { "type": "note" },
+  "blocks": [
+    {
+      "id": "c0042001-0004-4004-8004-000000000022",
+      "type": "callout",
+      "tone": "note",
+      "text": "공개 예시 목록에 넣지 않는 렌더링 경계다. 측정값이 아니다."
+    },
+    {
+      "id": "c0042001-0004-4004-8004-000000000023",
+      "type": "math",
+      "tex": "a+b"
+    }
+  ]
+}
