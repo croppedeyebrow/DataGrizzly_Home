@@ -1,0 +1,444 @@
+openapi: 3.1.0
+info:
+  title: DataGrizzly content API
+  version: "1"
+  summary: schemaVersion 1의 최소 CMS·검색 계약
+  description: >
+    운영 도메인은 미정이다. 관리자 인증 제공자도 M2-01 전까지 미정이다.
+    이 명세는 소유자 세션이 필요하다는 것과 오류 필드만 고정한다.
+    초안 저장은 publishedRevisionId를 바꾸지 않는다.
+    version과 releaseId를 같은 값으로 쓰지 않는다.
+servers:
+  - url: /
+    description: 운영 출처는 미정이다. 로컬 주소를 운영 서버로 적지 않는다.
+tags:
+  - name: admin
+  - name: search
+paths:
+  /api/admin/entries:
+    post:
+      tags: [admin]
+      operationId: createEntry
+      security:
+        - ownerSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [schemaVersion, type, title]
+              properties:
+                schemaVersion:
+                  const: 1
+                type:
+                  enum: [project, log, note, paper, news]
+                title:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+      responses:
+        "201":
+          description: 글 식별자와 저장 버전. 공개 포인터는 아직 없다.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateEntryResult"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+  /api/admin/entries/{id}/draft:
+    put:
+      tags: [admin]
+      operationId: saveDraft
+      security:
+        - ownerSession: []
+      parameters:
+        - $ref: "#/components/parameters/EntryId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [schemaVersion, expectedVersion, body, metadata]
+              properties:
+                schemaVersion:
+                  const: 1
+                expectedVersion:
+                  type: integer
+                  minimum: 1
+                body:
+                  $ref: ./content.schema.json#/$defs/revisionDocument
+                metadata:
+                  type: object
+                  additionalProperties: false
+                  required: [type]
+                  properties:
+                    type:
+                      enum: [project, log, note, paper, news]
+            description: body는 새 수정본이다. 이 요청은 공개 포인터를 바꾸지 않는다.
+      responses:
+        "200":
+          description: 새 revisionId와 증가한 entry version. releaseId가 아니다.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DraftSaveResult"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "409":
+          description: expectedVersion이 서버 버전과 다르다. 요청 본문을 덮어쓰지 않는다.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+  /api/admin/entries/{id}/preview:
+    get:
+      tags: [admin]
+      operationId: readDraftPreview
+      security:
+        - ownerSession: []
+      parameters:
+        - $ref: "#/components/parameters/EntryId"
+      responses:
+        "200":
+          description: 초안 수정본. 공개 수정본이 아니다.
+          content:
+            application/json:
+              schema:
+                $ref: ./content.schema.json#/$defs/revisionDocument
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+  /api/admin/entries/{id}/publications:
+    post:
+      tags: [admin]
+      operationId: publishEntry
+      security:
+        - ownerSession: []
+      parameters:
+        - $ref: "#/components/parameters/EntryId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [schemaVersion, revisionId, idempotencyKey]
+              properties:
+                schemaVersion:
+                  const: 1
+                revisionId:
+                  $ref: ./content.schema.json#/$defs/uuid
+                idempotencyKey:
+                  type: string
+                  minLength: 8
+                  maxLength: 80
+                  pattern: "^[A-Za-z0-9._:-]+$"
+            description: 같은 키와 같은 본문의 재전송은 같은 jobId다. 같은 키에 다른 본문이면 409다.
+      responses:
+        "202":
+          description: 발행 작업을 접수했다. 공개 전환이 끝났다는 뜻이 아니다.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobAccepted"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+  /api/admin/publication-jobs/{id}:
+    get:
+      tags: [admin]
+      operationId: readPublicationJob
+      security:
+        - ownerSession: []
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+      responses:
+        "200":
+          description: 작업 상태. error가 있으면 공개 성공이 아니다.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicationJob"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+  /api/admin/entries/{id}/restore:
+    post:
+      tags: [admin]
+      operationId: restoreRevision
+      security:
+        - ownerSession: []
+      parameters:
+        - $ref: "#/components/parameters/EntryId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [schemaVersion, revisionId, expectedVersion]
+              properties:
+                schemaVersion:
+                  const: 1
+                revisionId:
+                  $ref: ./content.schema.json#/$defs/uuid
+                expectedVersion:
+                  type: integer
+                  minimum: 1
+            description: 옛 수정본을 고치지 않는다. 그 내용으로 새 초안 수정본을 만든다.
+      responses:
+        "200":
+          description: 새 초안 revisionId.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DraftSaveResult"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+  /api/admin/entries/{id}/unpublish:
+    post:
+      tags: [admin]
+      operationId: unpublishEntry
+      security:
+        - ownerSession: []
+      parameters:
+        - $ref: "#/components/parameters/EntryId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [schemaVersion, expectedVersion]
+              properties:
+                schemaVersion:
+                  const: 1
+                expectedVersion:
+                  type: integer
+                  minimum: 1
+      responses:
+        "202":
+          description: 철회 작업을 접수했다.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobAccepted"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+  /api/search:
+    get:
+      tags: [search]
+      operationId: searchPublic
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+        - name: type
+          in: query
+          required: false
+          schema:
+            enum: [project, log, note, paper, news]
+        - name: project
+          in: query
+          required: false
+          schema:
+            $ref: ./content.schema.json#/$defs/uuid
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: 공개 세대의 검색 결과. score는 신뢰 확률이 아니다.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResult"
+        "422":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          description: 검색을 사용할 수 없다. CMS 저장 실패와 다른 코드다.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  securitySchemes:
+    ownerSession:
+      type: apiKey
+      in: cookie
+      name: datagrizzly_session
+      description: 제공자는 미정이다. 관리 API에 소유자 세션이 필요하다는 표시만 한다.
+  parameters:
+    EntryId:
+      name: id
+      in: path
+      required: true
+      schema:
+        $ref: ./content.schema.json#/$defs/uuid
+    JobId:
+      name: id
+      in: path
+      required: true
+      schema:
+        $ref: ./content.schema.json#/$defs/uuid
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 200
+  responses:
+    Error:
+      description: 공통 오류. stacktrace는 없다.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    Error:
+      $ref: ./content.schema.json#/$defs/error
+    CreateEntryResult:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, entryId, version, publishedRevisionId]
+      properties:
+        schemaVersion:
+          const: 1
+        entryId:
+          $ref: ./content.schema.json#/$defs/uuid
+        version:
+          type: integer
+          minimum: 1
+        publishedRevisionId:
+          type: "null"
+    DraftSaveResult:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, revisionId, version]
+      properties:
+        schemaVersion:
+          const: 1
+        revisionId:
+          $ref: ./content.schema.json#/$defs/uuid
+        version:
+          type: integer
+          minimum: 1
+    JobAccepted:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, jobId]
+      properties:
+        schemaVersion:
+          const: 1
+        jobId:
+          $ref: ./content.schema.json#/$defs/uuid
+    PublicationJob:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, state]
+      properties:
+        schemaVersion:
+          const: 1
+        state:
+          enum: [queued, running, succeeded, failed]
+        releaseId:
+          $ref: ./content.schema.json#/$defs/uuid
+        error:
+          $ref: "#/components/schemas/Error"
+    SearchResult:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, hits, releaseId, mode]
+      properties:
+        schemaVersion:
+          const: 1
+        releaseId:
+          $ref: ./content.schema.json#/$defs/uuid
+        mode:
+          const: keyword
+        nextCursor:
+          type: string
+          minLength: 1
+          maxLength: 200
+        hits:
+          type: array
+          maxItems: 50
+          items:
+            type: object
+            additionalProperties: false
+            required: [entryId, revisionId, chunkId, title, snippet, url, anchor, score]
+            properties:
+              entryId:
+                $ref: ./content.schema.json#/$defs/uuid
+              revisionId:
+                $ref: ./content.schema.json#/$defs/uuid
+              chunkId:
+                type: string
+                minLength: 1
+                maxLength: 80
+              title:
+                type: string
+                minLength: 1
+                maxLength: 200
+              snippet:
+                type: string
+                maxLength: 500
+              url:
+                $ref: ./content.schema.json#/$defs/httpsUrl
+              anchor:
+                $ref: ./content.schema.json#/$defs/anchor
+              score:
+                type: number
+                description: 정렬용 점수다. 신뢰 확률로 표시하지 않는다.

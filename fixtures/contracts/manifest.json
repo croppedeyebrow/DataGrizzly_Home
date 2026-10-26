@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "knownProjectIds": ["11111111-1111-4111-8111-111111111111"],
+  "cases": [
+    {
+      "file": "valid/project-log.json",
+      "definition": "revisionDocument",
+      "schema": "pass",
+      "structure": "pass",
+      "references": "pass"
+    },
+    {
+      "file": "valid/entry.json",
+      "definition": "entry",
+      "schema": "pass",
+      "structure": "pass",
+      "references": "skip"
+    },
+    {
+      "file": "invalid/missing-text.json",
+      "definition": "revisionDocument",
+      "schema": "fail",
+      "structure": "skip",
+      "references": "skip",
+      "errorPath": "/blocks/0/text"
+    },
+    {
+      "file": "invalid/unknown-block.json",
+      "definition": "revisionDocument",
+      "schema": "fail",
+      "structure": "skip",
+      "references": "skip"
+    },
+    {
+      "file": "invalid/unsupported-schema-version.json",
+      "definition": "revisionDocument",
+      "schema": "fail",
+      "structure": "skip",
+      "references": "skip",
+      "errorPath": "/schemaVersion"
+    },
+    {
+      "file": "invalid/duplicate-anchor.json",
+      "definition": "revisionDocument",
+      "schema": "pass",
+      "structure": "fail",
+      "references": "skip"
+    },
+    {
+      "file": "invalid/bad-url-scheme.json",
+      "definition": "revisionDocument",
+      "schema": "fail",
+      "structure": "skip",
+      "references": "skip",
+      "errorPath": "/blocks/0/url"
+    },
+    {
+      "file": "invalid/missing-schema-version.json",
+      "definition": "revisionDocument",
+      "schema": "fail",
+      "structure": "skip",
+      "references": "skip",
+      "errorPath": "/schemaVersion"
+    },
+    {
+      "file": "references/unknown-project.json",
+      "definition": "revisionDocument",
+      "schema": "pass",
+      "structure": "pass",
+      "references": "fail"
+    },
+    {
+      "file": "api/conflict.json",
+      "definition": "error",
+      "schema": "pass",
+      "structure": "skip",
+      "references": "skip"
+    },
+    {
+      "file": "api/validation-failed.json",
+      "definition": "error",
+      "schema": "pass",
+      "structure": "skip",
+      "references": "skip"
+    }
+  ]
+}

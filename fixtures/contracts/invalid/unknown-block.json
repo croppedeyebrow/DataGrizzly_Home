@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "revisionId": "33333333-3333-4333-8333-333333333333",
+  "entryId": "22222222-2222-4222-8222-222222222222",
+  "createdAt": "2026-10-25T08:00:00Z",
+  "title": "예시 미지원 블록",
+  "canonicalUrl": "https://example.com/logs/example-unknown",
+  "example": true,
+  "metadata": {
+    "type": "note"
+  },
+  "blocks": [
+    {
+      "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "type": "script",
+      "text": "허용하지 않는 블록"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "code": "validation_failed",
+  "message": "이미지 주소의 scheme을 허용하지 않습니다.",
+  "requestId": "req_validation01",
+  "fieldErrors": [
+    {
+      "path": "/blocks/0/url",
+      "code": "pattern"
+    }
+  ]
+}

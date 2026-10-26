@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "code": "conflict",
+  "message": "저장 버전이 일치하지 않습니다. 요청 본문은 유지됩니다.",
+  "requestId": "req_conflict01",
+  "fieldErrors": [
+    {
+      "path": "/expectedVersion",
+      "code": "stale"
+    }
+  ]
+}
