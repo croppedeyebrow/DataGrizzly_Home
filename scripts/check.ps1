@@ -40,6 +40,7 @@ Invoke-Native -Name 'web-build' -Command @('corepack', 'yarn', 'workspace', '@da
 Invoke-Native -Name 'web-check' -Command @('corepack', 'yarn', 'workspace', '@datagrizzly/web', 'check')
 Invoke-Native -Name 'env-classification' -Command @('node', 'scripts/check-m0-env.mjs')
 Invoke-Native -Name 'content-fixtures' -Command @('node', 'scripts/check-m0-content.mjs')
+Invoke-Native -Name 'layout-home' -Command @('node', 'scripts/check-m1-layout.mjs')
 
 $freeGiB = [math]::Round((Get-PSDrive -Name C).Free / 1GB, 2)
 Write-Output "DISK_FREE_GIB=$freeGiB"

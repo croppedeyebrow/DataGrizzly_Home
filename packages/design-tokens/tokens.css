@@ -1,0 +1,26 @@
+/*
+ * 개념: 공개 웹이 함께 쓰는 색, 글자, 간격, 본문 폭, 포커스 표시.
+ * 목적: 페이지마다 색과 글자 크기를 따로 정하지 않게 한다.
+ * 사용처: apps/web/src/styles/global.css 가 이 파일을 불러 홈과 소개에 적용한다.
+ * 한글 글꼴을 네트워크에서 받지 않는다. 첫 글꼴이 없으면 다음 시스템 글꼴을 쓴다.
+ */
+:root {
+  --color-bg: #f7f4ee;
+  --color-surface: #fffdf8;
+  --color-text: #1d1a16;
+  --color-muted: #5e584f;
+  --color-line: #ddd4c6;
+  --color-accent: #8c3d2f;
+  --color-focus: #1d4e89;
+  --font-body: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  --font-size-body: 1.0625rem;
+  --font-size-title: 2rem;
+  --line-height-body: 1.7;
+  --measure: 42rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2.5rem;
+  --focus-ring: 0 0 0 3px var(--color-focus);
+}

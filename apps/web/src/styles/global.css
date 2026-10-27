@@ -1,0 +1,180 @@
+/*
+ * 개념: 토큰을 공개 웹의 공통 배치로 풀어 쓴다.
+ * 목적: 본문 폭, 포커스 링, 좁은 화면 메뉴를 홈과 소개가 같이 쓰게 한다.
+ * 사용처: apps/web/src/layouts/Base.astro
+ */
+@import "@datagrizzly/design-tokens/tokens.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--color-bg);
+}
+
+body {
+  margin: 0;
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+h1,
+h2,
+h3,
+p,
+a,
+li {
+  overflow-wrap: anywhere;
+}
+
+h1 {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-title);
+  line-height: 1.25;
+}
+
+h2 {
+  margin: var(--space-6) 0 var(--space-3);
+  font-size: 1.35rem;
+  line-height: 1.35;
+}
+
+p,
+ul {
+  margin: 0 0 var(--space-4);
+}
+
+a {
+  color: var(--color-accent);
+}
+
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--space-4);
+  top: var(--space-4);
+  transform: translateY(-150%);
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: var(--space-2) var(--space-3);
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+.shell {
+  width: min(calc(100% - 2rem), var(--measure));
+  margin-inline: auto;
+}
+
+.site-header,
+.site-footer {
+  background: var(--color-surface);
+  border-block: 1px solid var(--color-line);
+}
+
+.site-header .shell,
+.site-footer .shell {
+  padding-block: var(--space-4);
+}
+
+.brand {
+  color: var(--color-text);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.site-menu {
+  margin-top: var(--space-3);
+}
+
+.site-menu summary {
+  width: fit-content;
+  cursor: pointer;
+}
+
+.site-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.site-nav a {
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.site-nav a[aria-current="page"] {
+  text-decoration: underline;
+  text-underline-offset: 0.35rem;
+}
+
+main {
+  padding-block: var(--space-6);
+}
+
+.example-flag,
+.empty-state {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+}
+
+.meta {
+  color: var(--color-muted);
+}
+
+/* 홈의 시작 링크 두 개. 좁은 화면에서 붙지 않게 줄바꿈한다. */
+.start-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+
+@media (max-width: 47.99rem) {
+  .site-menu:not([open]) .site-nav {
+    display: none;
+  }
+}
+
+@media (min-width: 48rem) {
+  .site-header .shell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .site-menu {
+    margin-top: 0;
+  }
+
+  .site-menu summary {
+    display: none;
+  }
+
+  .site-nav {
+    display: block;
+  }
+}

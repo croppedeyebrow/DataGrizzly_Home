@@ -379,6 +379,12 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@datagrizzly/design-tokens@workspace:*, @datagrizzly/design-tokens@workspace:packages/design-tokens":
+  version: 0.0.0-use.local
+  resolution: "@datagrizzly/design-tokens@workspace:packages/design-tokens"
+  languageName: unknown
+  linkType: soft
+
 "@datagrizzly/root@workspace:.":
   version: 0.0.0-use.local
   resolution: "@datagrizzly/root@workspace:."
@@ -393,6 +399,7 @@ __metadata:
   resolution: "@datagrizzly/web@workspace:apps/web"
   dependencies:
     "@astrojs/check": "npm:0.9.12"
+    "@datagrizzly/design-tokens": "workspace:*"
     astro: "npm:7.4.2"
     typescript: "npm:6.0.3"
   languageName: unknown

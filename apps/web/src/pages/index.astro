@@ -1,17 +1,98 @@
 ---
-const status = "공개 웹 골격. 정적 출력. API와 콘텐츠는 아직 연결하지 않았습니다.";
+/**
+ * 개념: 홈. 브랜드 문장, 대표 예시 프로젝트, 최근 과정 기록, 빈 연락 링크.
+ * 목적: fixture에 있는 예시만 보여주고, 없는 연락 링크는 준비 상태로 남긴다.
+ * 사용처: 공개 경로 `/`. 공통 틀은 layouts/Base.astro.
+ */
+import Base from '../layouts/Base.astro';
+import markUrl from '../../../../fixtures/media/example-mark.svg?url';
+import { loadPublicHome } from '../../../../scripts/public-examples.mjs';
+
+type LogItem = { title: string; stage: string; createdAt: string; displayOrder: number };
+type TopicItem = { title: string; kind: 'note' | 'paper' | 'news' };
+type HomeData = {
+  loadError: boolean;
+  project: { title: string; summary: string; imageAlt: string; imageName: string } | null;
+  logs: LogItem[];
+  topics: TopicItem[];
+  contact: string | null;
+};
+
+/* 개발과 빌드 명령의 현재 폴더는 apps/web 이다. */
+const home = loadPublicHome('../../fixtures/content') as HomeData;
+const kindLabel = { note: '노트', paper: '논문', news: '뉴스' };
 ---
 
-<html lang="ko">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>DataGrizzly</title>
-	</head>
-	<body>
-		<h1>DataGrizzly</h1>
-		<p>{status}</p>
-	</body>
-</html>
+<Base title="DataGrizzly" current="/">
+  <h1>DataGrizzly</h1>
+  <p>프로젝트 설명과 과정 기록을 나누어 보여주는 공개 웹이다.</p>
+  <p class="start-links">
+    <a href="/about">소개 보기</a>
+    <a href="#featured-project">예시 프로젝트 보기</a>
+  </p>
+  {
+    home.loadError ? (
+      <p class="empty-state">예시 파일을 읽지 못했다. 이 페이지는 빈 준비 상태로 남는다.</p>
+    ) : (
+      <>
+        <section id="featured-project">
+          <h2>대표 프로젝트</h2>
+          {home.project ? (
+            <>
+              <p class="example-flag">예시이며 실제 성과가 아니다.</p>
+              <h3>{home.project.title}</h3>
+              <p>{home.project.summary}</p>
+              {home.project.imageName === 'example-mark.svg' ? (
+                <img src={markUrl} alt={home.project.imageAlt} width="64" height="64" />
+              ) : (
+                <p class="empty-state">로컬 이미지 파일을 찾지 못했다.</p>
+              )}
+            </>
+          ) : (
+            <p class="empty-state">공개할 프로젝트가 아직 없다.</p>
+          )}
+        </section>
+        <section>
+          <h2>최근 과정 기록</h2>
+          {home.logs.length > 0 ? (
+            <ol>
+              {home.logs.map((log) => (
+                <li>
+                  <p>{log.title}</p>
+                  <p class="meta">
+                    읽는 순서 {log.displayOrder + 1} · {log.stage} · 작성 시각 {log.createdAt}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p class="empty-state">공개할 과정 기록이 아직 없다.</p>
+          )}
+        </section>
+        <section>
+          <h2>노트와 리서치</h2>
+          {home.topics.length > 0 ? (
+            <ul>
+              {home.topics.map((topic) => (
+                <li>
+                  {kindLabel[topic.kind]} · {topic.title}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="empty-state">공개할 노트와 리서치가 아직 없다.</p>
+          )}
+          <p class="meta">상세 페이지는 아직 없다. 제목만 예시로 보여 준다.</p>
+        </section>
+        <section>
+          <h2>연락</h2>
+          {home.contact ? (
+            <a href={home.contact}>{home.contact}</a>
+          ) : (
+            <p class="empty-state">연락 링크는 아직 없다.</p>
+          )}
+        </section>
+      </>
+    )
+  }
+</Base>

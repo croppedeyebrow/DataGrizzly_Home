@@ -1,0 +1,66 @@
+---
+/**
+ * 개념: 공개 웹의 공통 틀.
+ * 목적: 건너뛰기 링크, 헤더, 현재 메뉴, 본문 하나, 푸터를 페이지가 반복하지 않게 한다.
+ * 사용처: apps/web/src/pages/index.astro, apps/web/src/pages/about.astro
+ */
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  current: '/' | '/about';
+}
+
+const { title, current } = Astro.props;
+const items = [
+  { href: '/', label: '홈' },
+  { href: '/about', label: '소개' },
+];
+---
+
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <link rel="canonical" href={current} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+    <header class="site-header">
+      <div class="shell">
+        <a class="brand" href="/">DataGrizzly</a>
+        <details id="site-menu" class="site-menu">
+          <summary>메뉴</summary>
+          <nav class="site-nav" aria-label="공개 웹">
+            <ul>
+              {
+                items.map((item) => (
+                  <li>
+                    <a href={item.href} aria-current={item.href === current ? 'page' : undefined}>
+                      {item.label}
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </nav>
+        </details>
+      </div>
+    </header>
+    <main id="main" class="shell">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="shell">
+        <p>예시로 표시된 글은 실제 성과가 아니다. 상세 페이지와 API는 아직 연결하지 않았다.</p>
+      </div>
+    </footer>
+    <script>
+      import { setupSiteMenu } from '../scripts/site-menu.ts';
+      setupSiteMenu(document.querySelector('#site-menu'));
+    </script>
+  </body>
+</html>

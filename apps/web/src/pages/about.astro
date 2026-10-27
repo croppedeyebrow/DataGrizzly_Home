@@ -1,0 +1,28 @@
+---
+/**
+ * 개념: 소개 페이지.
+ * 목적: 제공되지 않은 경력, 도메인, 기술 근거, GitHub, 연락은 예시로 채우지 않고 빈 상태로 둔다.
+ * 사용처: 공개 경로 `/about`. 공통 틀은 layouts/Base.astro.
+ */
+import Base from '../layouts/Base.astro';
+
+const sections = [
+  { title: '지향하는 엔지니어', text: '소개 문장이 아직 없다.' },
+  { title: '관심 도메인', text: '관심 도메인이 아직 없다.' },
+  { title: '기술 역량', text: '근거가 되는 실제 프로젝트가 아직 없다. 홈의 예시를 경력으로 쓰지 않는다.' },
+  { title: 'GitHub와 연락', text: 'GitHub 주소와 연락 링크가 아직 없다.' },
+];
+---
+
+<Base title="소개 · DataGrizzly" current="/about">
+  <h1>소개</h1>
+  <p>이 페이지는 준비 상태다. 실제 이력은 제공된 내용만 적는다.</p>
+  {
+    sections.map((section) => (
+      <section>
+        <h2>{section.title}</h2>
+        <p class="empty-state">{section.text}</p>
+      </section>
+    ))
+  }
+</Base>
