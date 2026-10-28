@@ -1,0 +1,54 @@
+---
+/**
+ * 개념: 한 프로젝트의 과정 목록.
+ * 목적: 공개 과정을 읽는 순서로 보여주고, 각 항목은 과정 상세의 canonical로만 연결한다.
+ * 사용처: 공개 경로 `/projects/{slug}/logs`. 같은 글을 `/projects/{slug}/logs/{log}`에 복제하지 않는다.
+ */
+import Base from '../../../layouts/Base.astro';
+import ProjectIdentity from '../../../components/ProjectIdentity.astro';
+import { loadPublicProjects } from '../../../../../../scripts/public-projects.mjs';
+import type { ProjectSite, PublicProject } from '../../../scripts/project-types.ts';
+
+export function getStaticPaths() {
+  const site = loadPublicProjects('../../fixtures/content') as ProjectSite;
+  return site.projects.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+}
+
+interface Props {
+  project: PublicProject;
+}
+
+const { project } = Astro.props;
+---
+
+<Base title={`과정 · ${project.title}`} current="/projects" canonical={`/projects/${project.slug}/logs`}>
+  <ProjectIdentity
+    title={project.title}
+    status={project.status || '상태가 아직 없다.'}
+    exampleText={project.callout || '예시이며 실제 성과가 아니다.'}
+    slug={project.slug}
+    tab="logs"
+  />
+  <p class="meta">목록은 읽는 순서다. 작성 시각은 그 순서와 다를 수 있다.</p>
+  {
+    project.logs.length > 0 ? (
+      <ol class="log-list">
+        {project.logs.map((log) => (
+          <li>
+            <h2>
+              <a href={`/logs/${log.slug}`}>{log.title}</a>
+            </h2>
+            <p class="meta">
+              읽는 순서 {log.displayOrder + 1} · {log.stage} · 작성 시각 {log.createdAt}
+            </p>
+          </li>
+        ))}
+      </ol>
+    ) : (
+      <p class="empty-state">공개된 과정 기록이 아직 없다.</p>
+    )
+  }
+</Base>

@@ -1,0 +1,41 @@
+---
+/**
+ * 개념: 공개 프로젝트 목록.
+ * 목적: 공개된 예시만 카드로 보여주고, 각 카드는 그 프로젝트의 설명 주소로 간다.
+ * 사용처: 공개 경로 `/projects`. 공통 틀은 layouts/Base.astro.
+ */
+import Base from '../../layouts/Base.astro';
+import { loadPublicProjects } from '../../../../../scripts/public-projects.mjs';
+import type { ProjectSite } from '../../scripts/project-types.ts';
+
+/* 개발과 빌드 명령의 현재 폴더는 apps/web 이다. */
+const site = loadPublicProjects('../../fixtures/content') as ProjectSite;
+---
+
+<Base title="프로젝트 · DataGrizzly" current="/projects">
+  <h1>프로젝트</h1>
+  <p>공개된 예시 프로젝트만 보여 준다.</p>
+  <p class="meta">개발 중, 공개, 유지보수로 나누는 필터는 아직 없다.</p>
+  {
+    site.loadError ? (
+      <p class="empty-state">예시 파일을 읽지 못했다. 이 페이지는 빈 목록으로 남는다.</p>
+    ) : site.projects.length === 0 ? (
+      <p class="empty-state">공개 프로젝트가 아직 없다.</p>
+    ) : (
+      <ul class="project-list">
+        {site.projects.map((project) => (
+          <li class="project-card">
+            <h2>
+              <a href={`/projects/${project.slug}`}>{project.title}</a>
+            </h2>
+            <p class="example-flag">예시이며 실제 성과가 아니다.</p>
+            <p>{project.status || '상태가 아직 없다.'}</p>
+            <p class="empty-state">주제가 아직 없다.</p>
+            <p>{project.summary}</p>
+            <p class="meta">갱신 {project.updatedAt}</p>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Base>

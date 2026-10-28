@@ -1,0 +1,26 @@
+---
+/**
+ * 개념: 프로젝트 설명과 과정 목록이 함께 쓰는 제목과 탭.
+ * 목적: 탭을 옮겨도 같은 프로젝트 이름과 상태, 예시 표시가 남게 한다.
+ * 사용처: apps/web/src/pages/projects/[slug].astro, apps/web/src/pages/projects/[slug]/logs.astro
+ */
+interface Props {
+  title: string;
+  status: string;
+  exampleText: string;
+  slug: string;
+  tab: 'description' | 'logs';
+}
+
+const { title, status, exampleText, slug, tab } = Astro.props;
+---
+
+<header class="project-identity">
+  <p class="example-flag">{exampleText}</p>
+  <h1>{title}</h1>
+  <p>{status}</p>
+  <nav class="project-tabs" aria-label="프로젝트 구역">
+    <a href={`/projects/${slug}`} aria-current={tab === 'description' ? 'page' : undefined}>설명</a>
+    <a href={`/projects/${slug}/logs`} aria-current={tab === 'logs' ? 'page' : undefined}>과정</a>
+  </nav>
+</header>

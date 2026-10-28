@@ -152,6 +152,45 @@ main {
   gap: var(--space-2) var(--space-4);
 }
 
+/* 프로젝트 목록, 설명, 과정 목록, 과정 상세가 함께 쓰는 배치. */
+.project-list,
+.crumb,
+.log-list {
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.project-list,
+.log-list {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.project-card {
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+}
+
+.project-card h2,
+.log-list h2 {
+  margin-top: 0;
+}
+
+.project-tabs,
+.log-pager,
+.crumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+
+.project-tabs a[aria-current='page'] {
+  text-decoration: underline;
+  text-underline-offset: 0.35rem;
+}
+
 @media (max-width: 47.99rem) {
   .site-menu:not([open]) .site-nav {
     display: none;

@@ -2,18 +2,21 @@
 /**
  * 개념: 공개 웹의 공통 틀.
  * 목적: 건너뛰기 링크, 헤더, 현재 메뉴, 본문 하나, 푸터를 페이지가 반복하지 않게 한다.
- * 사용처: apps/web/src/pages/index.astro, apps/web/src/pages/about.astro
+ * 사용처: apps/web/src/pages/index.astro, apps/web/src/pages/about.astro, apps/web/src/pages/projects, apps/web/src/pages/logs
  */
 import '../styles/global.css';
 
 interface Props {
   title: string;
-  current: '/' | '/about';
+  current: '/' | '/about' | '/projects';
+  canonical?: string;
 }
 
-const { title, current } = Astro.props;
+const { title, current, canonical = current } = Astro.props;
+/* 도메인이 정해지지 않아 canonical은 경로만 적는다. 메뉴 강조는 current를 쓴다. */
 const items = [
   { href: '/', label: '홈' },
+  { href: '/projects', label: '프로젝트' },
   { href: '/about', label: '소개' },
 ];
 ---
@@ -25,7 +28,7 @@ const items = [
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
-    <link rel="canonical" href={current} />
+    <link rel="canonical" href={canonical} />
   </head>
   <body>
     <a class="skip-link" href="#main">본문으로 건너뛰기</a>
@@ -55,7 +58,7 @@ const items = [
     </main>
     <footer class="site-footer">
       <div class="shell">
-        <p>예시로 표시된 글은 실제 성과가 아니다. 상세 페이지와 API는 아직 연결하지 않았다.</p>
+        <p>예시로 표시된 글은 실제 성과가 아니다. 노트·리서치 상세와 API는 아직 연결하지 않았다.</p>
       </div>
     </footer>
     <script>

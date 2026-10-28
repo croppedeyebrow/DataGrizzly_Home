@@ -1,0 +1,77 @@
+---
+/**
+ * 개념: 과정 기록 상세.
+ * 목적: 한 글의 canonical을 `/logs/{slug}` 하나로 두고, 프로젝트로 돌아가는 링크와 이전·다음을 붙인다.
+ * 사용처: 공개 경로 `/logs/{slug}`. 관련 노트 페이지는 아직 없어 주소 없이 제목만 둔다.
+ */
+import Base from '../../layouts/Base.astro';
+import { loadPublicProjects } from '../../../../../scripts/public-projects.mjs';
+import type { ProjectSite, PublicLog } from '../../scripts/project-types.ts';
+
+export function getStaticPaths() {
+  const site = loadPublicProjects('../../fixtures/content') as ProjectSite;
+  return site.logs.map((log) => ({
+    params: { slug: log.slug },
+    props: { log },
+  }));
+}
+
+interface Props {
+  log: PublicLog;
+}
+
+const { log } = Astro.props;
+const notes = log.related.filter((item) => item.kind === 'note' || item.kind === 'paper' || item.kind === 'news');
+---
+
+<Base title={`${log.title} · DataGrizzly`} current="/projects" canonical={`/logs/${log.slug}`}>
+  <nav aria-label="현재 위치">
+    <ol class="crumb">
+      <li><a href="/projects">프로젝트</a></li>
+      <li><a href={`/projects/${log.projectSlug}`}>{log.projectTitle}</a></li>
+      <li><a href={`/projects/${log.projectSlug}/logs`}>과정</a></li>
+      <li>{log.title}</li>
+    </ol>
+  </nav>
+  <p class="example-flag">{log.callout || '예시이며 실제 성과가 아니다.'}</p>
+  <h1>{log.title}</h1>
+  <p class="meta">읽는 순서 {log.displayOrder + 1} · {log.stage} · 작성 시각 {log.createdAt}</p>
+  {
+    log.paragraphs.map((paragraph) => (
+      <p>{paragraph}</p>
+    ))
+  }
+  <nav class="log-pager" aria-label="인접한 과정">
+    {
+      log.previous ? (
+        <a href={`/logs/${log.previous.slug}`}>이전 과정 · {log.previous.title}</a>
+      ) : (
+        <p>이전 과정이 없다.</p>
+      )
+    }
+    {
+      log.next ? (
+        <a href={`/logs/${log.next.slug}`}>다음 과정 · {log.next.title}</a>
+      ) : (
+        <p>다음 과정이 없다.</p>
+      )
+    }
+  </nav>
+  <p>
+    <a href={`/projects/${log.projectSlug}`}>프로젝트 설명으로</a>
+  </p>
+  <section>
+    <h2>관련 노트</h2>
+    {
+      notes.length > 0 ? (
+        notes.map((note) => (
+          <p>
+            {note.title}. 상세 페이지는 아직 없다.
+          </p>
+        ))
+      ) : (
+        <p class="empty-state">관련 노트가 아직 없다.</p>
+      )
+    }
+  </section>
+</Base>

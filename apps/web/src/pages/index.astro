@@ -8,11 +8,11 @@ import Base from '../layouts/Base.astro';
 import markUrl from '../../../../fixtures/media/example-mark.svg?url';
 import { loadPublicHome } from '../../../../scripts/public-examples.mjs';
 
-type LogItem = { title: string; stage: string; createdAt: string; displayOrder: number };
+type LogItem = { title: string; slug: string; stage: string; createdAt: string; displayOrder: number };
 type TopicItem = { title: string; kind: 'note' | 'paper' | 'news' };
 type HomeData = {
   loadError: boolean;
-  project: { title: string; summary: string; imageAlt: string; imageName: string } | null;
+  project: { title: string; slug: string; summary: string; imageAlt: string; imageName: string } | null;
   logs: LogItem[];
   topics: TopicItem[];
   contact: string | null;
@@ -40,7 +40,9 @@ const kindLabel = { note: '노트', paper: '논문', news: '뉴스' };
           {home.project ? (
             <>
               <p class="example-flag">예시이며 실제 성과가 아니다.</p>
-              <h3>{home.project.title}</h3>
+              <h3>
+                {home.project.slug ? <a href={`/projects/${home.project.slug}`}>{home.project.title}</a> : home.project.title}
+              </h3>
               <p>{home.project.summary}</p>
               {home.project.imageName === 'example-mark.svg' ? (
                 <img src={markUrl} alt={home.project.imageAlt} width="64" height="64" />
@@ -58,7 +60,15 @@ const kindLabel = { note: '노트', paper: '논문', news: '뉴스' };
             <ol>
               {home.logs.map((log) => (
                 <li>
-                  <p>{log.title}</p>
+                  {
+                    log.slug ? (
+                      <p>
+                        <a href={`/logs/${log.slug}`}>{log.title}</a>
+                      </p>
+                    ) : (
+                      <p>{log.title}</p>
+                    )
+                  }
                   <p class="meta">
                     읽는 순서 {log.displayOrder + 1} · {log.stage} · 작성 시각 {log.createdAt}
                   </p>
@@ -82,7 +92,7 @@ const kindLabel = { note: '노트', paper: '논문', news: '뉴스' };
           ) : (
             <p class="empty-state">공개할 노트와 리서치가 아직 없다.</p>
           )}
-          <p class="meta">상세 페이지는 아직 없다. 제목만 예시로 보여 준다.</p>
+          <p class="meta">노트와 리서치 상세 페이지는 아직 없다. 제목만 예시로 보여 준다.</p>
         </section>
         <section>
           <h2>연락</h2>

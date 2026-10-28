@@ -1,0 +1,87 @@
+---
+/**
+ * 개념: 프로젝트 설명.
+ * 목적: 문제, 목표, 범위, 기술 선택, 한계를 fixture 문장으로 보여주고 없는 판단·결과·GitHub는 비워 둔다.
+ * 사용처: 공개 경로 `/projects/{slug}`. canonical은 이 경로 하나다.
+ */
+import Base from '../../layouts/Base.astro';
+import ProjectIdentity from '../../components/ProjectIdentity.astro';
+import markUrl from '../../../../../fixtures/media/example-mark.svg?url';
+import { loadPublicProjects } from '../../../../../scripts/public-projects.mjs';
+import type { ProjectSite, PublicProject } from '../../scripts/project-types.ts';
+
+export function getStaticPaths() {
+  const site = loadPublicProjects('../../fixtures/content') as ProjectSite;
+  return site.projects.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+}
+
+interface Props {
+  project: PublicProject;
+}
+
+const { project } = Astro.props;
+const sections = [
+  { title: '문제', text: project.problem },
+  { title: '목표', text: project.goal },
+  { title: '범위', text: project.scope },
+  { title: '기술 선택', text: project.choice },
+  { title: '판단', text: project.judgment },
+  { title: '결과', text: project.result },
+  { title: '한계', text: project.limit },
+];
+const relatedLogs = project.related.filter((item) => item.kind === 'log' && item.href);
+---
+
+<Base title={`${project.title} · DataGrizzly`} current="/projects" canonical={`/projects/${project.slug}`}>
+  <ProjectIdentity
+    title={project.title}
+    status={project.status || '상태가 아직 없다.'}
+    exampleText={project.callout || '예시이며 실제 성과가 아니다.'}
+    slug={project.slug}
+    tab="description"
+  />
+  {
+    sections.map((section) => (
+      <section>
+        <h2>{section.title}</h2>
+        {section.text ? <p>{section.text}</p> : <p class="empty-state">이 구역의 문장이 아직 없다.</p>}
+      </section>
+    ))
+  }
+  <section>
+    <h2>GitHub</h2>
+    {
+      project.github ? (
+        <a href={project.github}>{project.github}</a>
+      ) : (
+        <p class="empty-state">GitHub 주소가 아직 없다.</p>
+      )
+    }
+  </section>
+  <section>
+    <h2>관련 기록</h2>
+    {
+      relatedLogs.length > 0 ? (
+        <ul>
+          {relatedLogs.map((item) => (
+            <li>
+              <a href={item.href ?? ''}>{item.title}</a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty-state">관련 과정 기록이 아직 없다.</p>
+      )
+    }
+  </section>
+  {
+    project.imageName === 'example-mark.svg' ? (
+      <img src={markUrl} alt={project.imageAlt} width="64" height="64" />
+    ) : (
+      <p class="empty-state">로컬 이미지 파일을 찾지 못했다.</p>
+    )
+  }
+</Base>
