@@ -24,7 +24,14 @@ const { log } = Astro.props;
 const notes = log.related.filter((item) => item.kind === 'note' || item.kind === 'paper' || item.kind === 'news');
 ---
 
-<Base title={`${log.title} · DataGrizzly`} current="/projects" canonical={`/logs/${log.slug}`}>
+<Base
+  title={`${log.title} · DataGrizzly`}
+  current="/projects"
+  canonical={`/logs/${log.slug}`}
+  description={log.paragraphs[0] || '과정 기록 문장이 아직 없다.'}
+  date={log.createdAt}
+  dateKind="published"
+>
   <nav aria-label="현재 위치">
     <ol class="crumb">
       <li><a href="/projects">프로젝트</a></li>

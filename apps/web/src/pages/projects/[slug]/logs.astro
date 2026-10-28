@@ -24,7 +24,12 @@ interface Props {
 const { project } = Astro.props;
 ---
 
-<Base title={`과정 · ${project.title}`} current="/projects" canonical={`/projects/${project.slug}/logs`}>
+<Base
+  title={`과정 · ${project.title}`}
+  current="/projects"
+  canonical={`/projects/${project.slug}/logs`}
+  description="공개 과정을 읽는 순서로 보여 준다."
+>
   <ProjectIdentity
     title={project.title}
     status={project.status || '상태가 아직 없다.'}

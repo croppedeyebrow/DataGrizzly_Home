@@ -1,0 +1,48 @@
+---
+/**
+ * 개념: 시리즈 읽기 순서.
+ * 목적: 공개된 글만 지정된 position 순서로 보여 준다. 글이 없는 시리즈는 페이지를 만들지 않는다.
+ * 사용처: 공개 경로 `/series/{slug}`. 지금 공개 fixture에는 시리즈가 없어 빌드 결과에 파일이 없다.
+ */
+import Base from '../../layouts/Base.astro';
+import { loadPublicTaxonomy } from '../../../../../scripts/public-taxonomy.mjs';
+import type { TaxonomyPage, TaxonomySite } from '../../scripts/taxonomy-types.ts';
+
+export function getStaticPaths() {
+  const site = loadPublicTaxonomy('../../fixtures/content') as TaxonomySite;
+  if (site.loadError) return [];
+  return site.series
+    .filter((series) => series.entries.length > 0)
+    .map((series) => ({
+      params: { slug: series.slug },
+      props: { series },
+    }));
+}
+
+interface Props {
+  series: TaxonomyPage;
+}
+
+const { series } = Astro.props;
+---
+
+<Base
+  title={`${series.title} · DataGrizzly`}
+  current={null}
+  canonical={`/series/${series.slug}`}
+  description={`${series.title}의 공개 글을 지정된 순서로 보여 준다.`}
+>
+  <p class="example-flag">예시 분류이며 실제 성과가 아니다.</p>
+  <h1>{series.title}</h1>
+  <p class="empty-state">학습 목표는 아직 없다.</p>
+  <ol class="entry-list">
+    {
+      series.entries.map((entry, index) => (
+        <li>
+          <a href={entry.path}>{entry.title}</a>
+          <span class="meta"> 순서 {index + 1}</span>
+        </li>
+      ))
+    }
+  </ol>
+</Base>

@@ -24,7 +24,14 @@ interface Props {
 const { article } = Astro.props;
 ---
 
-<Base title={`${article.title} · DataGrizzly`} current="/notes" canonical={`/notes/${article.slug}`}>
+<Base
+  title={`${article.title} · DataGrizzly`}
+  current="/notes"
+  canonical={`/notes/${article.slug}`}
+  description={article.summary || '노트 본문이 아직 없다.'}
+  date={article.updatedAt}
+  dateKind="modified"
+>
   <p><a href="/notes">노트 목록으로</a></p>
   <h1>{article.title}</h1>
   <p class="meta">작성 시각 {article.createdAt}</p>

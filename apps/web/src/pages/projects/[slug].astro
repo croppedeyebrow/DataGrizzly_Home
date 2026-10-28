@@ -35,7 +35,14 @@ const sections = [
 const relatedLogs = project.related.filter((item) => item.kind === 'log' && item.href);
 ---
 
-<Base title={`${project.title} · DataGrizzly`} current="/projects" canonical={`/projects/${project.slug}`}>
+<Base
+  title={`${project.title} · DataGrizzly`}
+  current="/projects"
+  canonical={`/projects/${project.slug}`}
+  description={project.summary || '프로젝트 설명 문장이 아직 없다.'}
+  date={project.updatedAt}
+  dateKind="modified"
+>
   <ProjectIdentity
     title={project.title}
     status={project.status || '상태가 아직 없다.'}

@@ -33,6 +33,9 @@ node scripts/check-m1-projects.mjs
 echo "CHECK research-pages"
 node scripts/check-m1-research.mjs
 
+echo "CHECK seo-pages"
+node scripts/check-m1-seo.mjs
+
 if [ ! -d .git ]; then
   echo "GIT_CHECK=DEFERRED"
   echo "No Git repository. S03 and S04 remain deferred, so git diff --check was not run and is not a pass."

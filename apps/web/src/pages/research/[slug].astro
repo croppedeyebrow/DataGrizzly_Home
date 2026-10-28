@@ -25,7 +25,14 @@ const { article } = Astro.props;
 const kindLabel = article.kind === 'paper' ? '논문' : '뉴스';
 ---
 
-<Base title={`${article.title} · DataGrizzly`} current="/research" canonical={`/research/${article.slug}`}>
+<Base
+  title={`${article.title} · DataGrizzly`}
+  current="/research"
+  canonical={`/research/${article.slug}`}
+  description={article.summary || '리서치 본문이 아직 없다.'}
+  date={article.updatedAt}
+  dateKind="modified"
+>
   <p><a href="/research">리서치 목록으로</a></p>
   <p class="meta">{kindLabel}</p>
   <h1>{article.title}</h1>

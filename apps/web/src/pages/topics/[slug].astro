@@ -1,0 +1,48 @@
+---
+/**
+ * 개념: 주제별 공개 글 목록.
+ * 목적: 공개 목록에 글이 있는 주제만 정적 페이지로 만든다. 빈 주제와 없는 slug는 페이지를 만들지 않는다.
+ * 사용처: 공개 경로 `/topics/{slug}`. 지금 공개 fixture에는 주제가 없어 빌드 결과에 파일이 없다.
+ */
+import Base from '../../layouts/Base.astro';
+import { loadPublicTaxonomy } from '../../../../../scripts/public-taxonomy.mjs';
+import type { TaxonomyPage, TaxonomySite } from '../../scripts/taxonomy-types.ts';
+
+export function getStaticPaths() {
+  const site = loadPublicTaxonomy('../../fixtures/content') as TaxonomySite;
+  if (site.loadError) return [];
+  return site.topics
+    .filter((topic) => topic.entries.length > 0)
+    .map((topic) => ({
+      params: { slug: topic.slug },
+      props: { topic },
+    }));
+}
+
+interface Props {
+  topic: TaxonomyPage;
+}
+
+const { topic } = Astro.props;
+---
+
+<Base
+  title={`${topic.title} · DataGrizzly`}
+  current={null}
+  canonical={`/topics/${topic.slug}`}
+  description={`${topic.title}에 연결된 공개 글이다.`}
+>
+  <p class="example-flag">예시 분류이며 실제 성과가 아니다.</p>
+  <h1>{topic.title}</h1>
+  <p class="empty-state">관련 키워드는 아직 없다.</p>
+  <ul class="entry-list">
+    {
+      topic.entries.map((entry) => (
+        <li>
+          <a href={entry.path}>{entry.title}</a>
+        </li>
+      ))
+    }
+  </ul>
+  <p class="meta">언어, CS, 수학으로 나누는 필터는 아직 없다.</p>
+</Base>

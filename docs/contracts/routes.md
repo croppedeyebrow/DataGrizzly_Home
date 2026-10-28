@@ -2,7 +2,7 @@
 
 - 확정일: 2026-10-25
 - 태스크: M0-01
-- 상태: 경로 계약. 공개 웹에는 `/`, `/about`, `/projects`, `/projects/{slug}`, `/projects/{slug}/logs`, `/logs/{slug}`, `/notes`, `/notes/{slug}`, `/research`, `/research/{slug}`가 있다. 탐색과 관리자 앱은 아직 없다
+- 상태: 경로 계약. 공개 웹에는 `/`, `/about`, `/projects`, `/projects/{slug}`, `/projects/{slug}/logs`, `/logs/{slug}`, `/notes`, `/notes/{slug}`, `/research`, `/research/{slug}`, `/404`, `/sitemap.xml`, `/rss.xml`, `/robots.txt`가 있다. 주제·시리즈는 공개 분류가 없어 파일이 없다. 탐색 검색과 관리자 앱은 아직 없다
 
 ## 관리자 기준 경로
 
@@ -36,8 +36,8 @@
 | P09 | /research | 고정 | 정적 생성 | 없음 | 공개 리서치가 없으면 빈 목록 | 없는 주소는 404 | 예 |
 | P10/P11 | /research/{slug} | slug | 정적 생성 | 없음 | 논문과 뉴스를 이 경로 하나로 구분한다. 글이 없으면 파일을 만들지 않는다 | 없는 slug는 404 | 예 |
 | P12 | /explore | 고정 | 정적 생성 후 검색 요청 | 없음 | 검색 결과가 없으면 빈 결과. 질문 입력은 두지 않는다 | 검색 API가 생기면 429와 503을 숨기지 않는다. API는 M5 전이다 | 예. 검색어 조합마다 canonical을 만들지 않는다 |
-| P13 | /topics/{slug} | slug | 정적 생성 | 없음 | 공개 글이 없으면 빈 목록 | 없는 slug는 404 | 예 |
-| P14 | /series/{slug} | slug | 정적 생성 | 없음 | 공개 글이 없으면 빈 목록 | 없는 slug는 404 | 예 |
+| P13 | /topics/{slug} | slug | 정적 생성 | 없음 | 공개 글이 없는 분류는 페이지를 만들지 않는다 | 없는 slug는 404 | 예 |
+| P14 | /series/{slug} | slug | 정적 생성 | 없음 | 공개 글이 없는 시리즈는 페이지를 만들지 않는다 | 없는 slug는 404 | 예 |
 | P15 | /404 | 고정 | 정적 생성 | 없음 | 해당 없음 | 알 수 없는 공개 주소의 응답 | 아니오 |
 | A01 | /admin/login | 고정 | 관리자 라우트 | 없음 | 해당 없음 | 인증 실패를 성공 화면으로 넘기지 않는다 | 아니오 |
 | A02 | /admin | 고정 | 관리자 라우트 | 소유자 세션 | 데이터가 없으면 빈 관리 홈 | 세션이 없으면 로그인으로 보낸다 | 아니오 |

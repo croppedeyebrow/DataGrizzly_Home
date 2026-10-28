@@ -1,7 +1,7 @@
 # F11 SEO 외부AI노출
 
 > v5.0 기준: [[SCOPE_v5]] 적용. 주력 Kotlin·Rust·TypeScript·PostgreSQL. LLM·C++ 제외, Go는 국소 배포 도구로 필요할 때만 사용합니다. 로컬 자원은 [[02_RESOURCE_BUDGET]] 참조.
-상태: 설계 / 구현 전. 기준: DataGrizzly v2.0. 세부 보완은 본 문서 세트 v2.1에서 제안합니다.
+상태: M1-04에서 경로 canonical, 메타, sitemap, RSS, robots, 404를 정적 파일로 두었다. 도메인이 비어 절대 URL은 만들지 않는다. slug 리디렉션과 구조화 데이터는 아직 없다. AI 인용은 보장하지 않는다. 기준: DataGrizzly v2.0. 세부 보완은 본 문서 세트 v2.1에서 제안합니다.
 
 ## 사용자와 범위
 
