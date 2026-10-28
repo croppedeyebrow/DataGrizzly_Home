@@ -80,7 +80,7 @@ export function selectPublicHome(manifest, revisions, entriesByRevision = {}) {
     .map((item) => {
       const revision = revisions[item.revision]
       if (revision?.example !== true) return null
-      return { title: revision.title, kind: item.role }
+      return { title: revision.title, slug: publicSlug(entriesByRevision[item.revision]?.slug), kind: item.role }
     })
     .filter(Boolean)
 

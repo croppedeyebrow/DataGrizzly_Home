@@ -1,0 +1,37 @@
+---
+/**
+ * 개념: 공개 학습 노트 목록.
+ * 목적: 프로젝트에 묶이지 않은 예시 노트만 보여주고, 각 카드는 노트 상세로 간다.
+ * 사용처: 공개 경로 `/notes`.
+ */
+import Base from '../../layouts/Base.astro';
+import { loadPublicResearch } from '../../../../../scripts/public-research.mjs';
+import type { ResearchSite } from '../../scripts/research-types.ts';
+
+const site = loadPublicResearch('../../fixtures/content') as ResearchSite;
+---
+
+<Base title="노트 · DataGrizzly" current="/notes">
+  <h1>노트</h1>
+  <p>프로젝트에 속하지 않아도 되는 공개 학습 노트다.</p>
+  <p class="meta">언어, CS, 수학으로 나누는 필터는 아직 없다.</p>
+  {
+    site.loadError ? (
+      <p class="empty-state">예시 파일을 읽지 못했다. 이 페이지는 빈 목록으로 남는다.</p>
+    ) : site.notes.length === 0 ? (
+      <p class="empty-state">공개 노트가 아직 없다.</p>
+    ) : (
+      <ul class="project-list">
+        {site.notes.map((note) => (
+          <li class="project-card">
+            <h2><a href={`/notes/${note.slug}`}>{note.title}</a></h2>
+            <p class="example-flag">예시이며 실제 성과가 아니다.</p>
+            <p class="empty-state">주제가 아직 없다.</p>
+            <p>{note.summary}</p>
+            <p class="meta">작성 시각 {note.createdAt}</p>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Base>

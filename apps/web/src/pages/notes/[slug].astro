@@ -1,0 +1,39 @@
+---
+/**
+ * 개념: 학습 노트 상세.
+ * 목적: 공개 노트의 블록을 렌더하고, 프로젝트 소속이 없으면 그대로 비워 둔다.
+ * 사용처: 공개 경로 `/notes/{slug}`.
+ */
+import Base from '../../layouts/Base.astro';
+import BlockList from '../../components/BlockList.astro';
+import { loadPublicResearch } from '../../../../../scripts/public-research.mjs';
+import type { PublicArticle, ResearchSite } from '../../scripts/research-types.ts';
+
+export function getStaticPaths() {
+  const site = loadPublicResearch('../../fixtures/content') as ResearchSite;
+  return site.notes.map((article) => ({
+    params: { slug: article.slug },
+    props: { article },
+  }));
+}
+
+interface Props {
+  article: PublicArticle;
+}
+
+const { article } = Astro.props;
+---
+
+<Base title={`${article.title} · DataGrizzly`} current="/notes" canonical={`/notes/${article.slug}`}>
+  <p><a href="/notes">노트 목록으로</a></p>
+  <h1>{article.title}</h1>
+  <p class="meta">작성 시각 {article.createdAt}</p>
+  {
+    article.projectId ? (
+      <p class="meta">프로젝트 {article.projectId}</p>
+    ) : (
+      <p class="empty-state">이 글은 프로젝트에 속하지 않는다.</p>
+    )
+  }
+  {article.blocks.length > 0 ? <BlockList blocks={article.blocks} /> : <p class="empty-state">본문이 아직 없다.</p>}
+</Base>

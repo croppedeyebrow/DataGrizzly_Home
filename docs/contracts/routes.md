@@ -2,7 +2,7 @@
 
 - 확정일: 2026-10-25
 - 태스크: M0-01
-- 상태: 경로 계약. 공개 웹에는 `/`, `/about`, `/projects`, `/projects/{slug}`, `/projects/{slug}/logs`, `/logs/{slug}`가 있다. 노트·리서치와 관리자 앱은 아직 없다
+- 상태: 경로 계약. 공개 웹에는 `/`, `/about`, `/projects`, `/projects/{slug}`, `/projects/{slug}/logs`, `/logs/{slug}`, `/notes`, `/notes/{slug}`, `/research`, `/research/{slug}`가 있다. 탐색과 관리자 앱은 아직 없다
 
 ## 관리자 기준 경로
 

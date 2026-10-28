@@ -1,0 +1,106 @@
+---
+/**
+ * 개념: 글 블록을 종류별로 화면에 놓는다.
+ * 목적: 코드와 수식은 텍스트로만 보여주고, 모르는 블록은 빈 칸으로 지우지 않는다.
+ * 사용처: apps/web/src/pages/notes/[slug].astro, apps/web/src/pages/research/[slug].astro
+ */
+import type { ViewBlock } from '../scripts/research-types.ts';
+import markUrl from '../../../../fixtures/media/example-mark.svg?url';
+
+interface Props {
+  blocks: ViewBlock[];
+}
+
+const { blocks } = Astro.props;
+---
+
+{
+  blocks.map((block) => {
+    if (block.kind === 'paragraph') {
+      return (
+        <p>
+          {(block.parts ?? []).map((part) =>
+            part.kind === 'link' ? (
+              <a href={part.href} rel="noreferrer">{part.href}</a>
+            ) : (
+              part.text
+            ),
+          )}
+        </p>
+      );
+    }
+    if (block.kind === 'heading') {
+      return block.level === 3 ? (
+        <h3 id={block.anchor}>{block.text}</h3>
+      ) : (
+        <h2 id={block.anchor}>{block.text}</h2>
+      );
+    }
+    if (block.kind === 'list') {
+      const items = (block.items ?? []).map((item) => <li>{item}</li>);
+      return block.ordered ? <ol>{items}</ol> : <ul>{items}</ul>;
+    }
+    if (block.kind === 'quote') {
+      return (
+        <blockquote>
+          <p>{block.text}</p>
+          {block.citation ? <p class="meta">{block.citation}</p> : null}
+        </blockquote>
+      );
+    }
+    if (block.kind === 'table') {
+      return (
+        <div class="table-scroll">
+          <table>
+            {block.caption ? <caption>{block.caption}</caption> : null}
+            <thead>
+              <tr>{(block.header ?? []).map((cell) => <th>{cell}</th>)}</tr>
+            </thead>
+            <tbody>
+              {(block.rows ?? []).map((row) => (
+                <tr>{row.map((cell) => <td>{cell}</td>)}</tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+    if (block.kind === 'image') {
+      return block.imageName === 'example-mark.svg' && !block.missing ? (
+        <img src={markUrl} alt={block.alt} width="64" height="64" />
+      ) : (
+        <p class="empty-state">{block.alt} 파일을 찾지 못했다.</p>
+      );
+    }
+    if (block.kind === 'code') {
+      return (
+        <>
+          <p class="meta">언어 {block.language}. 파일명이 아직 없다.</p>
+          <pre class="code-block"><code>{block.text}</code></pre>
+        </>
+      );
+    }
+    if (block.kind === 'math' && block.state === 'shown') {
+      return (
+        <>
+          <p class="meta">수식은 실행하지 않는다.</p>
+          <pre class="math-block"><code>{block.tex}</code></pre>
+        </>
+      );
+    }
+    if (block.kind === 'math') {
+      return <p class="empty-state">{block.message}</p>;
+    }
+    if (block.kind === 'callout') {
+      return <p class={block.tone === 'warning' ? 'example-flag' : 'empty-state'}>{block.text}</p>;
+    }
+    if (block.kind === 'related') {
+      return block.href ? (
+        <p><a href={block.href}>{block.title}</a></p>
+      ) : (
+        <p class="empty-state">관련 글을 공개 목록에서 찾지 못했다.</p>
+      );
+    }
+    return <p class="empty-state">{block.message || '지원하지 않는 블록이다.'}</p>;
+  })
+}

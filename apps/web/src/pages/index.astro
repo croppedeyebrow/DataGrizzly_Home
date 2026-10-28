@@ -9,7 +9,7 @@ import markUrl from '../../../../fixtures/media/example-mark.svg?url';
 import { loadPublicHome } from '../../../../scripts/public-examples.mjs';
 
 type LogItem = { title: string; slug: string; stage: string; createdAt: string; displayOrder: number };
-type TopicItem = { title: string; kind: 'note' | 'paper' | 'news' };
+type TopicItem = { title: string; slug: string; kind: 'note' | 'paper' | 'news' };
 type HomeData = {
   loadError: boolean;
   project: { title: string; slug: string; summary: string; imageAlt: string; imageName: string } | null;
@@ -21,6 +21,11 @@ type HomeData = {
 /* 개발과 빌드 명령의 현재 폴더는 apps/web 이다. */
 const home = loadPublicHome('../../fixtures/content') as HomeData;
 const kindLabel = { note: '노트', paper: '논문', news: '뉴스' };
+const topicHref = {
+  note: (slug: string) => `/notes/${slug}`,
+  paper: (slug: string) => `/research/${slug}`,
+  news: (slug: string) => `/research/${slug}`,
+};
 ---
 
 <Base title="DataGrizzly" current="/">
@@ -85,14 +90,14 @@ const kindLabel = { note: '노트', paper: '논문', news: '뉴스' };
             <ul>
               {home.topics.map((topic) => (
                 <li>
-                  {kindLabel[topic.kind]} · {topic.title}
+                  {kindLabel[topic.kind]} ·{' '}
+                  {topic.slug ? <a href={topicHref[topic.kind](topic.slug)}>{topic.title}</a> : topic.title}
                 </li>
               ))}
             </ul>
           ) : (
             <p class="empty-state">공개할 노트와 리서치가 아직 없다.</p>
           )}
-          <p class="meta">노트와 리서치 상세 페이지는 아직 없다. 제목만 예시로 보여 준다.</p>
         </section>
         <section>
           <h2>연락</h2>

@@ -1,0 +1,33 @@
+---
+/**
+ * 개념: 논문 또는 뉴스 상세.
+ * 목적: 출처의 주장, 개인 해석, 재현, 사건일, 발표일을 블록 제목으로 구분해 보여 준다.
+ * 사용처: 공개 경로 `/research/{slug}`. 논문과 뉴스가 이 경로를 함께 쓴다.
+ */
+import Base from '../../layouts/Base.astro';
+import BlockList from '../../components/BlockList.astro';
+import { loadPublicResearch } from '../../../../../scripts/public-research.mjs';
+import type { PublicArticle, ResearchSite } from '../../scripts/research-types.ts';
+
+export function getStaticPaths() {
+  const site = loadPublicResearch('../../fixtures/content') as ResearchSite;
+  return site.research.map((article) => ({
+    params: { slug: article.slug },
+    props: { article },
+  }));
+}
+
+interface Props {
+  article: PublicArticle;
+}
+
+const { article } = Astro.props;
+const kindLabel = article.kind === 'paper' ? '논문' : '뉴스';
+---
+
+<Base title={`${article.title} · DataGrizzly`} current="/research" canonical={`/research/${article.slug}`}>
+  <p><a href="/research">리서치 목록으로</a></p>
+  <p class="meta">{kindLabel}</p>
+  <h1>{article.title}</h1>
+  {article.blocks.length > 0 ? <BlockList blocks={article.blocks} /> : <p class="empty-state">본문이 아직 없다.</p>}
+</Base>

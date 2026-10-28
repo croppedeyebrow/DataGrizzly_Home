@@ -2,13 +2,13 @@
 /**
  * 개념: 공개 웹의 공통 틀.
  * 목적: 건너뛰기 링크, 헤더, 현재 메뉴, 본문 하나, 푸터를 페이지가 반복하지 않게 한다.
- * 사용처: apps/web/src/pages/index.astro, apps/web/src/pages/about.astro, apps/web/src/pages/projects, apps/web/src/pages/logs
+ * 사용처: apps/web/src/pages/index.astro, apps/web/src/pages/about.astro, apps/web/src/pages/projects, apps/web/src/pages/logs, apps/web/src/pages/notes, apps/web/src/pages/research
  */
 import '../styles/global.css';
 
 interface Props {
   title: string;
-  current: '/' | '/about' | '/projects';
+  current: '/' | '/about' | '/projects' | '/notes' | '/research';
   canonical?: string;
 }
 
@@ -17,6 +17,8 @@ const { title, current, canonical = current } = Astro.props;
 const items = [
   { href: '/', label: '홈' },
   { href: '/projects', label: '프로젝트' },
+  { href: '/notes', label: '노트' },
+  { href: '/research', label: '리서치' },
   { href: '/about', label: '소개' },
 ];
 ---
@@ -58,7 +60,7 @@ const items = [
     </main>
     <footer class="site-footer">
       <div class="shell">
-        <p>예시로 표시된 글은 실제 성과가 아니다. 노트·리서치 상세와 API는 아직 연결하지 않았다.</p>
+        <p>예시로 표시된 글은 실제 성과가 아니다. API는 아직 연결하지 않았다.</p>
       </div>
     </footer>
     <script>

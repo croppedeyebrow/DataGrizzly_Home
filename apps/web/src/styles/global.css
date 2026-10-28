@@ -191,6 +191,22 @@ main {
   text-underline-offset: 0.35rem;
 }
 
+/* 노트와 리서치 본문의 표, 코드, 수식. 좁은 화면에서는 가로로만 스크롤한다. */
+.table-scroll,
+.code-block,
+.math-block {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.code-block,
+.math-block {
+  white-space: pre;
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+}
+
 @media (max-width: 47.99rem) {
   .site-menu:not([open]) .site-nav {
     display: none;

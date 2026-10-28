@@ -239,7 +239,6 @@ for (const html of [list, description, logList, planning, implementation, verifi
   if ((html.match(/<main\b/g) ?? []).length !== 1) fail('main count')
   if (html.includes(longTitleText)) fail('boundary title on page')
   if (html.includes('https://example.com')) fail('placeholder origin')
-  if (html.includes('href="/notes')) fail('note route')
   if (html.includes('/logs/example-planning/logs')) fail('nested log url')
 }
 
