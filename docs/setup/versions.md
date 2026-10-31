@@ -96,6 +96,6 @@ PostgreSQL 16은 현재 지원되는 메이저 버전이다. 설치된 16.10은 
 
 ## 다음 작업
 
-1. S08 기존 Docker 점검을 한다. S07은 JDK 21.0.8을 재사용하고 `services/cms/gradle.properties`만 두었다.
+1. S11 관리자 React 최초 실행을 한다. S08은 Docker Desktop 4.43.2를 재사용하고 엔진은 켜지 않았다.
 2. 재현 설치는 `corepack yarn install --immutable`을 사용한다.
 3. API와 DB는 S13·S14 전이다. Gradle Wrapper JVM 비교는 `gradlew.bat`가 생기는 S12에서 한다.
