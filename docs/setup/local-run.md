@@ -1,8 +1,8 @@
 # 로컬 실행
 
-- 기록일: 2026-10-25
-- 확인한 범위: 공개 웹 `@datagrizzly/web` 하나
-- API, 관리자, PostgreSQL, Rust는 실행하지 않았다
+- 기록일: 2026-10-25. CMS health 확인은 2026-10-31
+- 확인한 범위: 2026-10-25에는 공개 웹 `@datagrizzly/web` 하나
+- 2026-10-25 확인에서는 API, 관리자, PostgreSQL, Rust를 실행하지 않았다
 
 명령은 저장소 루트에서 실행한다. 경로는 그 루트의 상대 경로다.
 
@@ -36,13 +36,27 @@ node scripts/check-m0-env.mjs
 | 대상 | 계약에 적힌 값 | 현재 파일 | 이번 실행 |
 |---|---|---|---|
 | 공개 웹 | `127.0.0.1:4321` | `apps/web/astro.config.mjs` | HTTP 200 |
-| 관리자 | `127.0.0.1:5173` | `apps/admin` 없음 | 미실행 |
-| API | `localhost:8080` | `services/cms` 없음 | 미실행 |
+| 관리자 | `127.0.0.1:5173` | `apps/admin` | 2026-10-25에는 미실행. S11에서 자리표시자만 확인 |
+| API | `127.0.0.1:8080` | `services/cms` | 2026-10-31 health만 확인. `/api/status`는 없음 |
 | 공개 웹의 API 프록시 | 없음 | 설정 없음 | 추가하지 않음 |
 | 개발 DB | `127.0.0.1:15432` | `infra/local/compose.yaml` 없음 | 미실행 |
-| Spring `local` 프로필 | `application-local.yml` | 없음 | 미실행 |
+| Spring `local` 프로필 | `application-local.properties` | 있음. 데이터 소스 없음 | 2026-10-31 `--spring.profiles.active=local` |
 
 PC에 PostgreSQL 16.10이 `127.0.0.1:5432`로 설치되어 있다는 S00 기록은 유지한다. 이 저장소는 그 서버에 접속하지 않았다.
+
+## CMS health
+
+2026-10-31에 `services/cms`에서 Gradle Wrapper 9.7.0으로 테스트와 bootJar를 만들었다. 앱은 Gradle을 끈 뒤 따로 실행했다.
+
+```powershell
+Set-Location C:\Dev\sideproject\My_Web\services\cms
+.\gradlew.bat test --max-workers=2
+.\gradlew.bat bootJar --max-workers=2
+.\gradlew.bat --stop
+java -Xms128m -Xmx768m -jar build\libs\cms-0.0.1-SNAPSHOT.jar --spring.profiles.active=local
+```
+
+`http://127.0.0.1:8080/actuator/health`는 `status=UP`이었다. `/actuator/env`는 404였다. 확인 후 Java 프로세스를 종료했고 8080 수신은 없었다. 데이터베이스와 콘텐츠 API는 이 명령에 없다. 공개 웹이나 관리자와 같이 켜지 않는다.
 
 ## 환경 변수
 
