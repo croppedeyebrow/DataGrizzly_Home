@@ -1,0 +1,21 @@
+/*
+ * 개념: 관리자 자리표시자의 기본 글자.
+ * 목적: 템플릿 데모 색을 쓰지 않고 본문을 읽게 한다.
+ * 사용처: apps/admin/src/main.tsx
+ */
+:root {
+  color: #1d1a16;
+  background: #f7f4ee;
+  font-family: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  line-height: 1.7;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}

@@ -20,10 +20,10 @@
 | Astro | **7.4.2** | `apps/web` 설치·정적 빌드 검증 | 공개 웹 버전으로 고정 |
 | TypeScript | **6.0.3** | `apps/web` 설치, `astro check` 통과 | Astro와 관리자 workspace에서 통일 |
 | `@astrojs/check` | **0.9.12** | `apps/web` 설치, 오류 0 | 공개 웹 타입 검사 |
-| React / React DOM | **19.3** | 미설치 | S11 관리자에 사용 |
-| create-vite | **9.3.1** | 미설치 | S11에서 일회성 정확 버전 실행 |
-| Vite | **8.3.5** | 미설치 | S11 관리자 빌드 도구 |
-| `@vitejs/plugin-react` | **6.1.2** | 미설치 | S11 관리자 플러그인 |
+| React / React DOM | **19.3.1** | `apps/admin` 설치 | S11 관리자. 인증은 아직 없음 |
+| create-vite | **9.3.1** | S11에서 일회성 실행 완료 | 프로젝트 의존성으로 남기지 않음 |
+| Vite | **8.3.5** | `apps/admin` 설치·빌드 | 관리자 빌드 도구 |
+| `@vitejs/plugin-react` | **6.1.2** | `apps/admin` 설치 | 관리자 플러그인 |
 
 S06에서 Node 22.23.2를 동일 LTS 계열의 22.23.4로 패치 업데이트했다. 함께 설치된 npm 10.9.9는 유지하지만 프로젝트 패키지 관리는 Yarn 4.18.1로 통일한다. Yarn은 `node_modules` 호환 방식, 제3자 설치 스크립트 기본 차단, Hardened Mode, 3일 age gate를 사용한다.
 
@@ -96,6 +96,6 @@ PostgreSQL 16은 현재 지원되는 메이저 버전이다. 설치된 16.10은 
 
 ## 다음 작업
 
-1. S11 관리자 React 최초 실행을 한다. S08은 Docker Desktop 4.43.2를 재사용하고 엔진은 켜지 않았다.
+1. S12 Kotlin 서버 최초 실행을 한다. S11은 `apps/admin` 자리표시자만 만들었다.
 2. 재현 설치는 `corepack yarn install --immutable`을 사용한다.
 3. API와 DB는 S13·S14 전이다. Gradle Wrapper JVM 비교는 `gradlew.bat`가 생기는 S12에서 한다.
