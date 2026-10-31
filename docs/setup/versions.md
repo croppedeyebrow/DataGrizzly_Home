@@ -33,7 +33,7 @@ TypeScript 최신 채널은 7.0.2지만 Astro 7 계열은 TypeScript 7 type-chec
 
 | 구성 | 선택 버전 | 현재 상태 | 결정 |
 |---|---:|---|---|
-| JDK | **21.0.8 LTS** | 설치됨 | 재사용, JVM toolchain 21로 고정 |
+| JDK | **21.0.8 LTS** | 2026-10-31 `java`/`javac` 21.0.8, x64, `JAVA_HOME` 일치 | 재사용, JVM toolchain 21로 고정. 신규 설치 없음 |
 | Spring Boot | **4.1.2** | 프로젝트 미생성 | S12에서 정확 버전 사용 |
 | Kotlin Gradle Plugin | **2.4.21** | 전역 CLI 2.0.21 설치 | 프로젝트 플러그인은 2.4.21로 별도 고정 |
 | Gradle Wrapper | **9.7.0** | 미생성 | Kotlin 2.4.21의 완전 지원 상한에 맞춤 |
@@ -96,6 +96,6 @@ PostgreSQL 16은 현재 지원되는 메이저 버전이다. 설치된 16.10은 
 
 ## 다음 작업
 
-1. M2-01 인증과 DB는 S14·S18 전제라 시작하지 않는다. M1-04는 메타, sitemap, RSS, 404만 만들었다.
+1. S08 기존 Docker 점검을 한다. S07은 JDK 21.0.8을 재사용하고 `services/cms/gradle.properties`만 두었다.
 2. 재현 설치는 `corepack yarn install --immutable`을 사용한다.
-3. API와 DB는 S13·S14 전이다. M1-04 타입 검사는 24개 파일, 오류 0이다.
+3. API와 DB는 S13·S14 전이다. Gradle Wrapper JVM 비교는 `gradlew.bat`가 생기는 S12에서 한다.
