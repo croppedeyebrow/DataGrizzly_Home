@@ -1,6 +1,6 @@
 # AI에게 화면 구현을 맡기는 방법
 
-> v5.0 기준: [[SCOPE_v5]] 적용. 주력 Kotlin·Rust·TypeScript·PostgreSQL. LLM·C++ 제외, Go는 국소 배포 도구로 필요할 때만 사용합니다. 로컬 자원은 [[02_RESOURCE_BUDGET]] 참조.
+> v5.0 기준: [[SCOPE_v5]] 적용. 주력 React·TypeScript·Tailwind·Rust·PostgreSQL. LLM·C++ 제외, Go는 국소 배포 도구로 필요할 때만 사용합니다. 로컬 자원은 [[02_RESOURCE_BUDGET]] 참조.
 1. 현재 태스크의 연결 화면 ID를 확인합니다.
 2. 공통 계약과 기능 명세를 읽힌 뒤 09_screen_specs의 해당 문서를 읽힙니다.
 3. 같은 ID의 wireframes PNG와 ui PNG를 함께 제공합니다.

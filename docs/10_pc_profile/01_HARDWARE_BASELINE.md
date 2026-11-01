@@ -13,13 +13,13 @@
 
 ## 결론
 
-Astro/React·Kotlin·PostgreSQL 기반 기능 개발은 단계별 실행으로 진행하는 설계를 채택합니다. 노트북에서 모든 언어 빌드·이미지 생성·추론을 한꺼번에 실행하는 것을 요구하지 않습니다. 실제 실행 가능 판정은 단계별 측정으로 결정합니다. 처리속도·첫 빌드 시간·LLM 토큰속도를 사양만으로 보장하지 않습니다.
+React·TypeScript·Tailwind와 Rust·PostgreSQL 기반 기능 개발은 단계별 실행으로 진행하는 설계를 채택합니다. 노트북에서 모든 언어 빌드·이미지 생성·추론을 한꺼번에 실행하는 것을 요구하지 않습니다. 실제 실행 가능 판정은 단계별 측정으로 결정합니다. 처리속도·첫 빌드 시간·LLM 토큰속도를 사양만으로 보장하지 않습니다.
 
 ## 변경된 기본 경로
 
-초기에는 Windows PowerShell의 Git·Node·Kotlin CLI·JDK를 재사용합니다. PostgreSQL 16.10 네이티브 서비스도 설치·실행 상태이므로 S13에서 격리 요구를 검토한 뒤 재사용 여부를 결정합니다. Docker Desktop과 Rust도 설치되어 있어 중복 설치하지 않습니다. 개발용 Ubuntu는 현재 없으며 M4/S16에서 실제 필요가 생길 때만 설치합니다. Go는 배포 중 구체적 필요가 확인될 때만 설치합니다. C++·모델은 설치하지 않습니다. Python 환경은 S20~S22에서 별도로 준비합니다.
+초기에는 Windows PowerShell의 Git·Node·Rust를 재사용합니다. JDK와 Kotlin CLI는 프로젝트 API에 쓰지 않습니다. PostgreSQL 16.10 네이티브 서비스도 설치·실행 상태이므로 S13에서 격리 요구를 검토한 뒤 재사용 여부를 결정합니다. Docker Desktop과 Rust도 설치되어 있어 중복 설치하지 않습니다. 개발용 Ubuntu는 현재 없으며 M4/S16에서 실제 필요가 생길 때만 설치합니다. Go는 배포 중 구체적 필요가 확인될 때만 설치합니다. C++·모델은 설치하지 않습니다. Python 환경은 S20~S22에서 별도로 준비합니다.
 
-주력은 Kotlin·Rust·TypeScript·PostgreSQL입니다. Rust는 콘텐츠 검증·정규화·청킹·내보내기, Kotlin은 CMS·발행·검색 API, PostgreSQL은 원본과 공개 검색 데이터를 담당합니다. 생성형 답변 UI·API는 이번 출시 범위에서 제외합니다.
+주력은 React·TypeScript·Tailwind·Rust·PostgreSQL입니다. React는 공개 웹과 관리자, Rust는 업무 API와 콘텐츠 검증·정규화·청킹·내보내기, PostgreSQL은 원본과 공개 검색 데이터를 담당합니다. 생성형 답변 UI·API는 이번 출시 범위에서 제외합니다.
 
 ## 지금 해도 되는 일과 먼저 해결할 일
 

@@ -12,7 +12,7 @@
 
 ## 공개 상태와 캐시
 
-인덱스 전환 전에도 Kotlin이 현재 공개·철회 ID를 검사합니다. 생성 전후 공개 상태를 재확인합니다. 캐시 키에는 정규화 질문·scope·releaseId·modelVersion·promptVersion을 포함하고 철회 시 관련 캐시를 무효화합니다.
+인덱스 전환 전에도 Rust API가 현재 공개·철회 ID를 검사합니다. 생성 전후 공개 상태를 재확인합니다. 캐시 키에는 정규화 질문·scope·releaseId·modelVersion·promptVersion을 포함하고 철회 시 관련 캐시를 무효화합니다.
 
 ## 자원 제한 초기안
 

@@ -1,0 +1,17 @@
+[package]
+name = "datagrizzly-api"
+version = "0.0.1"
+edition = "2021"
+publish = false
+
+# 개념: CMS API의 Rust 서버.
+# 목적: 루프백 8080에서 health만 연다. 다른 actuator와 업무 API는 없다.
+# 사용처: services/api 의 cargo test, cargo run.
+
+[dependencies]
+axum = "0.8"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "net"] }
+
+[dev-dependencies]
+http-body-util = "0.1"
+tower = { version = "0.5", features = ["util"] }

@@ -4,7 +4,7 @@
 
 Ryzen 5 7530U, RAM 조회 13.8GiB, C: 여유 23.4GiB 기준입니다. [[02_RESOURCE_BUDGET]]의 공간 게이트를 먼저 적용합니다. Python은 S20 이전에 설치하지 않으며 모델·torch·transformers·OCR 패키지를 기본 의존성으로 추가하지 않습니다.
 
-WORKFLOW 모드: PostgreSQL + Kotlin API + Python 워커 1개 + 관리자 UI 1개. Rust는 사전 빌드된 CLI만 실행합니다. 공개 웹 watcher·전체 빌드·Rust 컴파일은 중지합니다. Python RSS 512MiB를 관측 목표로 시작하되 보장하지 않습니다. 총 시스템 메모리 85% 지속·paging·UI 지연이면 UI를 정적 빌드로 바꾸거나 작업 입력을 줄입니다. 워커 컨테이너 사용 시 768MiB/CPU1부터 측정하고 OOM은 영구 성공으로 처리하지 않습니다.
+WORKFLOW 모드: PostgreSQL + Rust API + Python 워커 1개 + 관리자 UI 1개. 공개 웹 watcher와 전체 프론트 빌드는 중지합니다. Python RSS 512MiB를 관측 목표로 시작하되 보장하지 않습니다. 총 시스템 메모리 85% 지속·paging·UI 지연이면 UI를 정적 빌드로 바꾸거나 작업 입력을 줄입니다. 워커 컨테이너 사용 시 768MiB/CPU1부터 측정하고 OOM은 영구 성공으로 처리하지 않습니다.
 
 ## 실행 의미
 
@@ -14,7 +14,7 @@ WORKFLOW 모드: PostgreSQL + Kotlin API + Python 워커 1개 + 관리자 UI 1�
 
 ## CI·컨테이너
 
-경로별 CI: Python lint/type/unit, Kotlin 계약/DB, Rust fixture, 관리자 상태 UI. 네트워크 fetch 테스트는 통제된 fixture 서버를 사용합니다. 별도 nightly 모델 테스트는 없습니다. Python 이미지는 필요한 의존성만 lock 기반 설치하고 비루트로 실행합니다. Rust 바이너리 호환 OS/아키텍처를 검사하고 이미지 digest를 기록합니다. 기본 compose up에 워커를 상시 추가하지 말고 workflow profile의 one-shot service로 제공합니다.
+경로별 CI: Python lint/type/unit, Rust API 계약과 DB, 관리자 상태 UI. 네트워크 fetch 테스트는 통제된 fixture 서버를 사용합니다. 별도 nightly 모델 테스트는 없습니다. Python 이미지는 필요한 의존성만 lock 기반 설치하고 비루트로 실행합니다. Rust 바이너리 호환 OS/아키텍처를 검사하고 이미지 digest를 기록합니다. 기본 compose up에 워커를 상시 추가하지 말고 workflow profile의 one-shot service로 제공합니다.
 
 ## 보존과 복구
 

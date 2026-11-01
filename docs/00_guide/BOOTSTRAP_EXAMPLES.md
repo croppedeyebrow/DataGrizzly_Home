@@ -1,6 +1,6 @@
 # v5.0 초기 설정 예시
 
-[[04_WINDOWS_COMMANDS]]의Gradle·DB·WSL예시를사용합니다. 기존CMake·LinuxNode전체설치·Go초기설치예시는폐기합니다.
+[[04_WINDOWS_COMMANDS]]의 Rust·DB·WSL 예시를 사용합니다. 기존CMake·LinuxNode전체설치·Go초기설치예시는폐기합니다.
 
 ## 처음의package.json
 
@@ -26,4 +26,4 @@ DB_USER/PASSWORD는서버전용이며VITE_/PUBLIC_변수에넣지않습니다. .
 
 ## Rust골격 — M4직전
 
-S16게이트통과후Ubuntu에서content-core라이브러리/content-cli실행파일만Cargo workspace로구성합니다. WASMtarget은선택후속입니다. Kotlin과TypeScript fixture를공유하고Linux바이너리는WSL호출또는CI로실행합니다. 동일프로젝트의Node/JDK환경을Linux에중복설치하지않습니다.
+콘텐츠 검증 라이브러리는 `services/api`와 같은 Cargo workspace에 둔다. 로컬 API는 Windows Rust로 빌드한다. Ubuntu는 로컬 API의 선행 조건이 아니다. WASM은 선택 후속이다. TypeScript fixture를 공유하고, Linux 바이너리가 필요하면 WSL 또는 CI에서 실행한다. 같은 프로젝트의 Node 환경을 Linux에 중복 설치하지 않는다.

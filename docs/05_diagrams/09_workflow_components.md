@@ -2,7 +2,7 @@
 
 ```mermaid
 flowchart TD
-    UI[관리자 TypeScript] --> API[Kotlin API]
+    UI[관리자 React] --> API[Rust API]
     WEB[공개 홈페이지] --> API
     API --> DB[PostgreSQL 업무 데이터]
     API --> OBJ[비공개 자료 저장소]
@@ -10,7 +10,7 @@ flowchart TD
     PY -->|작업·검색·초안 API| API
     PY --> LC[LangChain 어댑터]
     PY --> LG[LangGraph]
-    LC --> R[Rust CLI]
+    LC --> R[Rust 라이브러리]
     LG --> CP[전용 체크포인트 영역]
 ```
 

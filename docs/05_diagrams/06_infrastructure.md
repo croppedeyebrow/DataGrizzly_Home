@@ -5,10 +5,10 @@ flowchart TD
  B[브라우저] --> CDN[정적 CDN]
  B --> PX[HTTPS 프록시]
  subgraph HOST[단일 운영 서버]
- PX --> API[Kotlin API]
+ PX --> API[Rust API]
  API --> DB[PostgreSQL]
  end
- API --> JOB[CI 발행 작업·Rust CLI]
+ API --> JOB[CI 발행 작업·Rust 라이브러리]
  JOB --> CDN
  API --> OBJ[첨부·외부 백업]
 ```

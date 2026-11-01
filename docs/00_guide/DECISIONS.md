@@ -2,7 +2,7 @@
 
 ## 확정 범위
 
-프로젝트 설명/과정 기록 분리, DB 기반 CMS, 정적 공개 페이지, PostgreSQL 검색 유지·생성 제외, Rust 보조 도구, 필요 시 Go 배포 CLI, Python 워크플로를 M8에서 추가합니다.
+프로젝트 설명/과정 기록 분리, DB 기반 CMS, 발행된 공개 페이지의 정적 출력, PostgreSQL 검색 유지·생성 제외, 필요 시 Go 배포 CLI, Python 워크플로를 M8에서 추가합니다. 2026-11-01 S13-1부터 새 구현의 프론트는 React·TypeScript·Tailwind, 업무 API는 Rust다. Kotlin·Spring Boot와 Astro는 확장하지 않는다.
 
 ## 착수 시 결정할 항목
 
@@ -24,6 +24,17 @@
 현재 환경: Windows 우선, 도구는 단계별 설치. Rust 단계에서 WSL 환경을 준비하고 Python은 S20부터 준비합니다. C++은 제외합니다. [[03_EXECUTION_PLAN]]
 
 패키지 보안 결정: 제3자 설치 스크립트 기본 차단, Hardened Mode, 3일 age gate, 단일 `yarn.lock`을 적용합니다. 필요한 설치 스크립트는 패키지별 검토 후에만 허용합니다.
+
+## ADR-09 프론트와 API 스택
+
+- 문제: 공개 웹은 Astro, 관리자는 React, API는 Kotlin으로 나뉘어 이후 화면과 서버 구현이 두 체계를 따른다.
+- 후보: 기존 체계 유지, 프론트만 React로 통일, API만 Rust로 교체, 프론트와 API를 함께 교체.
+- 선택: 공개 웹과 관리자를 React·TypeScript·Tailwind로 만들고, 업무 API를 Rust로 만든다.
+- 근거: 화면 기술을 하나로 두고, 인증·저장·발행·검증을 Rust 프로세스에 모은다. 경로, 초안 비공개, PostgreSQL 원본은 유지한다.
+- 비용·위험: 공개 페이지와 health는 2026-11-01에 이전했다. 데이터베이스 접속은 아직 없다. 공개 글은 발행 빌드의 정적 HTML로 남겨 API 중단 시에도 읽히게 한다.
+- 재검토 조건: Rust 서버가 로컬 health와 15432 접속을 통과하지 못하면 이 결정을 다시 연다.
+- 영향 태스크: S13-1. S14의 JDBC 연결은 보류. 다음 구현은 Rust의 데이터베이스 접속이다.
+- 날짜: 2026-11-01
 
 ## v5.0 자료 워크플로 반영
 

@@ -2,7 +2,7 @@
 
 ## 주요 변경
 
-초기Ubuntu/다중언어일괄설치→Windows최소설치와단계별확장. S00~S19전부수행→필요시점별실행. 검색별도C++서비스→PostgreSQL공개검색행+Kotlin. Rust본문처리유지. LLM은 제외하며 Python 워크플로는 v5에서 추가. Go는배포국소도구로조건부. DBbootstrap와업무schema분리유지. 초기검사와운영CI분리유지.
+초기Ubuntu/다중언어일괄설치→Windows최소설치와단계별확장. S00~S19전부수행→필요시점별실행. 검색별도C++서비스→PostgreSQL공개검색행과 Rust API. 본문 검증도 Rust. LLM은 제외하며 Python 워크플로는 v5에서 추가. Go는배포국소도구로조건부. DBbootstrap와업무schema분리유지. 초기검사와운영CI분리유지.
 
 ## 검토 범위
 
@@ -135,7 +135,7 @@ PC실제벤치마크·설치상태·Docker버전·OS업데이트·디스크정�
 - 02_architecture/10_API와_언어_간_계약.md
 - 02_architecture/12_DB_제약_보존_마이그레이션.md
 - 02_architecture/07_전체_프로그램_구성.md
-- 02_architecture/09_Kotlin_백엔드_구조.md
+- 02_architecture/09_Rust_백엔드_구조.md
 - 02_architecture/17_CI_CD와_콘텐츠_배포.md
 - 02_architecture/15_Rust_콘텐츠_도구와_Go_Ops.md
 - 02_architecture/16_인프라와_컨테이너_배치.md

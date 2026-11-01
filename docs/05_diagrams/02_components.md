@@ -2,11 +2,11 @@
 
 ```mermaid
 flowchart TD
- W[Astro 공개 웹] --> K[Kotlin CMS·검색 API]
+ W[React 공개 웹] --> K[Rust 업무 API]
  A[React 관리자] --> K
  K --> DB[PostgreSQL]
  K --> J[발행 작업]
- J --> R[Rust 콘텐츠 CLI]
+ J --> R[Rust 콘텐츠 라이브러리]
  R --> B[정적 빌드]
  B --> C[CDN]
  J --> DB

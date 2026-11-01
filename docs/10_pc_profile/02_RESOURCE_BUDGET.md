@@ -14,15 +14,15 @@
 
 40GiB는 절대 최소 또는 충분조건이 아닙니다. 초기와 완료 후 모두 Windows C:를 측정합니다. WSL 내부 df의 큰 가상 여유를 실제 SSD 여유로 해석하지 않습니다. 다른 물리/외장 드라이브 존재는 확인되지 않았습니다. 구입을 필수 조건으로 두지 않습니다.
 
-Node·Kotlin·JDK·PostgreSQL·Rust·Docker Desktop은 이미 설치되어 있으므로 해당 프로그램의 신규 설치 공간을 다시 확보하지 않습니다. 40GiB 목표는 OS 기능 업데이트, 새 Ubuntu가 실제로 필요할 때, 대형 이미지처럼 증가량이 큰 작업에만 적용합니다. 현재 WEB 단계는 15GiB 하한을 지키며 진행합니다.
+Node·PostgreSQL·Rust·Docker Desktop은 이미 설치되어 있으므로 해당 프로그램의 신규 설치 공간을 다시 확보하지 않습니다. 40GiB 목표는 OS 기능 업데이트, 새 Ubuntu가 실제로 필요할 때, 대형 이미지처럼 증가량이 큰 작업에만 적용합니다. 현재 WEB 단계는 15GiB 하한을 지키며 진행합니다.
 
 ## 실행 모드
 
 | 모드 | 실행 | 정지할 대상 |
 |---|---|---|
 | DOCS | 에디터·브라우저/Obsidian | Docker가 불필요하면 종료, 서버·모델 없음 |
-| WEB | Astro 또는 관리자 dev 중1개, fixture | API·DB·다른 dev server·모델 |
-| CMS | 관리자 dev + Kotlin API + PostgreSQL1개 | 공개웹 watcher·C++·모델 |
+| WEB | 공개 웹 또는 관리자 dev 중 1개, fixture | API·DB·다른 dev server·모델 |
+| CMS | 관리자 dev + Rust API + PostgreSQL 1개 | 공개 웹 watcher·모델 |
 | PUBLISH | DB·API + 정적 빌드1개 | 두 프론트 watcher·다른 빌드·모델 |
 | SEARCH | DB·API + 필요한 UI1개 | 모델·전체 재빌드 |
 | NATIVE_BUILD | Rust 하나만 빌드 | API·DB·프론트 watcher |
@@ -30,8 +30,7 @@ Node·Kotlin·JDK·PostgreSQL·Rust·Docker Desktop은 이미 설치되어 있�
 
 ## 시작 설정
 
-- Gradle heap 1024MiB, worker2, parallel=false. Kotlin compiler는 in-process로 먼저 측정합니다. 전체 RSS는 heap보다 큽니다.
-- JVM 앱은 Xms128m/Xmx768m 시작. 부족하면 타 서비스 중지 후1024m 재측정; JVM 전체 메모리 제한이 아님.
+- Cargo 빌드는 `-j 2`에서 시작한다. 공개 웹 dev, Rust 빌드, PostgreSQL을 한 번에 켜지 않는다.
 - PostgreSQL 개발 컨테이너 mem_limit768m, cpus1.0, shared_buffers128MB, 연결20. 실제 Compose 설정과 docker stats로 확인합니다. 이는 단일 개발자 fixture용입니다.
 - DB connection pool maximum4, minimumIdle1 제안. 초기 테스트와 동시 요청에 맞춰 조정합니다.
 - WSL VM memory4GB/processors4/swap1GB 시작. 기존 .wslconfig를 보존·병합하고 Ubuntu·Docker가 공유할 수 있는 범위를 확인합니다. 전체 Windows 앱에 적용되는 상한이 아닙니다.

@@ -29,27 +29,16 @@ corepack yarn workspace @datagrizzly/web dev --host 127.0.0.1 --port 4321
 
 루트 workspace에는 처음에 `apps/web`만 등록합니다. S11에서 `apps/admin`을 추가하고 `packages/*`는 실제 package.json 생성 시 등록합니다. 정확한 `yarn.lock` 하나만 유지합니다. `.yarnrc.yml`의 설치 스크립트 차단을 임의로 풀지 않고, 필요한 패키지만 검토 후 개별 허용합니다.
 
-## Kotlin
-
-services/cms/gradle.properties 시작 예시:
-
-```properties
-org.gradle.jvmargs=-Xmx1024m -Dfile.encoding=UTF-8
-org.gradle.workers.max=2
-org.gradle.parallel=false
-kotlin.compiler.execution.strategy=in-process
-```
+## Rust API
 
 ```powershell
-Set-Location C:\Dev\sideproject\My_Web\services\cms
-.\gradlew.bat test --max-workers=2
-.\gradlew.bat bootJar --max-workers=2
-.\gradlew.bat --stop
-# 빌드된 실제 실행 JAR 이름으로 교체; plain.jar는 실행 대상 아님
-# java -Xms128m -Xmx768m -jar .\build\libs\<실제bootJar>.jar --spring.profiles.active=local
+Set-Location C:\Dev\sideproject\My_Web\services\api
+$env:CARGO_BUILD_JOBS = '2'
+cargo test -j 2
+cargo run
 ```
 
-bootRun을 쓸 때 앱 JVM heap은 Gradle heap과 별개이므로 BootRun의 jvmArgs를 설정합니다. 빌드 후 bootJar 실행은 Gradle daemon을 끄고 API만 실행하는 선택 경로입니다. test maxParallelForks=1과 테스트 JVM heap도 build.gradle.kts에서 별도로 설정합니다.
+바인드는 `127.0.0.1:8080`이다. 공개 웹 개발 서버와 데이터베이스를 이 빌드와 같이 켜지 않는다. `services/cms`의 Gradle 명령은 현재 절차가 아니다.
 
 ## PostgreSQL local 예시
 

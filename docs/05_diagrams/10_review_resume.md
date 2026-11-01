@@ -3,7 +3,7 @@
 ```mermaid
 sequenceDiagram
     participant U as 관리자
-    participant K as Kotlin
+    participant K as Rust API
     participant D as PostgreSQL
     participant W as Python 워커
     U->>K: 검토 승인(commandId, reviewVersion)

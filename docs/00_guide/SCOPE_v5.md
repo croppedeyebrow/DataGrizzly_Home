@@ -2,16 +2,20 @@
 
 결정일: 2026-10-24. 브랜드는 “DataGrizzly — 현장의 데이터에서, 신뢰할 수 있는 시스템까지”입니다. 프로젝트 설명과 과정 기록, 공부 노트, 논문·뉴스 정리를 직접 작성하는 개인 홈페이지입니다.
 
+## S13-1 스택
+
+2026-11-01 이후의 구현은 공개 웹과 관리자를 React·TypeScript·Tailwind로 만들고, 업무 API를 Rust로 만든다. 화면, 경로, PostgreSQL, 생성 제외는 유지한다. 상세는 [[S13-1]]이다.
+
 ## 이번 변경
 
-Kotlin·Rust·TypeScript·PostgreSQL을 주력으로 유지하고 Python은 LangChain·LangGraph 기반 자료 수집·검색·검토에 한정합니다. LLM·임베딩·자동 요약·자동 태그 추론·챗봇은 구현하지 않습니다. 생성 단계가 없으므로 현재 기능을 완성된 RAG라고 부르지 않습니다.
+React·TypeScript·Tailwind·Rust·PostgreSQL을 주력으로 두고 Python은 LangChain·LangGraph 기반 자료 수집·검색·검토에 한정합니다. LLM·임베딩·자동 요약·자동 태그 추론·챗봇은 구현하지 않습니다. 생성 단계가 없으므로 현재 기능을 완성된 RAG라고 부르지 않습니다.
 
 | 영역 | 기술·책임 |
 |---|---|
-| 공개 홈페이지 | Astro·TypeScript, 정적 본문·SEO |
-| 관리자 | React·TypeScript, 작성·자료 등록·검토 |
-| 업무 API | Kotlin/Spring Boot, 인증·권한·작업 접수·초안·발행·공개 검색 |
-| 콘텐츠 처리 | Rust CLI, 정규화·검증·절 추출·내보내기 |
+| 공개 홈페이지 | React·TypeScript·Tailwind, 정적 본문·SEO |
+| 관리자 | React·TypeScript·Tailwind, 작성·자료 등록·검토 |
+| 업무 API | Rust, 인증·권한·작업 접수·초안·발행·공개 검색 |
+| 콘텐츠 처리 | Rust 라이브러리, 정규화·검증·절 추출·내보내기 |
 | 자료 연결 | Python·LangChain 구성 요소, PDF/Markdown/HTML 어댑터·검색 결과 Document 변환 |
 | 처리 흐름 | Python·LangGraph, 분기·검토 중단·영속 체크포인트·재개 |
 | 저장 | PostgreSQL, CMS 데이터와 작업·별도 체크포인트 영역 |
@@ -20,13 +24,13 @@ Kotlin·Rust·TypeScript·PostgreSQL을 주력으로 유지하고 Python은 Lang
 
 ## 유지할 검색·발행 계약
 
-Rust가 공개 본문의 절을 추출하고 Kotlin이 release별 검색 행을 적재합니다. 현재 활성 release와 철회 목록을 적용합니다. 초안·외부 수집 원문은 공개 검색에서 제외합니다. 작은 데이터는 파라미터 바인딩한 부분일치로 시작하며 한국어 평가 후 pg_trgm/FTS를 검토합니다. 일반 방문자 검색은 Python을 거치지 않습니다.
+Rust API가 공개 본문의 절을 추출하고 release별 검색 행을 적재합니다. 현재 활성 release와 철회 목록을 적용합니다. 초안·외부 수집 원문은 공개 검색에서 제외합니다. 작은 데이터는 파라미터 바인딩한 부분일치로 시작하며 한국어 평가 후 pg_trgm/FTS를 검토합니다. 일반 방문자 검색은 Python을 거치지 않습니다.
 
 새 정적 release와 검색 행을 검증한 후 활성 pointer를 전환합니다. 실패 시 기존 공개 세대를 유지하고 철회는 모든 세대에 우선 적용합니다. 기존 CMS 수정본·자동저장·충돌·발행·SEO 계약은 유지합니다.
 
 ## 추가 흐름
 
-관리자 자료 등록 → 안전한 읽기 → Rust 검증 → 중복·메타데이터 검사 → 기존 공개 글 검색 → 사용자 검토 → Kotlin 초안 저장. 최종 발행은 별도 기존 CMS 작업입니다. Python이 CMS 테이블에 직접 쓰거나 공개 상태를 바꾸지 않습니다.
+관리자 자료 등록 → 안전한 읽기 → Rust 검증 → 중복·메타데이터 검사 → 기존 공개 글 검색 → 사용자 검토 → Rust API 초안 저장. 최종 발행은 별도 CMS 작업입니다. Python이 CMS 테이블에 직접 쓰거나 공개 상태를 바꾸지 않습니다.
 
 첫 구현은 수동 PDF/Markdown 업로드입니다. URL 수집은 네트워크 안전 검증을 통과한 다음 단계에서 허용합니다. 이미지 PDF OCR, 로그인 벽 우회, 무제한 크롤링은 제외합니다.
 

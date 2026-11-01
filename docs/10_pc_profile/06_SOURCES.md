@@ -6,8 +6,7 @@
 - Docker Desktop Windows 요구사항: https://docs.docker.com/desktop/setup/install/windows-install/
 - WSL 자원 설정: https://learn.microsoft.com/en-us/windows/wsl/wsl-config
 - WSL 가상 디스크: https://learn.microsoft.com/en-us/windows/wsl/disk-space
-- Gradle JVM/worker: https://docs.gradle.org/current/userguide/build_environment.html
-- Kotlin compiler 실행 전략: https://kotlinlang.org/docs/gradle-compilation-and-caches.html
-- llama.cpp server 설정: https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md
+- Cargo 빌드 병렬: https://doc.rust-lang.org/cargo/commands/cargo-build.html
+- Axum: https://docs.rs/axum/
 
 버전이 고정되지 않은 문서의 최신 내용은 설치 시 다시 확인합니다. Docker 내부 배포판이 Running이라는 사실은 지원 OS·Docker 버전·DB 실행 검증을 통과했다는 의미가 아닙니다.

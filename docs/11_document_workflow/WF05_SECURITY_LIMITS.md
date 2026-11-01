@@ -19,7 +19,7 @@
 - 사용자정보 포함 URL·비허용 포트·file/data/ftp를 거절합니다.
 - DNS 결과의 모든 IPv4/IPv6가 public 주소인지 확인하고 loopback/private/link-local/metadata 주소를 차단합니다.
 - DNS 재바인딩을 막기 위해 실제 연결 IP도 검증·고정 가능한 fetch 구현을 사용합니다. 리다이렉트마다 재검증하며 자동 redirect에 맡기지 않습니다. 이 보장을 구현할 수 없으면 URL fetch는 비활성화합니다.
-- 네트워크 레벨 egress도 내부 서비스와 클라우드 metadata로의 접근을 차단합니다. Kotlin 내부 API용 연결과 외부 fetch client를 분리합니다.
+- 네트워크 레벨 egress도 내부 서비스와 클라우드 metadata로의 접근을 차단합니다. Rust 내부 API용 연결과 외부 fetch client를 분리합니다.
 - 응답 Content-Length를 신뢰하지 않고 스트리밍 수신량을 제한합니다. 압축 해제 후 크기·시간도 제한합니다.
 - 쿠키·관리자 토큰·브라우저 세션을 외부 호스트로 전달하지 않습니다. 로그인/구독 벽을 우회하지 않습니다.
 

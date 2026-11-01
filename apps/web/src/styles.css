@@ -1,0 +1,66 @@
+/*
+ * 개념: 공개 웹의 Tailwind 테마와 공통 배치.
+ * 목적: 기존 색 토큰을 유틸리티로 쓰고, 좁은 화면의 표와 코드가 페이지 안에서만 스크롤되게 한다.
+ * 사용처: apps/web/src/boot.ts 가 빌드에 포함하고, 정적 HTML은 이 결과를 style로 넣는다.
+ */
+@import "tailwindcss";
+@import "@datagrizzly/design-tokens/tokens.css";
+
+@theme inline {
+  --color-canvas: var(--color-bg);
+  --color-paper: var(--color-surface);
+  --color-ink: var(--color-text);
+  --color-quiet: var(--color-muted);
+  --color-rule: var(--color-line);
+  --color-mark: var(--color-accent);
+  --color-ring: var(--color-focus);
+  --font-sans: var(--font-body);
+}
+
+@layer base {
+  html {
+    background: var(--color-bg);
+  }
+
+  body {
+    margin: 0;
+    color: var(--color-text);
+    background: var(--color-bg);
+    font-family: var(--font-body);
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body);
+  }
+
+  h1,
+  h2,
+  h3,
+  p,
+  a,
+  li {
+    overflow-wrap: anywhere;
+  }
+
+  img,
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .table-scroll,
+  .code-block,
+  .math-block {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .code-block,
+  .math-block {
+    white-space: pre;
+  }
+
+  .site-nav a[aria-current='page'],
+  .project-tabs a[aria-current='page'] {
+    text-decoration: underline;
+    text-underline-offset: 0.35rem;
+  }
+}

@@ -9,7 +9,7 @@
 | NEEDS_REVIEW | 승인/수정 command → RESUME_QUEUED, 거절 → REJECTED |
 | RESUME_QUEUED | 워커 claim 후 저장된 command를 적용 → RUNNING |
 | RETRY_WAIT | nextAttemptAt 이후 claim → RUNNING; 최대 3회 소진 → FAILED |
-| DRAFT_SAVED | Kotlin이 초안 ID를 확정한 종료 상태 |
+| DRAFT_SAVED | Rust API가 초안 ID를 확정한 종료 상태 |
 | FAILED | 사용자 명시 재시도만 허용, 입력 변경 시 새 작업 |
 | REJECTED / CANCELLED | 종료. 재개 불가, 다시 시도하려면 새 작업 |
 
@@ -23,7 +23,7 @@ state에는 schemaVersion, workflowVersion, jobId, sourceHash, artifactId, secti
 
 ## lease와 fencing
 
-claim은 Kotlin의 단일 트랜잭션에서 실행 가능한 행을 잠그고 leaseToken, leaseUntil, attempt를 갱신합니다. 최초 제안 lease 120초, heartbeat 30초. 만료된 RUNNING은 다음 claim에서 회수합니다. 모든 워커 결과 쓰기는 최신 leaseToken 일치와 유효기간을 검사합니다. 이전 워커의 늦은 결과는 409로 거절합니다. 워커 한 개 정책이어도 이 규칙은 유지합니다.
+claim은 Rust API의 단일 트랜잭션에서 실행 가능한 행을 잠그고 leaseToken, leaseUntil, attempt를 갱신합니다. 최초 제안 lease 120초, heartbeat 30초. 만료된 RUNNING은 다음 claim에서 회수합니다. 모든 워커 결과 쓰기는 최신 leaseToken 일치와 유효기간을 검사합니다. 이전 워커의 늦은 결과는 409로 거절합니다. 워커 한 개 정책이어도 이 규칙은 유지합니다.
 
 ## 승인 재개
 

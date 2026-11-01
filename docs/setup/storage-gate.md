@@ -18,14 +18,14 @@
 | Docker 저장공간 | Docker Desktop 4.43.2 설치, 엔진 중지 | 필요 시 시작 후 `docker system df` 재측정 |
 | Docker 실행 컨테이너 | 데몬 연결 실패 | 미확인; Docker를 강제로 시작하지 않음 |
 
-S01의 조사와 기록을 완료했다. Node, Kotlin, PostgreSQL, Rust, Docker Desktop은 이미 설치되어 있으므로 해당 도구의 신규 설치 용량을 추가로 확보할 필요가 없다. 현재 25.98 GiB에서 문서와 작은 WEB 개발을 진행하고, 매 단계 후 여유 공간이 15 GiB 아래로 내려가지 않는지 측정한다. 40 GiB는 OS 기능 업데이트, 새 Ubuntu 설치가 실제로 필요한 경우, 대형 Docker 이미지처럼 증가량이 큰 작업 전의 보수적 목표일 뿐 현재 단계의 필수 통과값이 아니다.
+S01의 조사와 기록을 완료했다. Node, PostgreSQL, Rust, Docker Desktop은 이미 설치되어 있으므로 해당 도구의 신규 설치 용량을 추가로 확보할 필요가 없다. PC에 있는 Kotlin CLI는 프로젝트 API에 쓰지 않는다. 현재 25.98 GiB에서 문서와 작은 WEB 개발을 진행하고, 매 단계 후 여유 공간이 15 GiB 아래로 내려가지 않는지 측정한다. 40 GiB는 OS 기능 업데이트, 새 Ubuntu 설치가 실제로 필요한 경우, 대형 Docker 이미지처럼 증가량이 큰 작업 전의 보수적 목표일 뿐 현재 단계의 필수 통과값이 아니다.
 
 ## 기존 도구 재사용 확인
 
 | 도구 | 확인 결과 | 현재 결정 |
 |---|---|---|
 | Node/npm | v22.23.2 / 10.9.8 | 재설치하지 않음; S05 호환성 확정 후 재사용 |
-| Kotlin CLI | 2.0.21 | 재설치하지 않음; 프로젝트 Kotlin 플러그인 버전은 별도 확정 |
+| Kotlin CLI | 2.0.21 | 재설치하지 않음. 프로젝트 API는 Rust이며 이 CLI를 쓰지 않음 |
 | JDK | 21.0.8 LTS | 재설치하지 않음; S05 호환성 확인 |
 | PostgreSQL | 16.10, Windows 서비스 실행 중, 5432 연결 수락 | 네이티브 설치 재사용 후보; S13에서 컨테이너 필요성만 판단 |
 | Rust | 1.92.0 Windows MSVC | 재설치하지 않음; M4 Linux 검증과는 구분 |
@@ -51,7 +51,7 @@ S00 이후 여유 공간이 4.39 GiB 늘었지만 이번 S01 작업에서는 파
 | Rust toolchains | 1.18 GiB | 설치 자산 | 자동 삭제 금지; M4 계획과 함께 재검토 |
 | `C:\ProgramData\Package Cache` | 1.02 GiB | 설치 복구 자산 | 수동 삭제 금지 |
 | Cargo registry cache | 0.48 GiB | 재생성 가능 캐시 | Rust 작업이 없을 때 사용자 승인 후 정리 후보 |
-| Gradle cache | 0.27 GiB | 재생성 가능 캐시 | Kotlin 작업 전 재다운로드 비용을 고려해 사용자 승인 후 결정 |
+| Gradle cache | 0.27 GiB | 재생성 가능 캐시 | 현재 API 빌드는 Cargo를 쓴다. 삭제는 사용자 승인 후 결정 |
 | Downloads | 0.01 GiB | 사용자 파일 | 영향 작음 |
 | npm cache | 0.00 GiB | 재생성 가능 캐시 | 정리 효과 없음 |
 | Docker 사용자 폴더 | 0.00 GiB로 관측 | Docker 관리 영역 | 데몬 미실행 상태라 Docker 명령으로 재검증 필요 |

@@ -2,9 +2,9 @@
 
 ## 시스템 경계
 
-- Astro: 정적 공개 HTML. React: 관리자 및 필요한 상호작용.
-- Kotlin Spring Boot: 인증·CMS·발행·검색 중계. PostgreSQL: 콘텐츠 원본.
-- Rust: 콘텐츠 CLI, 선택 WASM. Go: 필요 시 국소 배포 CLI. Python은 자료 처리 워커에만 사용하며 CMS 업무 규칙을 소유하지 않습니다.
+- React·TypeScript·Tailwind: 공개 정적 HTML과 관리자. 공개 글은 발행 빌드의 정적 파일이고, 검색처럼 요청이 필요한 화면만 API를 호출한다.
+- Rust: 인증·CMS·발행·검색·콘텐츠 검증. PostgreSQL: 콘텐츠 원본.
+- Go: 필요 시 국소 배포 CLI. Python은 자료 처리 워커에만 사용하며 CMS 업무 규칙을 소유하지 않습니다.
 - 단일 서버+CDN+외부 백업을 초기안으로 둡니다. 상시 GPU·Kubernetes·Kafka·자체 CI 플랫폼은 제외합니다.
 
 ## 원본·수정본·공개 세대
@@ -56,7 +56,7 @@ Manifest: releaseId, schemaVersion, chunkerVersion, indexVersion, hashes.
 
 ## v5.0 확정 변경
 
-[[SCOPE_v5]]를적용합니다. 검색은PostgreSQL공개검색행+KotlinAPI이며RustCLI가발행텍스트를추출합니다. 별도C++검색/추론서버는없습니다. Go는선택입니다. S19/M0-03은현재설치된공개웹만초기검증하고DB는M2전S14에서확인합니다. 실행 절차는 `docs/setup/local-run.md`에 있다. 2026-10-26에 다른 경로의 잠금 파일 빌드와 미리보기가 통과했다. API와 DB는 실행하지 않았다.
+[[SCOPE_v5]]를 적용합니다. 검색은 PostgreSQL 공개 검색 행과 Rust API이며, 발행 텍스트 추출도 Rust가 맡습니다. 별도 C++ 검색·추론 서버는 없습니다. Go는 선택입니다. DB 접속은 S14의 JDBC가 아니라 Rust 접속 작업에서 확인합니다. 실행 절차는 `docs/setup/local-run.md`에 있다. 2026-10-26에 다른 경로의 잠금 파일 빌드와 미리보기가 통과했다. API와 DB는 실행하지 않았다.
 
 ## v5.0 자료 워크플로 반영
 

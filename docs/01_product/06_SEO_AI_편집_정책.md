@@ -1,6 +1,6 @@
 # 06. SEO·AI·편집 정책
 
-> v5.0 기준: [[SCOPE_v5]] 적용. 주력 Kotlin·Rust·TypeScript·PostgreSQL. LLM·C++ 제외, Go는 국소 배포 도구로 필요할 때만 사용합니다. 로컬 자원은 [[02_RESOURCE_BUDGET]] 참조.
+> v5.0 기준: [[SCOPE_v5]] 적용. 주력 React·TypeScript·Tailwind·Rust·PostgreSQL. LLM·C++ 제외, Go는 국소 배포 도구로 필요할 때만 사용합니다. 로컬 자원은 [[02_RESOURCE_BUDGET]] 참조.
 검색과 답변은 공개 원문으로 돌아가는 통로
 
 ## SEO 기본

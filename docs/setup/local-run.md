@@ -10,7 +10,7 @@
 
 탐색기에서 저장소 루트의 `dev-web.cmd`를 실행하면 개발 서버가 켜진다. PowerShell에서는 `.\dev-web.cmd`다. 주소는 http://127.0.0.1:4321/ 이고, 창을 닫거나 `Ctrl+C`로 멈춘다. `node_modules`가 없을 때만 `corepack yarn install --immutable`을 먼저 실행한다.
 
-`apps/web/astro.config.mjs`의 개발 서버는 `127.0.0.1:4321`이다. 4321이 이미 사용 중이면 Astro는 다음 포트로 옮겨 간다. 이번 확인에서는 4321이 비어 있었고 그 포트가 응답했다.
+`apps/web/vite.config.ts`의 개발 서버는 `127.0.0.1:4321`이다. 포트가 이미 사용 중이면 서버는 다른 포트로 옮겨 가지 않는다.
 
 ```powershell
 corepack yarn install --immutable
@@ -27,7 +27,7 @@ node scripts/check-m0-env.mjs
 | `corepack yarn workspace @datagrizzly/web preview --host 127.0.0.1 --port 4321` | 응답 후 종료 | `http://127.0.0.1:4321/` HTTP 200. 본문은 제목 DataGrizzly와 아직 API·콘텐츠를 연결하지 않았다는 문장 |
 | `npm.cmd --version` | 0 | 10.9.9. `package-lock.json`은 없음. 설치는 Yarn만 사용 |
 
-빌드 로그는 `output: "static"`, 페이지 1개, adapter 없음이다. `yarn install`은 peer dependency 경고 YN0086을 남기고 종료 코드 0이었다.
+2026-10-25 빌드 로그는 당시 Astro의 `output: "static"`이었다. 2026-11-01 이후 공개 웹은 Vite가 React 페이지를 정적 HTML로 뽑는다. `yarn install`은 peer dependency 경고 YN0086을 남기고 종료 코드 0이었다.
 
 미리보기를 띄운 뒤에는 프로세스를 종료했다. 종료 후 4321 수신은 없었다.
 
@@ -35,12 +35,12 @@ node scripts/check-m0-env.mjs
 
 | 대상 | 계약에 적힌 값 | 현재 파일 | 이번 실행 |
 |---|---|---|---|
-| 공개 웹 | `127.0.0.1:4321` | `apps/web/astro.config.mjs` | HTTP 200 |
+| 공개 웹 | `127.0.0.1:4321` | `apps/web/vite.config.ts` | React 정적 빌드 |
 | 관리자 | `127.0.0.1:5173` | `apps/admin` | 2026-10-25에는 미실행. S11에서 자리표시자만 확인 |
-| API | `127.0.0.1:8080` | `services/cms` | 2026-10-31 health만 확인. `/api/status`는 없음 |
+| API | `127.0.0.1:8080` | `services/api` | Rust health. `/actuator/env`는 404 |
 | 공개 웹의 API 프록시 | 없음 | 설정 없음 | 추가하지 않음 |
 | 개발 DB | `127.0.0.1:15432` | `infra/local/compose.yaml` | 2026-11-01 컨테이너 기동. CMS는 아직 접속하지 않음 |
-| Spring `local` 프로필 | `application-local.properties` | 있음. 데이터 소스 없음 | 2026-10-31 `--spring.profiles.active=local` |
+| 이전 Kotlin 프로필 | `services/cms` | 확장하지 않음 | 현재 health는 Rust |
 
 PC에 PostgreSQL 16.10이 `127.0.0.1:5432`로 설치되어 있다는 S00 기록은 유지한다. 이 저장소는 그 서버에 접속하지 않았다.
 
@@ -57,6 +57,14 @@ java -Xms128m -Xmx768m -jar build\libs\cms-0.0.1-SNAPSHOT.jar --spring.profiles.
 ```
 
 `http://127.0.0.1:8080/actuator/health`는 `status=UP`이었다. `/actuator/env`는 404였다. 확인 후 Java 프로세스를 종료했고 8080 수신은 없었다. 데이터베이스와 콘텐츠 API는 이 명령에 없다. 공개 웹이나 관리자와 같이 켜지 않는다.
+
+2026-11-01부터 같은 health는 `services/api`의 Rust 서버가 맡는다. `services/cms`는 확장하지 않는다.
+
+```powershell
+Set-Location C:\Dev\sideproject\My_Web\services\api
+cargo test -j 2
+cargo run
+```
 
 ## 환경 변수
 

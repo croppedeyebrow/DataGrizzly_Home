@@ -1,12 +1,12 @@
-# 프로젝트 구성 — 주력 Kotlin·Rust·TypeScript·PostgreSQL
+# 프로젝트 구성 — 주력 React·TypeScript·Tailwind·Rust·PostgreSQL
 
-> v5.0 기준: [[SCOPE_v5]] 적용. 주력 Kotlin·Rust·TypeScript·PostgreSQL. LLM·C++ 제외, Go는 국소 배포 도구로 필요할 때만 사용합니다. 로컬 자원은 [[02_RESOURCE_BUDGET]] 참조.
+> v5.0 기준: [[SCOPE_v5]] 적용. 주력 React·TypeScript·Tailwind·Rust·PostgreSQL. LLM·C++ 제외, Go는 국소 배포 도구로 필요할 때만 사용합니다. 로컬 자원은 [[02_RESOURCE_BUDGET]] 참조.
 | 영역 | 기술 | 책임 |
 |---|---|---|
-| 공개 페이지 | Astro·TypeScript | 정적본문·SEO·프로젝트/노트/리서치 |
-| 관리자·검색UI | React·TypeScript | 편집·상태·검색 |
-| API | Kotlin/Spring Boot | 인증·수정본·발행·검색·권한 |
-| 콘텐츠 도구 | Rust | 검증·절추출·정규화·export |
+| 공개 페이지 | React·TypeScript·Tailwind | 정적 본문·SEO·프로젝트/노트/리서치 |
+| 관리자·검색 UI | React·TypeScript·Tailwind | 편집·상태·검색 |
+| API | Rust | 인증·수정본·발행·검색·권한·검증 |
+| 콘텐츠 도구 | Rust 라이브러리 | 검증·절 추출·정규화·export |
 | 데이터 | PostgreSQL | 원본·관계·작업·공개검색행 |
 | 배포 | Actions·Compose·스크립트 | 검사·승격·복귀·백업 |
 | 조건부 보조 | Go | 구체적필요가있는국소배포CLI |

@@ -1,6 +1,6 @@
 # DataGrizzly
 
-> v5.0 기준: [[SCOPE_v5]] 적용. 주력 Kotlin·Rust·TypeScript·PostgreSQL. LLM·C++ 제외, Go는 국소 배포 도구로 필요할 때만 사용합니다. 로컬 자원은 [[02_RESOURCE_BUDGET]] 참조.
+> v5.0 기준: [[SCOPE_v5]] 적용. 주력 React·TypeScript·Tailwind·Rust·PostgreSQL. LLM·C++ 제외, Go는 국소 배포 도구로 필요할 때만 사용합니다. 로컬 자원은 [[02_RESOURCE_BUDGET]] 참조.
 종합 기획 · 시스템 아키텍처 · 개발 태스크 | v2.0 | 2026.10.23
 
 ## 현장의 데이터에서, 신뢰할 수 있는 시스템까지
@@ -9,7 +9,7 @@
 
 ## 이번 개정의 확정 방향
 
-실험실 메뉴를 제거합니다. 프로젝트를 설명과 과정 기록으로 나눕니다. 웹 기반 관리자 CMS를 유지합니다. Kotlin은 CMS, Rust는 콘텐츠 검증·가공 도구, Go는 필요 시 국소 배포 도구에 사용합니다. Python은 LangChain·LangGraph 기반 자료 수집·검색·검토 워커에 한정합니다.
+실험실 메뉴를 제거합니다. 프로젝트를 설명과 과정 기록으로 나눕니다. 웹 기반 관리자 CMS를 유지합니다. 공개 웹과 관리자는 React·TypeScript·Tailwind, 업무 API와 콘텐츠 검증은 Rust, Go는 필요 시 국소 배포 도구에 사용합니다. Python은 LangChain·LangGraph 기반 자료 수집·검색·검토 워커에 한정합니다.
 
 ## 문서 읽는 순서
 

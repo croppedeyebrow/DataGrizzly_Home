@@ -1,6 +1,6 @@
 # UI/UX 구성과 디자인 원칙
 
-> v5.0 기준: [[SCOPE_v5]] 적용. 주력 Kotlin·Rust·TypeScript·PostgreSQL. LLM·C++ 제외, Go는 국소 배포 도구로 필요할 때만 사용합니다. 로컬 자원은 [[02_RESOURCE_BUDGET]] 참조.
+> v5.0 기준: [[SCOPE_v5]] 적용. 주력 React·TypeScript·Tailwind·Rust·PostgreSQL. LLM·C++ 제외, Go는 국소 배포 도구로 필요할 때만 사용합니다. 로컬 자원은 [[02_RESOURCE_BUDGET]] 참조.
 ## 정보 구조
 
 공개 상단 메뉴는 소개 / 프로젝트 / 노트 / 리서치 / 탐색입니다. 로고는 홈으로 연결합니다. 프로젝트 상세에는 설명과 과정 기록을 구분합니다. 관리자에는 글·프로젝트·분류·미디어·발행·검색 상태·설정을 배치합니다. 공개 방문자 회원가입은 없습니다.

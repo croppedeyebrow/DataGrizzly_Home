@@ -59,11 +59,11 @@ const filled = example.split(/\r?\n/).some((line) => /^\s*(DB_PASSWORD|DB_USER|T
 if (filled) fail('.env.example contains a filled secret');
 console.log('PASS env example classifies names and has no secret value');
 
-const config = readFileSync(join(webRoot, 'astro.config.mjs'), 'utf8');
+const config = readFileSync(join(webRoot, 'vite.config.ts'), 'utf8');
 if (!config.includes('127.0.0.1') || !config.includes('4321')) {
-  fail('astro server host or port is not pinned');
+  fail('web server host or port is not pinned');
 }
-console.log('PASS astro server is 127.0.0.1:4321');
+console.log('PASS web server is 127.0.0.1:4321');
 
 const proxyHit = sourceFiles.find((path) => /^\s*proxy\s*:/m.test(readFileSync(path, 'utf8')));
 if (proxyHit) fail('public web has an API proxy before the API exists');

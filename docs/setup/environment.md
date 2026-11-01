@@ -35,7 +35,7 @@ S00의 읽기 전용 환경 조사와 개발 경로 결정은 완료했다. 현�
 | Node.js | 설치됨 | v22.23.2 |
 | npm | 설치됨 | 10.9.8 |
 | Java/JDK | 설치됨 | Java/Javac 21.0.8 LTS |
-| Kotlin CLI | 설치됨 | kotlinc-jvm 2.0.21 — `C:\Dev\KOTLIN\kotlinc` |
+| Kotlin CLI | 설치됨. 프로젝트 API는 쓰지 않음 | kotlinc-jvm 2.0.21 — `C:\Dev\KOTLIN\kotlinc` |
 | PostgreSQL | 설치·실행 중 | 16.10, Windows 서비스 `postgresql-x64-16`, `127.0.0.1:5432` 연결 수락 |
 | Docker Desktop | 설치됨·엔진 중지 | 4.43.2 |
 | Docker CLI | 설치됨 | 28.3.2, build 578ccf6 |
@@ -46,7 +46,7 @@ S00의 읽기 전용 환경 조사와 개발 경로 결정은 완료했다. 현�
 
 설치되어 있다는 사실은 프로젝트 버전 확정이나 태스크 완료를 의미하지 않는다. Node·npm·JDK의 재사용 여부는 S05 공식 호환성 검토에서 확정한다. Windows Rust는 M4의 Ubuntu 기반 S16을 완료한 것으로 간주하지 않는다. Python은 S20 전까지 프로젝트 의존성으로 사용하지 않는다.
 
-Node, Kotlin, PostgreSQL, Rust, Docker Desktop은 신규 설치 대상으로 계산하지 않는다. 프로젝트 의존성·빌드 캐시·DB 데이터 증가량만 단계별로 측정한다. PostgreSQL은 기존 네이티브 16.10을 우선 재사용 후보로 두며, S13에서 Docker DB가 반드시 필요한지 계약과 격리 요구를 검토한 뒤 결정한다. S13(2026-11-01)은 네이티브 서비스를 중지된 채로 두고 Compose `postgres:16.10`을 `127.0.0.1:15432`에만 두었다. 둘을 같이 켜지 않는다. 근거는 `docs/evidence/S13.md`다.
+Node, PostgreSQL, Rust, Docker Desktop은 신규 설치 대상으로 계산하지 않는다. PC에 있는 Kotlin CLI는 프로젝트 API에 쓰지 않는다. 프로젝트 의존성·빌드 캐시·DB 데이터 증가량만 단계별로 측정한다. PostgreSQL은 기존 네이티브 16.10을 우선 재사용 후보로 두며, S13에서 Docker DB가 반드시 필요한지 계약과 격리 요구를 검토한 뒤 결정한다. S13(2026-11-01)은 네이티브 서비스를 중지된 채로 두고 Compose `postgres:16.10`을 `127.0.0.1:15432`에만 두었다. 둘을 같이 켜지 않는다. 근거는 `docs/evidence/S13.md`다.
 
 ## WSL과 Docker 관측
 
@@ -64,10 +64,10 @@ Codex 실행 세션에서는 배포판 조회가 `E_ACCESSDENIED`로 실패했�
 | 모드 | 현재 허용 | 조건 |
 |---|---|---|
 | DOCS | 예 | 문서 검토와 작은 파일 작업 |
-| WEB | 조건부 | Astro 또는 관리자 중 하나만 실행하고 메모리·디스크를 관측 |
+| WEB | 조건부 | 공개 웹 또는 관리자 중 하나만 실행하고 메모리·디스크를 관측 |
 | CMS | 아니요 | S01, S07~S14와 DB 준비 후 |
 | PUBLISH | 아니요 | CMS와 발행 기능 구현 후 |
-| SEARCH | 아니요 | PostgreSQL/Kotlin 검색 구현 후 |
+| SEARCH | 아니요 | PostgreSQL과 Rust 검색 구현 후 |
 | NATIVE_BUILD | 아니요 | 40 GiB 공간 목표와 S16 선행조건 통과 후 |
 | OPS | 아니요 | M6 단계에서 필요 범위 확정 후 |
 | WORKFLOW | 아니요 | S20~S22와 M8 단계에서 준비 후 |

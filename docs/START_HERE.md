@@ -1,6 +1,6 @@
 # DataGrizzly v5.0 시작
 
-[[SCOPE_v5]]와 [[01_HARDWARE_BASELINE]]을 먼저 읽습니다. 주력 Kotlin·Rust·TypeScript·PostgreSQL, 보조 Python·LangChain·LangGraph, Go는 배포 필요 시입니다. C++·생성형 모델은 제외합니다.
+[[SCOPE_v5]]와 [[01_HARDWARE_BASELINE]]을 먼저 읽습니다. 주력 React·TypeScript·Tailwind·Rust·PostgreSQL, 보조 Python·LangChain·LangGraph, Go는 배포 필요 시입니다. C++·생성형 모델은 제외합니다.
 
 아무것도 준비하지 않았다면 [[S00]]부터 [[03_EXECUTION_PLAN]]을 따릅니다. 기존 홈페이지 기반이 준비됐다면 [[WF01_OVERVIEW]]→[[WF02_ARCHITECTURE]]→[[WF08_TASK_MAP]]을 읽고 [[S20]]부터 진행합니다.
 

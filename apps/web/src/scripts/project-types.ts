@@ -47,7 +47,7 @@ export type PublicProject = {
   imageAlt: string;
   imageName: string;
   topic: null;
-  github: null;
+  github: string | null;
   logs: PublicLog[];
   related: RelatedLink[];
 };

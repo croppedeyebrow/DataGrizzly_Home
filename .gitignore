@@ -1,4 +1,5 @@
 node_modules/
+services/api/target/
 dist/
 .astro/
 .yarn/cache/

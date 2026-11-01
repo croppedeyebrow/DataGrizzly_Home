@@ -22,6 +22,6 @@
 | W16 | Python 프로세스 없음 | 공개 글·CMS 수동 작성·일반 검색 정상 |
 | W17 | workflowVersion 변경 | 구버전 대기 작업 호환 또는 명시적 격리 |
 
-단위: parser/상태 분기/입력 검증. 통합: 실제 PostgreSQL·Kotlin HTTP·durable checkpointer. E2E: 등록→검토→초안→별도 발행. 외부 사이트 live 호출을 CI 필수 테스트로 삼지 않습니다.
+단위: parser/상태 분기/입력 검증. 통합: 실제 PostgreSQL·Rust HTTP·durable checkpointer. E2E: 등록→검토→초안→별도 발행. 외부 사이트 live 호출을 CI 필수 테스트로 삼지 않습니다.
 
 각 결과에는 커밋·명령·OS·버전·fixture·기대/실제·최대 RSS·미검증 항목을 남깁니다. 자원 측정은 작은 fixture와 한도 근처 fixture를 구분합니다.

@@ -1,6 +1,6 @@
 # 전체 화면 목록과 태스크 연결
 
-> v5.0 기준: [[SCOPE_v5]] 적용. 주력 Kotlin·Rust·TypeScript·PostgreSQL. LLM·C++ 제외, Go는 국소 배포 도구로 필요할 때만 사용합니다. 로컬 자원은 [[02_RESOURCE_BUDGET]] 참조.
+> v5.0 기준: [[SCOPE_v5]] 적용. 주력 React·TypeScript·Tailwind·Rust·PostgreSQL. LLM·C++ 제외, Go는 국소 배포 도구로 필요할 때만 사용합니다. 로컬 자원은 [[02_RESOURCE_BUDGET]] 참조.
 27개 데스크톱 화면 템플릿입니다. 상태 변형과 콘텐츠 종류는 같은 템플릿을 재사용할 수 있습니다. 아래 관리자 보조 화면도 각 태스크에서 누락 없이 구현합니다.
 
 | ID | 화면 | 경로 | 기능 | 태스크 |
