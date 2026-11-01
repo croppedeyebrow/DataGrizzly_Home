@@ -25,7 +25,7 @@
 
 S06에서 Node 22.23.2를 동일 LTS 계열의 22.23.4로 패치 업데이트했다. 함께 설치된 npm 10.9.9는 유지하지만 프로젝트 패키지 관리는 Yarn 4.18.1로 통일한다. Yarn은 `node_modules` 호환 방식, 제3자 설치 스크립트 기본 차단, Hardened Mode, 3일 age gate를 사용한다.
 
-TypeScript 6.0.3은 공개 웹과 관리자에 고정한 버전이다. S10에서 쓰던 Astro 7.4.2와 `@astrojs/check` 0.9.12, create-astro 5.2.6은 S13-1에서 저장소 의존성으로 남기지 않는다.
+TypeScript 6.0.3은 공개 웹과 관리자에 고정한 버전이다. 공개 웹 빌드는 Vite가 React 페이지를 정적 HTML로 뽑는다.
 
 ### Rust API와 데이터베이스
 
@@ -36,8 +36,6 @@ TypeScript 6.0.3은 공개 웹과 관리자에 고정한 버전이다. S10에서
 | Tokio | **1** | `services/api` | 런타임 |
 | PostgreSQL | **16.x** | 네이티브 16.10은 설치됨. S13에서 서비스는 중지. Compose `postgres:16.10`이 `127.0.0.1:15432` | 개발 DB는 Compose 하나. 네이티브 5432와 같이 켜지 않음 |
 | PostgreSQL 유지보수 목표 | **16.15** | 16.10 | S13 전 백업·릴리스 노트 확인 후 사용자 승인 범위에서 패치 업데이트 검토 |
-
-S12에서 확인한 Spring Boot 4.1.2, Kotlin 2.4.21, Gradle Wrapper 9.7.0, JDK 21.0.8은 당시 health 서버의 기록이다. 현재 업무 API는 그 스택을 확장하지 않는다.
 
 PostgreSQL 16은 현재 지원되는 메이저 버전이다. 설치된 16.10은 개발 접속을 수락하지만 최신 16.x 유지보수 릴리스는 16.15다. 데이터 디렉터리를 보존하고 백업 없이 설치 프로그램을 덮어쓰지 않는다.
 
@@ -75,11 +73,10 @@ PostgreSQL 16은 현재 지원되는 메이저 버전이다. 설치된 16.10은 
 | `corepack yarn --version` | 4.18.1 |
 | Yarn linker / scripts / hardened / age gate | node-modules / false / true / 3d |
 | Node 플랫폼 | win32 x64 |
-| `java -version` / `javac -version` | 21.0.8 LTS |
 | `services/api` `cargo test -j 2` | 종료 코드 0. health와 env 404 |
 | `psql --version` | PostgreSQL 16.10 |
 | `pg_isready -h 127.0.0.1 -p 5432` | S13 시점 응답 없음. 서비스 Stopped |
-| Compose `postgres:16.10` `127.0.0.1:15432` | accepting connections. CMS는 미접속 |
+| Compose `postgres:16.10` `127.0.0.1:15432` | accepting connections. API는 미접속 |
 | `rustc --version` / `cargo --version` | 1.92.0 |
 | `python --version` | 3.11.5 |
 | `docker --version` | 28.3.2 |
@@ -88,6 +85,6 @@ PostgreSQL 16은 현재 지원되는 메이저 버전이다. 설치된 16.10은 
 
 ## 다음 작업
 
-1. Rust가 S13 데이터베이스에 접속하고 메타 마이그레이션만 적용하는지 확인한다. S14의 JDBC 연결은 시작하지 않는다.
+1. S14에서 Axum이 S13 데이터베이스에 접속하고 메타 마이그레이션만 적용하는지 확인한다.
 2. 재현 설치는 `corepack yarn install --immutable`을 사용한다.
 3. 콘텐츠 API는 S18 전이다. 네이티브 5432와 compose DB를 같이 켜지 않는다.

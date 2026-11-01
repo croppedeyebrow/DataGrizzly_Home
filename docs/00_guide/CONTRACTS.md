@@ -56,7 +56,7 @@ Manifest: releaseId, schemaVersion, chunkerVersion, indexVersion, hashes.
 
 ## v5.0 확정 변경
 
-[[SCOPE_v5]]를 적용합니다. 검색은 PostgreSQL 공개 검색 행과 Rust API이며, 발행 텍스트 추출도 Rust가 맡습니다. 별도 C++ 검색·추론 서버는 없습니다. Go는 선택입니다. DB 접속은 S14의 JDBC가 아니라 Rust 접속 작업에서 확인합니다. 실행 절차는 `docs/setup/local-run.md`에 있다. 2026-10-26에 다른 경로의 잠금 파일 빌드와 미리보기가 통과했다. API와 DB는 실행하지 않았다.
+[[SCOPE_v5]]를 적용합니다. 검색은 PostgreSQL 공개 검색 행과 Rust API이며, 발행 텍스트 추출도 Rust가 맡습니다. 별도 C++ 검색·추론 서버는 없습니다. Go는 선택입니다. DB 접속은 S14에서 Axum이 확인합니다. 실행 절차는 `docs/setup/local-run.md`에 있다. 2026-10-26에 다른 경로의 잠금 파일 빌드와 미리보기가 통과했다. API와 DB는 실행하지 않았다.
 
 ## v5.0 자료 워크플로 반영
 

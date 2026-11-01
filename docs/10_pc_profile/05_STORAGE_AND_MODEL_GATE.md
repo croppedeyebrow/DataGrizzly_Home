@@ -2,7 +2,7 @@
 
 C: 여유23.4GiB에서 모든 도구를 설치하지 않습니다. Windows 저장소 설정에서 사용량을 조사하고 본인이 삭제 가능한 자료를 구분합니다. DB volume·미디어·Docker VHDX를 임의 삭제하거나 전체 prune을 실행하지 않습니다. 현재 다른 앱의 컨테이너 보유 여부도 확인해야 합니다.
 
-한 번 설치→C: 여유 재측정→증가량 기록 순으로 진행합니다. 재생성 가능한 cache도 무조건 매번 지우지 않습니다. Windows 작업본과 Ubuntu Rust 작업본은 소스만 공유하고 node_modules·.gradle·target을 중복하지 않습니다. WSL의 가상 여유와 Windows 물리 여유는 다릅니다.
+한 번 설치→C: 여유 재측정→증가량 기록 순으로 진행합니다. 재생성 가능한 cache도 무조건 매번 지우지 않습니다. Windows 작업본과 Ubuntu Rust 작업본은 소스만 공유하고 node_modules·target을 중복하지 않습니다. WSL의 가상 여유와 Windows 물리 여유는 다릅니다.
 
 디자인 PNG64개는 참고용입니다. 전부 웹 번들에 포함하지 않습니다. Obsidian에는 문서·이미지만 넣고 node_modules·빌드 결과·DB·모델·비밀값은 넣지 않습니다.
 

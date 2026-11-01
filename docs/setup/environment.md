@@ -34,8 +34,6 @@ S00의 읽기 전용 환경 조사와 개발 경로 결정은 완료했다. 현�
 | Git | 설치됨 | 2.43.0.windows.1 |
 | Node.js | 설치됨 | v22.23.2 |
 | npm | 설치됨 | 10.9.8 |
-| Java/JDK | 설치됨 | Java/Javac 21.0.8 LTS |
-| Kotlin CLI | 설치됨. 프로젝트 API는 쓰지 않음 | kotlinc-jvm 2.0.21 — `C:\Dev\KOTLIN\kotlinc` |
 | PostgreSQL | 설치·실행 중 | 16.10, Windows 서비스 `postgresql-x64-16`, `127.0.0.1:5432` 연결 수락 |
 | Docker Desktop | 설치됨·엔진 중지 | 4.43.2 |
 | Docker CLI | 설치됨 | 28.3.2, build 578ccf6 |
@@ -44,9 +42,9 @@ S00의 읽기 전용 환경 조사와 개발 경로 결정은 완료했다. 현�
 | CMake | 없음 | 이번 범위의 C++ 제외 정책과 일치 |
 | Go | 없음 | 실제 배포 필요가 확인될 때만 검토 |
 
-설치되어 있다는 사실은 프로젝트 버전 확정이나 태스크 완료를 의미하지 않는다. Node·npm·JDK의 재사용 여부는 S05 공식 호환성 검토에서 확정한다. Windows Rust는 M4의 Ubuntu 기반 S16을 완료한 것으로 간주하지 않는다. Python은 S20 전까지 프로젝트 의존성으로 사용하지 않는다.
+설치되어 있다는 사실은 프로젝트 버전 확정이나 태스크 완료를 의미하지 않는다. Node·npm의 재사용 여부는 S05 공식 호환성 검토에서 확정한다. 로컬 API는 Windows Rust를 쓴다. Python은 S20 전까지 프로젝트 의존성으로 사용하지 않는다.
 
-Node, PostgreSQL, Rust, Docker Desktop은 신규 설치 대상으로 계산하지 않는다. PC에 있는 Kotlin CLI는 프로젝트 API에 쓰지 않는다. 프로젝트 의존성·빌드 캐시·DB 데이터 증가량만 단계별로 측정한다. PostgreSQL은 기존 네이티브 16.10을 우선 재사용 후보로 두며, S13에서 Docker DB가 반드시 필요한지 계약과 격리 요구를 검토한 뒤 결정한다. S13(2026-11-01)은 네이티브 서비스를 중지된 채로 두고 Compose `postgres:16.10`을 `127.0.0.1:15432`에만 두었다. 둘을 같이 켜지 않는다. 근거는 `docs/evidence/S13.md`다.
+Node, PostgreSQL, Rust, Docker Desktop은 신규 설치 대상으로 계산하지 않는다. 프로젝트 의존성·빌드 캐시·DB 데이터 증가량만 단계별로 측정한다. PostgreSQL은 기존 네이티브 16.10을 우선 재사용 후보로 두며, S13에서 Docker DB가 반드시 필요한지 계약과 격리 요구를 검토한 뒤 결정한다. S13(2026-11-01)은 네이티브 서비스를 중지된 채로 두고 Compose `postgres:16.10`을 `127.0.0.1:15432`에만 두었다. 둘을 같이 켜지 않는다. 근거는 `docs/evidence/S13.md`다.
 
 ## WSL과 Docker 관측
 
@@ -78,14 +76,14 @@ Codex 실행 세션에서는 배포판 조회가 `E_ACCESSDENIED`로 실패했�
 
 | 명령 또는 확인 | 결과 |
 |---|---|
-| `Get-Command git,node,npm,java,docker` | 모두 발견 |
+| `Get-Command git,node,npm,docker,cargo` | 모두 발견 |
 | `Get-PSDrive C` | 여유 21.59 GiB |
 | `wsl -l -v` | 실패, `E_ACCESSDENIED`, 종료 코드 -1 |
 | 레지스트리 OS 정보 | 23H2, 빌드 22631.6199, Core/Home, x64 |
 | `GlobalMemoryStatusEx` | 전체 13.84 GiB, 가용 2.05 GiB |
 | `IsProcessorFeaturePresent` | 펌웨어 가상화 True, SLAT False |
 | 도구별 `--version` | 위 설치 도구 표에 기록 |
-| `kotlinc -version` | kotlinc-jvm 2.0.21 |
+| `cargo --version` | 1.92.0 |
 | `pg_isready -h 127.0.0.1 -p 5432` | 연결 수락, PostgreSQL 16.10 서비스 실행 확인 |
 | 프로젝트 `.git` 확인 | 없음; 사용자 요청에 따라 생성하지 않음 |
 

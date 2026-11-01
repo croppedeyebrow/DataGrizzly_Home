@@ -1,7 +1,7 @@
 # 09. Rust 백엔드 구조
 
 > v5.0 기준: [[SCOPE_v5]] 적용. 주력 React·TypeScript·Tailwind·Rust·PostgreSQL. LLM·C++ 제외, Go는 국소 배포 도구로 필요할 때만 사용합니다. 로컬 자원은 [[02_RESOURCE_BUDGET]] 참조.
-모듈형 Rust 프로세스 하나를 기본으로 한다. HTTP는 Axum, 이후 저장은 PostgreSQL이다. Kotlin과 Spring Boot는 쓰지 않는다.
+모듈형 Rust 프로세스 하나를 기본으로 한다. HTTP는 Axum, 이후 저장은 PostgreSQL이다.
 
 ## 모듈 책임
 

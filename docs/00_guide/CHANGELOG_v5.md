@@ -2,7 +2,7 @@
 
 2026-10-24 사용자 결정: Python을 LangChain·LangGraph 자료 수집·검색·검토 워크플로로 추가합니다. v4의 Python 제외 정책을 종료하고 모델 제외는 유지합니다.
 
-2026-11-01 S13-1: 공개 웹과 관리자의 기준을 React·TypeScript·Tailwind로, 업무 API의 기준을 Rust로 바꿨다. Astro와 Kotlin·Spring Boot는 이후 구현에서 확장하지 않는다. 화면, 경로, PostgreSQL, 생성 제외는 유지한다.
+2026-11-01 S13-1: 공개 웹과 관리자는 React·TypeScript·Tailwind, 업무 API는 Rust(Axum)다. 화면, 경로, PostgreSQL, 생성 제외는 유지한다.
 
 ## 추가
 
