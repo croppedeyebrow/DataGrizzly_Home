@@ -39,7 +39,7 @@ node scripts/check-m0-env.mjs
 | 관리자 | `127.0.0.1:5173` | `apps/admin` | 2026-10-25에는 미실행. S11에서 자리표시자만 확인 |
 | API | `127.0.0.1:8080` | `services/cms` | 2026-10-31 health만 확인. `/api/status`는 없음 |
 | 공개 웹의 API 프록시 | 없음 | 설정 없음 | 추가하지 않음 |
-| 개발 DB | `127.0.0.1:15432` | `infra/local/compose.yaml` 없음 | 미실행 |
+| 개발 DB | `127.0.0.1:15432` | `infra/local/compose.yaml` | 2026-11-01 컨테이너 기동. CMS는 아직 접속하지 않음 |
 | Spring `local` 프로필 | `application-local.properties` | 있음. 데이터 소스 없음 | 2026-10-31 `--spring.profiles.active=local` |
 
 PC에 PostgreSQL 16.10이 `127.0.0.1:5432`로 설치되어 있다는 S00 기록은 유지한다. 이 저장소는 그 서버에 접속하지 않았다.
@@ -80,7 +80,19 @@ java -Xms128m -Xmx768m -jar build\libs\cms-0.0.1-SNAPSHOT.jar --spring.profiles.
 3. `DB_PASSWORD`는 저장소에 넣지 않고, 서버를 실행하는 프로세스에만 주입한다.
 4. 공개 웹 `dist`에 `DB_PASSWORD`가 없는지는 `node scripts/check-m0-env.mjs`로 다시 본다.
 
-이번 단계에서는 `docker compose`를 실행하지 않았다. Compose 파일이 없기 때문이다.
+2026-10-25 확인에서는 `docker compose`를 실행하지 않았다. 그때는 Compose 파일이 없었다.
+
+## 개발 DB
+
+2026-11-01에 `infra/local/compose.yaml`로 PostgreSQL 16.10 컨테이너 하나만 띄웠다. 주소는 `127.0.0.1:15432`이고 데이터는 named volume `datagrizzly_pg`에 있다. 네이티브 `postgresql-x64-16`은 중지된 상태였고 켜지 않았다.
+
+```powershell
+Set-Location C:\Dev\sideproject\My_Web
+docker compose --env-file .env -f infra/local/compose.yaml up -d db
+docker compose --env-file .env -f infra/local/compose.yaml exec db pg_isready -U datagrizzly -d datagrizzly
+```
+
+`pg_isready`는 종료 코드 0이었다. `stop` 후 `start`에도 확인용 행이 남았고, 그 테이블은 지웠다. CMS는 이 데이터베이스에 접속하지 않았다. 비밀번호는 추적하지 않는 `.env`에만 있다. 근거는 `docs/evidence/S13.md`다.
 
 ## 다른 경로에서의 재빌드
 

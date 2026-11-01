@@ -1,0 +1,24 @@
+# 개념: 로컬 개발용 PostgreSQL 하나.
+# 목적: named volume과 127.0.0.1:15432만 연다. CMS 연결과 업무 테이블은 S14·M2다.
+# 사용처: 저장소 루트. docker compose --env-file .env -f infra/local/compose.yaml
+# 이미지 16의 데이터 경로는 /var/lib/postgresql/data 다. 18부터는 경로가 다르다.
+services:
+  db:
+    image: postgres:16.10
+    container_name: datagrizzly-db
+    environment:
+      POSTGRES_USER: datagrizzly
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required in .env}
+      POSTGRES_DB: datagrizzly
+    ports:
+      - "127.0.0.1:15432:5432"
+    volumes:
+      - datagrizzly_pg:/var/lib/postgresql/data
+    mem_limit: 768m
+    cpus: 1.0
+    shm_size: 256mb
+    command: ["postgres", "-c", "shared_buffers=128MB", "-c", "max_connections=20"]
+
+volumes:
+  datagrizzly_pg:
+    name: datagrizzly_pg

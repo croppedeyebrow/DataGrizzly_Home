@@ -46,7 +46,7 @@ S00의 읽기 전용 환경 조사와 개발 경로 결정은 완료했다. 현�
 
 설치되어 있다는 사실은 프로젝트 버전 확정이나 태스크 완료를 의미하지 않는다. Node·npm·JDK의 재사용 여부는 S05 공식 호환성 검토에서 확정한다. Windows Rust는 M4의 Ubuntu 기반 S16을 완료한 것으로 간주하지 않는다. Python은 S20 전까지 프로젝트 의존성으로 사용하지 않는다.
 
-Node, Kotlin, PostgreSQL, Rust, Docker Desktop은 신규 설치 대상으로 계산하지 않는다. 프로젝트 의존성·빌드 캐시·DB 데이터 증가량만 단계별로 측정한다. PostgreSQL은 기존 네이티브 16.10을 우선 재사용 후보로 두며, S13에서 Docker DB가 반드시 필요한지 계약과 격리 요구를 검토한 뒤 결정한다.
+Node, Kotlin, PostgreSQL, Rust, Docker Desktop은 신규 설치 대상으로 계산하지 않는다. 프로젝트 의존성·빌드 캐시·DB 데이터 증가량만 단계별로 측정한다. PostgreSQL은 기존 네이티브 16.10을 우선 재사용 후보로 두며, S13에서 Docker DB가 반드시 필요한지 계약과 격리 요구를 검토한 뒤 결정한다. S13(2026-11-01)은 네이티브 서비스를 중지된 채로 두고 Compose `postgres:16.10`을 `127.0.0.1:15432`에만 두었다. 둘을 같이 켜지 않는다. 근거는 `docs/evidence/S13.md`다.
 
 ## WSL과 Docker 관측
 

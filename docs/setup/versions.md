@@ -37,7 +37,7 @@ TypeScript 최신 채널은 7.0.2지만 Astro 7 계열은 TypeScript 7 type-chec
 | Spring Boot | **4.1.2** | `services/cms` bootJar. health만 확인 | CMS 기능은 아직 없음 |
 | Kotlin Gradle Plugin | **2.4.21** | `services/cms` 빌드에 사용. 전역 CLI는 2.0.21 | 프로젝트 플러그인은 2.4.21로 별도 고정 |
 | Gradle Wrapper | **9.7.0** | `gradlew.bat --version` JVM 21.0.8 | Kotlin 2.4.21의 완전 지원 상한에 맞춤 |
-| PostgreSQL | **16.x** | 16.10 설치·실행 중 | 기존 네이티브 서비스 재사용 후보 |
+| PostgreSQL | **16.x** | 네이티브 16.10은 설치됨. S13에서 서비스는 중지. Compose `postgres:16.10`이 `127.0.0.1:15432` | 개발 DB는 Compose 하나. 네이티브 5432와 같이 켜지 않음 |
 | PostgreSQL 유지보수 목표 | **16.15** | 16.10 | S13 전 백업·릴리스 노트 확인 후 사용자 승인 범위에서 패치 업데이트 검토 |
 
 Spring Boot 4.1.2는 Java 17~27 및 Gradle 8.14+ 또는 9.x를 지원한다. JDK 21은 범위 안이다. Spring Boot의 Kotlin 최소 요구는 2.2.x이며 Kotlin 2.4.21은 충족한다. Kotlin 2.4.21이 완전히 지원하는 Gradle 상한은 9.7.0이므로 최신 Gradle 9.8.2 대신 9.7.0을 선택한다.
@@ -89,7 +89,8 @@ PostgreSQL 16은 현재 지원되는 메이저 버전이다. 설치된 16.10은 
 | CMS `java -jar` health | `127.0.0.1:8080/actuator/health` UP. `/actuator/env` 404 |
 | `kotlinc -version` | 2.0.21 |
 | `psql --version` | PostgreSQL 16.10 |
-| `pg_isready -h 127.0.0.1 -p 5432` | accepting connections |
+| `pg_isready -h 127.0.0.1 -p 5432` | S13 시점 응답 없음. 서비스 Stopped |
+| Compose `postgres:16.10` `127.0.0.1:15432` | accepting connections. CMS는 미접속 |
 | `rustc --version` / `cargo --version` | 1.92.0 |
 | `python --version` | 3.11.5 |
 | `docker --version` | 28.3.2 |
@@ -99,6 +100,6 @@ PostgreSQL 16은 현재 지원되는 메이저 버전이다. 설치된 16.10은 
 
 ## 다음 작업
 
-1. S13에서 PostgreSQL 하나를 `127.0.0.1:15432`에 둔다. S12는 health만 확인했다.
+1. S14에서 CMS를 `127.0.0.1:15432`에 연결하고 bootstrap migration만 만든다. S13은 컨테이너 기동까지다.
 2. 재현 설치는 `corepack yarn install --immutable`을 사용한다.
-3. 콘텐츠 API와 DB 접속은 S14·S18 전이다. 네이티브 5432와 compose DB를 같이 켜지 않는다.
+3. 콘텐츠 API는 S18 전이다. 네이티브 5432와 compose DB를 같이 켜지 않는다.
