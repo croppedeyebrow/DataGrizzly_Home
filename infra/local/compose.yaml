@@ -1,5 +1,5 @@
 # 개념: 로컬 개발용 PostgreSQL 하나.
-# 목적: named volume과 127.0.0.1:15432만 연다. CMS 연결과 업무 테이블은 S14·M2다.
+# 목적: named volume과 127.0.0.1:15432만 연다. API 메타 마이그레이션은 S14, 업무 테이블은 M2다.
 # 사용처: 저장소 루트. docker compose --env-file .env -f infra/local/compose.yaml
 # 이미지 16의 데이터 경로는 /var/lib/postgresql/data 다. 18부터는 경로가 다르다.
 services:

@@ -4,12 +4,13 @@ version = "0.0.1"
 edition = "2021"
 publish = false
 
-# 개념: CMS API의 Rust 서버.
-# 목적: 루프백 8080에서 health만 연다. 다른 actuator와 업무 API는 없다.
+# 개념: API의 Rust 서버.
+# 목적: 127.0.0.1:15432에 접속해 메타 마이그레이션을 적용하고, 8080에서 health를 연다.
 # 사용처: services/api 의 cargo test, cargo run.
 
 [dependencies]
 axum = "0.8"
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "tls-none", "postgres", "macros", "migrate"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "net"] }
 
 [dev-dependencies]

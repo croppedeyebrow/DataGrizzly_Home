@@ -34,11 +34,14 @@ corepack yarn workspace @datagrizzly/web dev --host 127.0.0.1 --port 4321
 ```powershell
 Set-Location C:\Dev\sideproject\My_Web\services\api
 $env:CARGO_BUILD_JOBS = '2'
+$env:DB_URL = 'postgres://127.0.0.1:15432/datagrizzly'
+$env:DB_USER = 'datagrizzly'
+# DB_PASSWORD는 프로세스 환경에만 넣는다. 값은 출력하지 않는다.
 cargo test -j 2
 cargo run
 ```
 
-바인드는 `127.0.0.1:8080`이다. 공개 웹 개발 서버와 데이터베이스를 이 빌드와 같이 켜지 않는다.
+바인드는 `127.0.0.1:8080`이다. 기동 전에 Compose DB가 `127.0.0.1:15432`에 있어야 한다. 공개 웹 개발 서버와 이 빌드를 같이 켜지 않는다.
 
 ## PostgreSQL local 예시
 

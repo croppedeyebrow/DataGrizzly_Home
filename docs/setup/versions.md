@@ -32,7 +32,8 @@ TypeScript 6.0.3은 공개 웹과 관리자에 고정한 버전이다. 공개 �
 | 구성 | 선택 버전 | 현재 상태 | 결정 |
 |---|---:|---|---|
 | Rust / Cargo | **1.92.0** | Windows MSVC. `services/api` `cargo test` | 로컬 API. Ubuntu를 기다리지 않음 |
-| Axum | **0.8** | `services/api/Cargo.toml` | health만. 업무 API는 아직 없음 |
+| Axum | **0.8** | `services/api/Cargo.toml` | health. 업무 API는 아직 없음 |
+| SQLx | **0.8.6** | `services/api` | 15432 접속과 `schema_meta` |
 | Tokio | **1** | `services/api` | 런타임 |
 | PostgreSQL | **16.x** | 네이티브 16.10은 설치됨. S13에서 서비스는 중지. Compose `postgres:16.10`이 `127.0.0.1:15432` | 개발 DB는 Compose 하나. 네이티브 5432와 같이 켜지 않음 |
 | PostgreSQL 유지보수 목표 | **16.15** | 16.10 | S13 전 백업·릴리스 노트 확인 후 사용자 승인 범위에서 패치 업데이트 검토 |
@@ -73,10 +74,10 @@ PostgreSQL 16은 현재 지원되는 메이저 버전이다. 설치된 16.10은 
 | `corepack yarn --version` | 4.18.1 |
 | Yarn linker / scripts / hardened / age gate | node-modules / false / true / 3d |
 | Node 플랫폼 | win32 x64 |
-| `services/api` `cargo test -j 2` | 종료 코드 0. health와 env 404 |
+| `services/api` `cargo test -j 2` | 종료 코드 0. health, env 404, URL 검사. DB 테스트는 별도 ignore 실행에서 통과 |
 | `psql --version` | PostgreSQL 16.10 |
 | `pg_isready -h 127.0.0.1 -p 5432` | S13 시점 응답 없음. 서비스 Stopped |
-| Compose `postgres:16.10` `127.0.0.1:15432` | accepting connections. API는 미접속 |
+| Compose `postgres:16.10` `127.0.0.1:15432` | accepting connections. `schema_meta` 버전 1 |
 | `rustc --version` / `cargo --version` | 1.92.0 |
 | `python --version` | 3.11.5 |
 | `docker --version` | 28.3.2 |
@@ -85,6 +86,6 @@ PostgreSQL 16은 현재 지원되는 메이저 버전이다. 설치된 16.10은 
 
 ## 다음 작업
 
-1. S14에서 Axum이 S13 데이터베이스에 접속하고 메타 마이그레이션만 적용하는지 확인한다.
+1. S14 메타 마이그레이션은 적용했다. 인증과 업무 테이블은 M2다.
 2. 재현 설치는 `corepack yarn install --immutable`을 사용한다.
 3. 콘텐츠 API는 S18 전이다. 네이티브 5432와 compose DB를 같이 켜지 않는다.

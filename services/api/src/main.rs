@@ -1,6 +1,8 @@
-//! 개념: CMS API의 시작점.
-//! 목적: 127.0.0.1:8080에서 health만 연다. 데이터베이스와 인증은 아직 없다.
+//! 개념: API의 시작점.
+//! 목적: 15432에 접속해 메타 마이그레이션을 적용한 뒤 127.0.0.1:8080에서 health를 연다.
 //! 사용처: `cargo run`과 `cargo test`.
+
+mod db;
 
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
@@ -30,11 +32,23 @@ async fn not_found() -> StatusCode {
 
 #[tokio::main]
 async fn main() {
+    if let Err(error) = run().await {
+        eprintln!("api: {error}");
+        std::process::exit(1);
+    }
+}
+
+async fn run() -> Result<(), String> {
+    let config = db::DbConfig::from_env()?;
+    let pool = db::connect(&config).await?;
+    db::migrate(&pool).await?;
     let address: SocketAddr = "127.0.0.1:8080".parse().expect("loopback address");
     let listener = tokio::net::TcpListener::bind(address)
         .await
-        .expect("bind 127.0.0.1:8080");
-    axum::serve(listener, app()).await.expect("server");
+        .map_err(|_| "bind 127.0.0.1:8080".to_string())?;
+    axum::serve(listener, app())
+        .await
+        .map_err(|_| "server".to_string())
 }
 
 #[cfg(test)]
@@ -71,5 +85,26 @@ mod tests {
             .await
             .expect("response");
         assert_eq!(response.status(), StatusCode::NOT_FOUND);
+    }
+
+    #[tokio::test]
+    #[ignore = "needs DB_URL, DB_USER, DB_PASSWORD and the compose database"]
+    async fn schema_meta_is_version_one() {
+        let config = crate::db::DbConfig::from_env().expect("db env");
+        let pool = crate::db::connect(&config).await.expect("connect");
+        crate::db::migrate(&pool).await.expect("migrate");
+        crate::db::migrate(&pool).await.expect("migrate again");
+        let version: i32 = sqlx::query_scalar::<_, i32>("SELECT schema_version FROM schema_meta")
+            .fetch_one(&pool)
+            .await
+            .expect("schema_meta");
+        assert_eq!(version, 1);
+        let extra: i64 = sqlx::query_scalar::<_, i64>(
+            "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name NOT IN ('schema_meta', '_sqlx_migrations')",
+        )
+        .fetch_one(&pool)
+        .await
+        .expect("tables");
+        assert_eq!(extra, 0);
     }
 }

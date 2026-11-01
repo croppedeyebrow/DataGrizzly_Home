@@ -39,7 +39,7 @@ node scripts/check-m0-env.mjs
 | 관리자 | `127.0.0.1:5173` | `apps/admin` | 2026-10-25에는 미실행. S11에서 자리표시자만 확인 |
 | API | `127.0.0.1:8080` | `services/api` | Rust health. `/actuator/env`는 404 |
 | 공개 웹의 API 프록시 | 없음 | 설정 없음 | 추가하지 않음 |
-| 개발 DB | `127.0.0.1:15432` | `infra/local/compose.yaml` | 2026-11-01 컨테이너 기동. API는 아직 접속하지 않음 |
+| 개발 DB | `127.0.0.1:15432` | `infra/local/compose.yaml` | 2026-11-01 컨테이너 기동. S14에서 schema_meta 버전 1 |
 
 PC에 PostgreSQL 16.10이 `127.0.0.1:5432`로 설치되어 있다는 S00 기록은 유지한다. 이 저장소는 그 서버에 접속하지 않았다.
 
@@ -50,18 +50,21 @@ PC에 PostgreSQL 16.10이 `127.0.0.1:5432`로 설치되어 있다는 S00 기록�
 ```powershell
 Set-Location C:\Dev\sideproject\My_Web\services\api
 $env:CARGO_BUILD_JOBS = '2'
+$env:DB_URL = 'postgres://127.0.0.1:15432/datagrizzly'
+$env:DB_USER = 'datagrizzly'
+# DB_PASSWORD는 .env의 POSTGRES_PASSWORD를 프로세스 환경에만 넣는다. 값은 출력하지 않는다.
 cargo test -j 2
 cargo run
 ```
 
-`http://127.0.0.1:8080/actuator/health`는 `status=UP`이다. `/actuator/env`는 404다. 데이터베이스와 콘텐츠 API는 이 명령에 없다. 공개 웹이나 관리자와 같이 켜지 않는다.
+기동 시 `schema_meta` 마이그레이션을 적용한다. `http://127.0.0.1:8080/actuator/health`는 `status=UP`이다. `/actuator/env`는 404다. 콘텐츠 API는 이 명령에 없다. 공개 웹이나 관리자와 같이 켜지 않는다.
 
 ## 환경 변수
 
 `.env.example`은 이름만 구분한다. 값으로 쓸 비밀번호와 토큰은 없다.
 
 - `BROWSER_PUBLIC`: 브라우저 번들에 들어갈 수 있는 이름. `PUBLIC_` 변수는 정의하지 않았다.
-- `SERVER_ONLY`: 이후 CMS가 프로세스 환경으로 읽을 `DB_URL`, `DB_USER`, `DB_PASSWORD`. 공개 웹은 읽지 않는다.
+- `SERVER_ONLY`: `services/api`가 프로세스 환경으로 읽는 `DB_URL`, `DB_USER`, `DB_PASSWORD`. 공개 웹은 읽지 않는다.
 
 `.gitignore`는 `.env`와 `node_modules`, `dist`를 제외한다. 2026-10-26 다른 경로 빌드에서는 커밋하지 않았다.
 
@@ -69,9 +72,9 @@ cargo run
 
 ## DB는 이후 단계
 
-도메인 테이블 없이 공개 웹 확인은 가능하다. DB 설치와 bootstrap migration은 M2 직전 S13·S14까지 미룬다.
+도메인 테이블 없이 공개 웹 확인은 가능하다. S13은 PostgreSQL을 `127.0.0.1:15432`에 두었고, S14는 `schema_meta` 버전 1만 적용했다.
 
-그때의 확인 순서:
+확인 순서:
 
 1. S13에서 PostgreSQL 하나를 `127.0.0.1:15432`에만 둔다.
 2. S14에서 연결 확인용 메타만 만든다. 업무 테이블은 M2-01이다.
