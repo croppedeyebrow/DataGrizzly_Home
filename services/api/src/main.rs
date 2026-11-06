@@ -1,21 +1,38 @@
 //! 개념: API의 시작점.
-//! 목적: 15432에 접속해 메타 마이그레이션을 적용한 뒤 127.0.0.1:8080에서 health를 연다.
+//! 목적: 15432에 접속해 메타 마이그레이션을 적용한 뒤 health와 /api/status를 연다.
 //! 사용처: `cargo run`과 `cargo test`.
 
 mod db;
 
+use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::Router;
+use sqlx::PgPool;
 use std::net::SocketAddr;
 
 const HEALTH: &str = r#"{"groups":["liveness","readiness"],"status":"UP"}"#;
+const STATUS_DOWN: &str = r#"{"service":"datagrizzly-api","status":"UP","database":"DOWN"}"#;
 
-pub fn app() -> Router {
+pub fn app(pool: PgPool) -> Router {
     Router::new()
         .route("/actuator/health", get(health))
+        .route("/api/status", get(status))
         .fallback(not_found)
+        .with_state(pool)
+}
+
+fn status_body(version: Option<i32>) -> (StatusCode, String) {
+    match version {
+        Some(version) => (
+            StatusCode::OK,
+            format!(
+                r#"{{"service":"datagrizzly-api","status":"UP","database":"UP","schemaVersion":{version}}}"#
+            ),
+        ),
+        None => (StatusCode::SERVICE_UNAVAILABLE, STATUS_DOWN.to_string()),
+    }
 }
 
 async fn health() -> impl IntoResponse {
@@ -28,6 +45,20 @@ async fn health() -> impl IntoResponse {
 
 async fn not_found() -> StatusCode {
     StatusCode::NOT_FOUND
+}
+
+async fn status(State(pool): State<PgPool>) -> impl IntoResponse {
+    let version = sqlx::query_scalar::<_, i32>("SELECT schema_version FROM schema_meta LIMIT 1")
+        .fetch_optional(&pool)
+        .await
+        .ok()
+        .flatten();
+    let (code, body) = status_body(version);
+    (
+        code,
+        [("content-type", "application/json; charset=utf-8")],
+        body,
+    )
 }
 
 #[tokio::main]
@@ -46,22 +77,42 @@ async fn run() -> Result<(), String> {
     let listener = tokio::net::TcpListener::bind(address)
         .await
         .map_err(|_| "bind 127.0.0.1:8080".to_string())?;
-    axum::serve(listener, app())
+    axum::serve(listener, app(pool))
         .await
         .map_err(|_| "server".to_string())
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{app, HEALTH};
+    use super::{app, status_body, HEALTH, STATUS_DOWN};
     use axum::body::Body;
     use axum::http::{Request, StatusCode};
     use http_body_util::BodyExt;
     use tower::ServiceExt;
 
+    fn router() -> axum::Router {
+        let pool = sqlx::postgres::PgPoolOptions::new()
+            .connect_lazy("postgres://127.0.0.1:15432/datagrizzly")
+            .expect("lazy pool");
+        app(pool)
+    }
+
+    #[test]
+    fn status_reports_schema_version() {
+        let (code, body) = status_body(Some(1));
+        assert_eq!(code, StatusCode::OK);
+        assert_eq!(
+            body,
+            r#"{"service":"datagrizzly-api","status":"UP","database":"UP","schemaVersion":1}"#
+        );
+        let (down, down_body) = status_body(None);
+        assert_eq!(down, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(down_body, STATUS_DOWN);
+    }
+
     #[tokio::test]
     async fn health_is_up() {
-        let response = app()
+        let response = router()
             .oneshot(
                 Request::get("/actuator/health")
                     .body(Body::empty())
@@ -76,7 +127,7 @@ mod tests {
 
     #[tokio::test]
     async fn env_actuator_is_hidden() {
-        let response = app()
+        let response = router()
             .oneshot(
                 Request::get("/actuator/env")
                     .body(Body::empty())

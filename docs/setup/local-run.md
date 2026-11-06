@@ -57,7 +57,7 @@ cargo test -j 2
 cargo run
 ```
 
-기동 시 `schema_meta` 마이그레이션을 적용한다. `http://127.0.0.1:8080/actuator/health`는 `status=UP`이다. `/actuator/env`는 404다. 콘텐츠 API는 이 명령에 없다. 공개 웹이나 관리자와 같이 켜지 않는다.
+기동 시 `schema_meta` 마이그레이션을 적용한다. `http://127.0.0.1:8080/actuator/health`는 `status=UP`이다. `http://127.0.0.1:8080/api/status`는 `schemaVersion`을 돌려준다. `/actuator/env`는 404다. 관리자 개발 서버는 `/api`를 이 주소로 넘긴다. 공개 웹 4321과 같이 켜지 않는다.
 
 ## 환경 변수
 
