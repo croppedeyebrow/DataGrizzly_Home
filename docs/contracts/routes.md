@@ -2,7 +2,7 @@
 
 - 확정일: 2026-10-25
 - 태스크: M0-01
-- 상태: 경로 계약. 공개 웹에는 `/`, `/about`, `/projects`, `/projects/{slug}`, `/projects/{slug}/logs`, `/logs/{slug}`, `/notes`, `/notes/{slug}`, `/research`, `/research/{slug}`, `/404`, `/sitemap.xml`, `/rss.xml`, `/robots.txt`가 있다. 주제·시리즈는 공개 분류가 없어 파일이 없다. 탐색 검색은 아직 없다. 관리자 개발 서버는 `127.0.0.1:5173/admin/`의 로그인 자리표시자만 있다. 인증 API와 `/admin/login` 동작은 아직 없다
+- 상태: 경로 계약. 공개 웹에는 `/`, `/about`, `/projects`, `/projects/{slug}`, `/projects/{slug}/logs`, `/logs/{slug}`, `/notes`, `/notes/{slug}`, `/research`, `/research/{slug}`, `/404`, `/sitemap.xml`, `/rss.xml`, `/robots.txt`가 있다. 주제·시리즈는 공개 분류가 없어 파일이 없다. 탐색 검색은 아직 없다. 관리자 개발 서버의 `/admin/`과 `/admin/login`은 소유자 로그인이다. `POST /api/admin/session`이 세션 쿠키와 CSRF를 만들고, 쿠키만으로는 `/api/admin`이 통과하지 않는다. 관리 홈과 편집기는 아직 없다
 
 ## 관리자 기준 경로
 

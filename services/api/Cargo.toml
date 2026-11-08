@@ -5,13 +5,19 @@ edition = "2021"
 publish = false
 
 # 개념: API의 Rust 서버.
-# 목적: 127.0.0.1:15432에 접속해 메타 마이그레이션을 적용하고, 8080에서 health를 연다.
+# 목적: 127.0.0.1:15432에 접속하고, 8080에서 health와 소유자 관리 API를 연다.
 # 사용처: services/api 의 cargo test, cargo run.
 
 [dependencies]
+argon2 = "0.5"
 axum = "0.8"
-sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "tls-none", "postgres", "macros", "migrate"] }
+rand = "0.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "tls-none", "postgres", "macros", "migrate", "uuid"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "net"] }
+uuid = { version = "1", features = ["v4"] }
 
 [dev-dependencies]
 http-body-util = "0.1"

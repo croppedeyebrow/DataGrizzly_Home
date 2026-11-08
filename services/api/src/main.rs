@@ -1,7 +1,9 @@
 //! 개념: API의 시작점.
-//! 목적: 15432에 접속해 메타 마이그레이션을 적용한 뒤 health와 /api/status를 연다.
+//! 목적: 15432에 접속해 마이그레이션을 적용한 뒤 health, /api/status, 소유자 API를 연다.
 //! 사용처: `cargo run`과 `cargo test`.
 
+mod admin;
+mod auth;
 mod db;
 
 use axum::extract::State;
@@ -19,6 +21,7 @@ pub fn app(pool: PgPool) -> Router {
     Router::new()
         .route("/actuator/health", get(health))
         .route("/api/status", get(status))
+        .merge(admin::router())
         .fallback(not_found)
         .with_state(pool)
 }
@@ -73,6 +76,7 @@ async fn run() -> Result<(), String> {
     let config = db::DbConfig::from_env()?;
     let pool = db::connect(&config).await?;
     db::migrate(&pool).await?;
+    db::ensure_owner(&pool).await?;
     let address: SocketAddr = "127.0.0.1:8080".parse().expect("loopback address");
     let listener = tokio::net::TcpListener::bind(address)
         .await

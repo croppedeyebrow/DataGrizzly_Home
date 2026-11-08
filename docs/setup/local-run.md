@@ -57,14 +57,14 @@ cargo test -j 2
 cargo run
 ```
 
-기동 시 `schema_meta` 마이그레이션을 적용한다. `http://127.0.0.1:8080/actuator/health`는 `status=UP`이다. `http://127.0.0.1:8080/api/status`는 `schemaVersion`을 돌려준다. `/actuator/env`는 404다. 관리자 개발 서버는 `/api`를 이 주소로 넘긴다. 공개 웹 4321과 같이 켜지 않는다.
+기동 시 `schema_meta`와 `0002_content_identity.sql`의 업무 테이블을 적용한다. 소유자가 없고 `OWNER_PASSWORD`가 있으면 그 값의 Argon2id 해시만 저장한다. `http://127.0.0.1:8080/actuator/health`는 `status=UP`이다. `http://127.0.0.1:8080/api/status`는 `schemaVersion`을 돌려준다. `/actuator/env`는 404다. 관리자 개발 서버는 `/api`를 이 주소로 넘긴다. 로그인은 `/admin/login`이고, 실패는 `401 {"error":"unauthorized"}`다. 공개 웹 4321과 같이 켜지 않는다.
 
 ## 환경 변수
 
 `.env.example`은 이름만 구분한다. 값으로 쓸 비밀번호와 토큰은 없다.
 
 - `BROWSER_PUBLIC`: 브라우저 번들에 들어갈 수 있는 이름. `PUBLIC_` 변수는 정의하지 않았다.
-- `SERVER_ONLY`: `services/api`가 프로세스 환경으로 읽는 `DB_URL`, `DB_USER`, `DB_PASSWORD`. 공개 웹은 읽지 않는다.
+- `SERVER_ONLY`: `services/api`가 프로세스 환경으로 읽는 `DB_URL`, `DB_USER`, `DB_PASSWORD`, `OWNER_PASSWORD`, `OWNER_PASSWORD_RESET`, `SECURE_COOKIES`. 공개 웹은 읽지 않는다.
 
 `.gitignore`는 `.env`와 `node_modules`, `dist`를 제외한다. 2026-10-26 다른 경로 빌드에서는 커밋하지 않았다.
 
@@ -77,7 +77,7 @@ cargo run
 확인 순서:
 
 1. S13에서 PostgreSQL 하나를 `127.0.0.1:15432`에만 둔다.
-2. S14에서 연결 확인용 메타만 만든다. 업무 테이블은 M2-01이다.
+2. S14에서 연결 확인용 메타를 만들고, M2-01에서 업무 테이블과 소유자 세션을 추가했다.
 3. `DB_PASSWORD`는 저장소에 넣지 않고, 서버를 실행하는 프로세스에만 주입한다.
 4. 공개 웹 `dist`에 `DB_PASSWORD`가 없는지는 `node scripts/check-m0-env.mjs`로 다시 본다.
 

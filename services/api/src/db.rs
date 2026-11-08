@@ -1,5 +1,5 @@
 //! 개념: 로컬 PostgreSQL 접속과 메타 마이그레이션.
-//! 목적: 127.0.0.1:15432에만 붙고 schema_meta 한 테이블을 만든다.
+//! 목적: 127.0.0.1:15432에만 붙고, 개발 DB와 격리된 시험 DB를 구분한다.
 //! 사용처: `main`의 기동, `cargo test`.
 
 use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
@@ -46,7 +46,66 @@ pub async fn migrate(pool: &PgPool) -> Result<(), String> {
         .run(pool)
         .await
         .map(|_| ())
-        .map_err(|error| format!("migration failed: {error}"))
+        .map_err(redact_env)
+}
+
+#[cfg_attr(not(test), allow(dead_code))]
+pub async fn connect_database(database: &str) -> Result<PgPool, String> {
+    if database != DATABASE && database != "datagrizzly_m2" {
+        return Err("database not allowed".into());
+    }
+    let user = required("DB_USER")?;
+    let password = required("DB_PASSWORD")?;
+    if user != DATABASE {
+        return Err("DB_USER must be datagrizzly".into());
+    }
+    let url = format!("postgres://{HOST}:{PORT}/{database}");
+    connect(&DbConfig { url, user, password }).await
+}
+
+pub async fn ensure_owner(pool: &PgPool) -> Result<(), String> {
+    let count: i64 = sqlx::query_scalar("SELECT count(*) FROM owner")
+        .fetch_one(pool)
+        .await
+        .map_err(redact_env)?;
+    let password = std::env::var("OWNER_PASSWORD")
+        .ok()
+        .filter(|value| !value.is_empty());
+    let reset = matches!(std::env::var("OWNER_PASSWORD_RESET").as_deref(), Ok("1"));
+    if count == 0 {
+        let Some(password) = password else {
+            return Ok(());
+        };
+        let hash = crate::auth::hash_password(&password)?;
+        sqlx::query("INSERT INTO owner (password_hash) VALUES ($1)")
+            .bind(hash)
+            .execute(pool)
+            .await
+            .map_err(redact_env)?;
+        return Ok(());
+    }
+    if reset {
+        let Some(password) = password else {
+            return Err("OWNER_PASSWORD is required".into());
+        };
+        let hash = crate::auth::hash_password(&password)?;
+        sqlx::query(
+            "UPDATE owner SET password_hash = $1
+             WHERE id = (
+                SELECT id FROM owner WHERE disabled = false ORDER BY created_at ASC LIMIT 1
+             )",
+        )
+        .bind(hash)
+        .execute(pool)
+        .await
+        .map_err(redact_env)?;
+    }
+    Ok(())
+}
+
+fn redact_env(error: impl std::fmt::Display) -> String {
+    let password = std::env::var("DB_PASSWORD").unwrap_or_default();
+    redact(&password, error)
 }
 
 fn required(name: &str) -> Result<String, String> {
