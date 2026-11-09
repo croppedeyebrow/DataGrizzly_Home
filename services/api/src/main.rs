@@ -4,6 +4,7 @@
 
 mod admin;
 mod auth;
+mod content;
 mod db;
 
 use axum::extract::State;

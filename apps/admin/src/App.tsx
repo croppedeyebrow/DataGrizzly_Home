@@ -1,105 +1,35 @@
 /**
- * 개념: 소유자 로그인 화면.
- * 목적: 비밀번호를 API로 보내고, 돌아온 CSRF로만 로그아웃한다.
- * 사용처: apps/admin/src/main.tsx. 경로는 /admin/ 와 /admin/login.
+ * 개념: 관리자 화면의 경로 선택.
+ * 목적: 로그인, 글 목록, 블록 편집을 각각의 주소에 연결한다.
+ * 사용처: apps/admin/src/main.tsx.
  */
-import { useState, type FormEvent } from 'react'
+import Editor from './editor/Editor'
+import EntryList from './entries/EntryList'
+import Login from './Login'
 
-const FAILURE = '로그인에 실패했다. 다시 시도해 달라.'
+type AdminRoute = { name: 'login' } | { name: 'entries' } | { name: 'edit'; id: string }
 
+/**
+ * 개념: 주소에서 관리 화면을 고른다.
+ * 목적: 라우터 패키지 없이 /admin 아래 경로를 구분한다.
+ * 사용처: App.
+ */
+function parseRoute(pathname: string): AdminRoute {
+  const path = pathname.replace(/\/+$/, '')
+  if (path === '/admin/entries') return { name: 'entries' }
+  const edit = /^\/admin\/entries\/([0-9a-f-]{36})\/edit$/.exec(path)
+  if (edit) return { name: 'edit', id: edit[1] }
+  return { name: 'login' }
+}
+
+/**
+ * 개념: 현재 주소의 관리 화면.
+ * 목적: 로그인 뒤에 목록과 편집기를 연다.
+ * 사용처: main.tsx.
+ */
 export default function App() {
-  const [password, setPassword] = useState('')
-  const [csrfToken, setCsrfToken] = useState('')
-  const [message, setMessage] = useState('')
-  const [pending, setPending] = useState(false)
-
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (!password) {
-      setMessage('비밀번호를 입력해 달라.')
-      return
-    }
-    setPending(true)
-    setMessage('')
-    const entered = password
-    setPassword('')
-    try {
-      const response = await fetch('/api/admin/session', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ password: entered }),
-      })
-      if (!response.ok) {
-        setCsrfToken('')
-        setMessage(FAILURE)
-        return
-      }
-      const body = (await response.json()) as { csrfToken?: string }
-      if (!body.csrfToken) {
-        setMessage(FAILURE)
-        return
-      }
-      setCsrfToken(body.csrfToken)
-      setMessage('')
-    } catch {
-      setCsrfToken('')
-      setMessage('서버에 연결하지 못했다. 다시 시도해 달라.')
-    } finally {
-      setPending(false)
-    }
-  }
-
-  async function onLogout() {
-    setPending(true)
-    try {
-      const response = await fetch('/api/admin/session', {
-        method: 'DELETE',
-        credentials: 'include',
-        headers: { 'x-csrf-token': csrfToken },
-      })
-      if (!response.ok) {
-        setMessage('로그아웃하지 못했다. 다시 시도해 달라.')
-        return
-      }
-      setCsrfToken('')
-      setMessage('')
-    } catch {
-      setMessage('서버에 연결하지 못했다. 다시 시도해 달라.')
-    } finally {
-      setPending(false)
-    }
-  }
-
-  return (
-    <main>
-      <h1>소유자 로그인</h1>
-      {csrfToken ? (
-        <>
-          <p>로그인되었다.</p>
-          <button type="button" onClick={onLogout} disabled={pending}>
-            로그아웃
-          </button>
-        </>
-      ) : (
-        <form onSubmit={onSubmit}>
-          <label htmlFor="owner-password">비밀번호</label>
-          <input
-            id="owner-password"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-          <button type="submit" disabled={pending}>
-            로그인
-          </button>
-        </form>
-      )}
-      {message ? <p role="alert">{message}</p> : null}
-      <p>
-        <a href="http://127.0.0.1:4321/">공개 홈페이지로 돌아가기</a>
-      </p>
-    </main>
-  )
+  const route = parseRoute(window.location.pathname)
+  if (route.name === 'entries') return <EntryList />
+  if (route.name === 'edit') return <Editor entryId={route.id} />
+  return <Login />
 }

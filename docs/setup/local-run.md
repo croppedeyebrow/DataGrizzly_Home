@@ -57,7 +57,7 @@ cargo test -j 2
 cargo run
 ```
 
-기동 시 `schema_meta`와 `0002_content_identity.sql`의 업무 테이블을 적용한다. 소유자가 없고 `OWNER_PASSWORD`가 있으면 그 값의 Argon2id 해시만 저장한다. `http://127.0.0.1:8080/actuator/health`는 `status=UP`이다. `http://127.0.0.1:8080/api/status`는 `schemaVersion`을 돌려준다. `/actuator/env`는 404다. 관리자 개발 서버는 `/api`를 이 주소로 넘긴다. 로그인은 `/admin/login`이고, 실패는 `401 {"error":"unauthorized"}`다. 공개 웹 4321과 같이 켜지 않는다.
+기동 시 `schema_meta`와 `0002_content_identity.sql`의 업무 테이블을 적용한다. 소유자가 없고 `OWNER_PASSWORD`가 있으면 그 값의 Argon2id 해시만 저장한다. `http://127.0.0.1:8080/actuator/health`는 `status=UP`이다. `http://127.0.0.1:8080/api/status`는 `schemaVersion`을 돌려준다. `/actuator/env`는 404다. 관리자 개발 서버는 `/api`를 이 주소로 넘긴다. 로그인은 `/admin/login`이고, 실패는 `401 {"error":"unauthorized"}`다. 글 편집은 `/admin/entries/{id}/edit`이고, 저장은 현재 버전과 같을 때만 새 초안을 만든다. 공개 웹 4321과 같이 켜지 않는다.
 
 ## 환경 변수
 
