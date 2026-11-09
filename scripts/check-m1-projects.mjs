@@ -214,7 +214,7 @@ function canonicalHref(html) {
 if (existsSync(nested)) fail('duplicate log path')
 if (canonicalHref(list) !== '/projects') fail('list canonical')
 if (list && !list.includes('href="/projects/example-memo-desk"')) fail('list card link')
-if (list && !list.includes('주제가 아직 없다.')) fail('empty topic')
+if (list && !list.includes('문제 · 기술 · 진행 상태')) fail('empty topic')
 if (canonicalHref(description) !== '/projects/example-memo-desk') fail('description canonical')
 if (description && !description.includes('GitHub 주소가 아직 없다.')) fail('empty github')
 if (description && !description.includes('이 구역의 문장이 아직 없다.')) fail('empty judgment')

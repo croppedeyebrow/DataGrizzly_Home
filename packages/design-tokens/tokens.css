@@ -1,26 +1,104 @@
 /*
- * 개념: 공개 웹이 함께 쓰는 색, 글자, 간격, 본문 폭, 포커스 표시.
- * 목적: 페이지마다 색과 글자 크기를 따로 정하지 않게 한다.
- * 사용처: apps/web/src/styles/global.css 가 이 파일을 불러 홈과 소개에 적용한다.
+ * 개념: 공개 웹과 관리자가 함께 쓰는 색, 글자, 간격, 모양, 그림자, 그라데이션 값.
+ * 목적: 자수정(남보라) 글래스 테마를 한곳에서 정해 페이지마다 색과 효과를 따로 정하지 않게 한다.
+ * 사용처: theme.css 가 이 파일을 불러 Tailwind 테마와 dg-* 유틸리티로 옮긴다.
  * 한글 글꼴을 네트워크에서 받지 않는다. 첫 글꼴이 없으면 다음 시스템 글꼴을 쓴다.
+ * 기존 이름(--color-bg 등)은 그대로 두고 값만 어두운 테마로 바꿨다.
  */
 :root {
-  --color-bg: #f7f4ee;
-  --color-surface: #fffdf8;
-  --color-text: #1d1a16;
-  --color-muted: #5e584f;
-  --color-line: #ddd4c6;
-  --color-accent: #8c3d2f;
-  --color-focus: #1d4e89;
+  color-scheme: dark;
+
+  /* 기존 의미 토큰: 이름 유지, 값만 교체 */
+  --color-bg: #070a20;
+  --color-surface: #1c1752;
+  --color-text: #eef1ff;
+  --color-muted: #a3abd1;
+  --color-line: rgba(196, 170, 255, 0.22);
+  --color-accent: #c7b6ff;
+  --color-focus: #f0a6ff;
   --font-body: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  --font-code: "JetBrains Mono", "D2Coding", Consolas, "Courier New", monospace;
   --font-size-body: 1.0625rem;
-  --font-size-title: 2rem;
-  --line-height-body: 1.7;
+  --font-size-title: 2.5rem;
+  --line-height-body: 1.75;
   --measure: 42rem;
+  --page-width: 82.5rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
   --space-4: 1rem;
   --space-5: 1.5rem;
   --space-6: 2.5rem;
   --focus-ring: 0 0 0 3px var(--color-focus);
+
+  /* 자수정 팔레트 */
+  --dg-blue: #3d63e8;
+  --dg-violet: #6a47e6;
+  --dg-purple: #8b3fd9;
+  --dg-lilac: #b05be0;
+  --dg-glow-blue: #8fb0ff;
+  --dg-glow-violet: #b79cff;
+  --dg-glow-pink: #f0a6ff;
+  --dg-ink-strong: #f5f7ff;
+  --dg-ink-soft: #c3caeb;
+  --dg-label: #a5b4fc;
+  --dg-ok: #34d399;
+  --dg-ok-text: #a7f3d0;
+  --dg-danger: #f472b6;
+  --dg-danger-text: #fbcfe8;
+  --dg-depth: #2b1872;
+
+  /* 그라데이션 */
+  --dg-gradient-brand: linear-gradient(160deg, #3d63e8 0%, #6a47e6 42%, #8b3fd9 78%, #b05be0 100%);
+  --dg-gradient-text: linear-gradient(90deg, #8fb0ff, #b79cff 50%, #f0a6ff);
+  --dg-gradient-page:
+    radial-gradient(1000px 560px at 70% -10%, rgba(124, 82, 255, 0.32), transparent 62%),
+    radial-gradient(800px 600px at -5% 55%, rgba(106, 71, 230, 0.22), transparent 60%),
+    radial-gradient(800px 600px at 100% 90%, rgba(176, 91, 224, 0.18), transparent 60%),
+    linear-gradient(180deg, #0b0a2a, #070a20 45%, #0c0726);
+  --dg-gradient-panel: linear-gradient(155deg, rgba(64, 44, 132, 0.62), rgba(30, 24, 80, 0.6) 45%, rgba(12, 14, 44, 0.7));
+  --dg-gradient-panel-rim: linear-gradient(145deg, rgba(222, 190, 255, 0.6), rgba(139, 92, 246, 0.22) 35%, rgba(61, 99, 232, 0.08) 65%, rgba(240, 166, 255, 0.38));
+  --dg-gradient-hero:
+    radial-gradient(600px 300px at 85% 30%, rgba(176, 91, 224, 0.28), transparent 70%),
+    linear-gradient(155deg, rgba(84, 56, 170, 0.66), rgba(38, 28, 98, 0.62) 45%, rgba(12, 12, 44, 0.74));
+  --dg-gradient-hero-rim: linear-gradient(140deg, rgba(232, 206, 255, 0.7), rgba(139, 92, 246, 0.25) 35%, rgba(61, 99, 232, 0.1) 65%, rgba(240, 166, 255, 0.45));
+  --dg-gradient-item: linear-gradient(160deg, rgba(183, 156, 255, 0.12), rgba(255, 255, 255, 0.025) 55%, rgba(8, 6, 30, 0.25));
+  --dg-gradient-ghost: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+  --dg-gradient-folder-tab: linear-gradient(180deg, rgba(120, 84, 220, 0.78), rgba(74, 50, 150, 0.7));
+  --dg-gradient-folder-body: linear-gradient(170deg, rgba(74, 50, 150, 0.62), rgba(30, 24, 80, 0.62) 40%, rgba(12, 14, 44, 0.72));
+  --dg-gradient-icon: linear-gradient(150deg, rgba(160, 130, 255, 0.55), rgba(84, 56, 190, 0.4) 55%, rgba(30, 18, 90, 0.55));
+  --dg-gradient-orb: radial-gradient(circle at 34% 28%, #f3e8ff 0%, #b48cff 22%, #7a45e0 52%, #3a1590 85%);
+  --dg-gradient-nav-active: linear-gradient(180deg, rgba(167, 139, 250, 0.32), rgba(106, 71, 230, 0.18));
+
+  /* 테두리 색 */
+  --dg-rim-item: rgba(196, 170, 255, 0.22);
+  --dg-rim-control: rgba(196, 170, 255, 0.4);
+  --dg-rim-folder: rgba(196, 170, 255, 0.36);
+  --dg-rim-active: rgba(214, 180, 255, 0.42);
+
+  /* 그림자: 윗면 빛 + 아랫면 어둠 + 바닥 두께 + 떠 있는 그림자 + 보라 빛 */
+  --dg-shadow-panel:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -14px 28px rgba(6, 4, 24, 0.38),
+    0 2px 0 rgba(20, 10, 60, 0.9), 0 22px 44px -12px rgba(2, 2, 16, 0.85), 0 0 46px -14px rgba(167, 139, 250, 0.45);
+  --dg-shadow-hero:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18), inset 0 -24px 48px rgba(6, 4, 24, 0.45),
+    0 3px 0 rgba(24, 12, 70, 0.95), 0 36px 70px -20px rgba(2, 2, 16, 0.9), 0 0 80px -20px rgba(167, 139, 250, 0.55);
+  --dg-shadow-item: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 6px 14px -6px rgba(2, 2, 16, 0.8);
+  --dg-shadow-btn:
+    inset 0 1px 0 rgba(255, 255, 255, 0.38), inset 0 -3px 0 rgba(36, 10, 90, 0.45),
+    0 4px 0 var(--dg-depth), 0 14px 30px -4px rgba(139, 92, 246, 0.65);
+  --dg-shadow-btn-pressed:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(36, 10, 90, 0.45),
+    0 1px 0 var(--dg-depth), 0 6px 16px -4px rgba(139, 92, 246, 0.55);
+  --dg-shadow-ghost: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 3px 0 rgba(14, 8, 44, 0.9), 0 10px 20px -6px rgba(2, 2, 16, 0.7);
+  --dg-shadow-icon: inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 -3px 5px rgba(10, 4, 40, 0.55), 0 4px 10px rgba(3, 2, 20, 0.65);
+  --dg-shadow-orb:
+    inset -6px -8px 14px rgba(20, 4, 60, 0.55), inset 2px 3px 6px rgba(255, 255, 255, 0.35),
+    0 6px 0 -1px #241062, 0 0 32px rgba(196, 160, 255, 0.85);
+  --dg-shadow-nav-active: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 3px 0 rgba(20, 10, 60, 0.9), 0 6px 14px rgba(139, 92, 246, 0.35);
+
+  /* 모서리 */
+  --dg-radius-hero: 1.75rem;
+  --dg-radius-panel: 1.375rem;
+  --dg-radius-item: 0.875rem;
+  --dg-radius-control: 0.75rem;
 }

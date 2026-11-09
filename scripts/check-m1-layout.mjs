@@ -46,9 +46,11 @@ for (const [name, html] of [['home', home], ['about', about]]) {
   if (/\/(lab|labs|experiments|signup|register)\b/.test(html)) fail(`${name} forbidden route`)
 }
 
-if (!home.includes('예시이며 실제 성과가 아니다.')) fail('home example flag')
-if (!home.includes('연락 링크는 아직 없다.')) fail('home empty contact')
-if (!about.includes('홈의 예시를 경력으로 쓰지 않는다.')) fail('about career guard')
+if (!home.includes('예시 콘텐츠')) fail('home example flag')
+if (!home.includes('현장의 데이터에서,')) fail('home headline')
+if (!home.includes('© DataGrizzly')) fail('home footer')
+if (home.includes('mailto:')) fail('home invented contact')
+if (!about.includes('없는 성과는 적지 않습니다.')) fail('about career guard')
 if (!home.includes(homeData.project.title)) fail('home project title')
 
 if (emptyHome(true).loadError !== true) fail('emptyHome')

@@ -12,6 +12,12 @@ export function setupSiteMenu(menu: Element | null): void {
   const firstLink = menu.querySelector<HTMLAnchorElement>('.site-nav a')
   if (!summary || !firstLink) return
 
+  // 넓은 화면은 닫힌 details의 너비가 0이 되므로 항상 펼친다. 좁은 화면은 처음 접는다.
+  if (narrowMenu.matches) menu.open = false
+  narrowMenu.addEventListener('change', () => {
+    if (!narrowMenu.matches) menu.open = true
+  })
+
   menu.addEventListener('toggle', () => {
     if (!narrowMenu.matches || !menu.open) return
     firstLink.focus()

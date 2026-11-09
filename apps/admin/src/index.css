@@ -1,62 +1,62 @@
 /*
- * 개념: 관리자 자리표시자의 기본 글자.
- * 목적: 템플릿 데모 색을 쓰지 않고 본문을 읽게 한다.
+ * 개념: 관리자 화면의 Tailwind 테마와 기본 글자.
+ * 목적: 공개 웹과 같은 자수정 글래스 테마를 쓰고, 아직 클래스가 없는 폼 요소도 어두운 배경에서 읽히게 한다.
  * 사용처: apps/admin/src/main.tsx
+ * 색·그림자·dg-* 조합 클래스는 packages/design-tokens/theme.css 에서 정한다.
  */
-:root {
-  color: #1d1a16;
-  background: #f7f4ee;
-  font-family: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
-  line-height: 1.7;
-}
+@import "tailwindcss";
+@import "@datagrizzly/design-tokens/theme.css";
 
-body {
-  margin: 0;
-}
+@layer base {
+  label,
+  button {
+    display: block;
+  }
 
-main {
-  max-width: 40rem;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-}
+  input,
+  select,
+  textarea {
+    display: block;
+    font: inherit;
+    color: var(--color-text);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(196, 170, 255, 0.3);
+    border-radius: var(--dg-radius-control);
+  }
 
-label,
-button {
-  display: block;
-}
+  input {
+    width: 100%;
+    min-height: 2.75rem;
+    margin: 0.25rem 0 1rem;
+    padding: 0 0.75rem;
+  }
 
-input {
-  display: block;
-  width: 100%;
-  max-width: 20rem;
-  margin: 0.25rem 0 1rem;
-  font: inherit;
-}
+  textarea {
+    width: 100%;
+    min-height: 6rem;
+    margin: 0.25rem 0 1rem;
+    padding: 0.625rem 0.75rem;
+  }
 
-button,
-select,
-textarea {
-  font: inherit;
-}
+  select {
+    min-height: 2.75rem;
+    margin: 0.25rem 0 1rem;
+    padding: 0 0.75rem;
+  }
 
-textarea {
-  display: block;
-  width: 100%;
-  max-width: 36rem;
-  min-height: 6rem;
-  margin: 0.25rem 0 1rem;
-}
+  button {
+    font: inherit;
+    cursor: pointer;
+  }
 
-select {
-  display: block;
-  margin: 0.25rem 0 1rem;
-}
+  fieldset {
+    margin: 0 0 1rem;
+    padding: 1rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--dg-radius-item);
+  }
 
-fieldset {
-  margin: 0 0 1rem;
-  border: 1px solid #d9d1c5;
-}
-
-ul {
-  padding-left: 1.2rem;
+  ul {
+    padding-left: 1.2rem;
+  }
 }

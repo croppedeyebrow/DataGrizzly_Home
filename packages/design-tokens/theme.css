@@ -1,0 +1,293 @@
+/*
+ * 개념: 자수정 글래스 테마를 Tailwind v4 에 연결하는 파일.
+ * 목적: tokens.css 값을 bg-*, text-*, rounded-*, shadow-* 유틸리티와 dg-* 조합 클래스로 쓰게 한다.
+ * 사용처: apps/web/src/styles.css, apps/admin/src/index.css 가 `@import "tailwindcss"` 다음에 불러온다.
+ *
+ * 조합 클래스 요약
+ *   dg-page        페이지 배경(자수정 성운)
+ *   dg-hero        히어로 패널 · 진한 그라데이션과 빛나는 테두리
+ *   dg-panel       기본 글래스 패널
+ *   dg-item        패널 안의 행·타일
+ *   dg-folder-tab  번호 탭(폴더 모양) · 바로 아래에 dg-folder-body
+ *   dg-folder-body 탭과 이어지는 패널(왼쪽 위 모서리 직각)
+ *   dg-btn         주 버튼 · 눌리는 키캡 입체감
+ *   dg-btn-ghost   보조 버튼 · 유리판
+ *   dg-nav-active  선택된 메뉴
+ *   dg-chip        태그·상태 알약
+ *   dg-icon-tile   입체 아이콘 타일
+ *   dg-orb         자수정 구(탐색 버튼 등)
+ *   dg-input       입력창
+ *   dg-code        코드 블록
+ *   dg-text-gradient 그라데이션 글자
+ *   dg-label       자간 넓은 섹션 라벨
+ */
+@import "./tokens.css";
+
+@theme inline {
+  --color-canvas: var(--color-bg);
+  --color-paper: var(--color-surface);
+  --color-ink: var(--color-text);
+  --color-quiet: var(--color-muted);
+  --color-rule: var(--color-line);
+  --color-mark: var(--color-accent);
+  --color-ring: var(--color-focus);
+
+  --color-dg-blue: var(--dg-blue);
+  --color-dg-violet: var(--dg-violet);
+  --color-dg-purple: var(--dg-purple);
+  --color-dg-lilac: var(--dg-lilac);
+  --color-glow-blue: var(--dg-glow-blue);
+  --color-glow-violet: var(--dg-glow-violet);
+  --color-glow-pink: var(--dg-glow-pink);
+  --color-ink-strong: var(--dg-ink-strong);
+  --color-ink-soft: var(--dg-ink-soft);
+  --color-label: var(--dg-label);
+  --color-ok: var(--dg-ok);
+  --color-danger: var(--dg-danger);
+
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-code);
+
+  --radius-hero: var(--dg-radius-hero);
+  --radius-panel: var(--dg-radius-panel);
+  --radius-item: var(--dg-radius-item);
+  --radius-control: var(--dg-radius-control);
+
+  --shadow-panel: var(--dg-shadow-panel);
+  --shadow-hero: var(--dg-shadow-hero);
+  --shadow-item: var(--dg-shadow-item);
+  --shadow-btn: var(--dg-shadow-btn);
+  --shadow-ghost: var(--dg-shadow-ghost);
+  --shadow-orb: var(--dg-shadow-orb);
+
+  --container-page: var(--page-width);
+}
+
+@layer base {
+  html {
+    background: var(--color-bg);
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--color-text);
+    background: var(--dg-gradient-page);
+    background-attachment: fixed;
+    font-family: var(--font-body);
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body);
+  }
+
+  a {
+    color: var(--color-accent);
+  }
+
+  a:hover {
+    color: #ffffff;
+  }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  ::selection {
+    color: #ffffff;
+    background: rgba(176, 91, 224, 0.55);
+  }
+}
+
+@utility dg-page {
+  min-height: 100vh;
+  color: var(--color-text);
+  background: var(--dg-gradient-page);
+}
+
+@utility dg-hero {
+  background: var(--dg-gradient-hero) padding-box, var(--dg-gradient-hero-rim) border-box;
+  border: 1px solid transparent;
+  border-radius: var(--dg-radius-hero);
+  box-shadow: var(--dg-shadow-hero);
+}
+
+@utility dg-panel {
+  background: var(--dg-gradient-panel) padding-box, var(--dg-gradient-panel-rim) border-box;
+  border: 1px solid transparent;
+  border-radius: var(--dg-radius-panel);
+  box-shadow: var(--dg-shadow-panel);
+}
+
+@utility dg-item {
+  background: var(--dg-gradient-item);
+  border: 1px solid var(--dg-rim-item);
+  border-radius: var(--dg-radius-item);
+  box-shadow: var(--dg-shadow-item);
+}
+
+@utility dg-folder-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem 0.375rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: #e4daff;
+  background: var(--dg-gradient-folder-tab);
+  border: 1px solid var(--dg-rim-folder);
+  border-bottom: 0;
+  border-radius: 0.875rem 0.875rem 0 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+@utility dg-folder-body {
+  background: var(--dg-gradient-folder-body);
+  border: 1px solid var(--dg-rim-folder);
+  border-radius: 0 var(--dg-radius-panel) var(--dg-radius-panel) var(--dg-radius-panel);
+  box-shadow: var(--dg-shadow-panel);
+}
+
+@utility dg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0 1.375rem;
+  border: 0;
+  border-radius: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  text-decoration: none;
+  background: var(--dg-gradient-brand);
+  box-shadow: var(--dg-shadow-btn);
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+
+  &:hover {
+    color: #ffffff;
+    filter: brightness(1.08);
+  }
+
+  &:active {
+    transform: translateY(3px);
+    box-shadow: var(--dg-shadow-btn-pressed);
+  }
+}
+
+@utility dg-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0 1.125rem;
+  border: 1px solid var(--dg-rim-control);
+  border-radius: var(--dg-radius-control);
+  color: #e0e7ff;
+  text-decoration: none;
+  background: var(--dg-gradient-ghost);
+  box-shadow: var(--dg-shadow-ghost);
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1px 0 rgba(14, 8, 44, 0.9);
+  }
+}
+
+@utility dg-nav-active {
+  color: #ffffff;
+  background: var(--dg-gradient-nav-active);
+  border: 1px solid var(--dg-rim-active);
+  box-shadow: var(--dg-shadow-nav-active);
+}
+
+@utility dg-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3125rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  color: #d9ccff;
+  background: rgba(106, 71, 230, 0.2);
+  border: 1px solid rgba(183, 156, 255, 0.34);
+}
+
+@utility dg-icon-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--dg-radius-control);
+  color: #e4daff;
+  background: var(--dg-gradient-icon);
+  border: 1px solid var(--dg-rim-active);
+  box-shadow: var(--dg-shadow-icon);
+}
+
+@utility dg-orb {
+  border-radius: 50%;
+  color: #ffffff;
+  background: var(--dg-gradient-orb);
+  box-shadow: var(--dg-shadow-orb);
+}
+
+@utility dg-input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+  border-radius: var(--dg-radius-control);
+  font: inherit;
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(196, 170, 255, 0.3);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
+
+  &:focus-visible {
+    border-color: rgba(214, 180, 255, 0.6);
+    box-shadow: 0 0 0 4px rgba(124, 92, 255, 0.18), 0 0 22px rgba(124, 92, 255, 0.2);
+  }
+
+  &[aria-invalid="true"] {
+    border-color: rgba(244, 114, 182, 0.6);
+    background: rgba(244, 114, 182, 0.06);
+  }
+}
+
+@utility dg-code {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 1rem;
+  border-radius: var(--dg-radius-item);
+  font-family: var(--font-code);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: #bfd0ff;
+  background: rgba(4, 4, 20, 0.78);
+  border: 1px solid rgba(196, 170, 255, 0.18);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+@utility dg-text-gradient {
+  background: var(--dg-gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+
+@utility dg-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--dg-label);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dg-btn,
+  .dg-btn-ghost {
+    transition: none;
+  }
+}

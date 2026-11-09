@@ -6,7 +6,7 @@
 import type { ViewBlock } from '../scripts/research-types'
 
 const markUrl = '/media/example-mark.svg'
-const panel = 'mb-4 border border-rule bg-paper px-4 py-3'
+const panel = 'dg-item mb-4 px-4 py-3'
 
 export function BlockList({ blocks }: { blocks: ViewBlock[] }) {
   return (
@@ -97,7 +97,7 @@ function BlockView({ block }: { block: ViewBlock }) {
     return (
       <>
         <p className="mb-4 text-quiet">언어 {block.language}. 파일명이 아직 없다.</p>
-        <pre className="code-block mb-4 border border-rule bg-paper p-3">
+        <pre className="code-block dg-code mb-4">
           <code>{block.text}</code>
         </pre>
       </>
@@ -107,7 +107,7 @@ function BlockView({ block }: { block: ViewBlock }) {
     return (
       <>
         <p className="mb-4 text-quiet">수식은 실행하지 않는다.</p>
-        <pre className="math-block mb-4 border border-rule bg-paper p-3">
+        <pre className="math-block dg-code mb-4">
           <code>{block.tex}</code>
         </pre>
       </>

@@ -4,6 +4,7 @@
  * 사용처: /admin/entries.
  */
 import { useEffect, useState, type FormEvent } from 'react'
+import { AdminFrame } from '../AdminFrame'
 import { clearOwnerSession, readCsrf } from '../session'
 
 type EntryRow = {
@@ -96,66 +97,56 @@ export default function EntryList() {
     }
   }
 
-  async function onLogout() {
-    await fetch('/api/admin/session', {
-      method: 'DELETE',
-      credentials: 'include',
-      headers: { 'x-csrf-token': csrf },
-    })
-    clearOwnerSession()
-    window.location.assign('/admin/login')
-  }
-
   if (!csrf) {
     return (
-      <main>
-        <h1>게시물</h1>
-        <p role="alert">로그인이 필요하다.</p>
+      <AdminFrame title="게시물 관리">
+        <p className="dg-item px-4 py-3" role="alert">로그인이 필요하다.</p>
         <p>
-          <a href="/admin/login">소유자 로그인</a>
+          <a className="dg-btn" href="/admin/login">소유자 로그인</a>
         </p>
-      </main>
+      </AdminFrame>
     )
   }
 
   return (
-    <main>
-      <h1>게시물</h1>
-      <button type="button" onClick={onLogout}>
-        로그아웃
-      </button>
-      <form onSubmit={onCreate}>
+    <AdminFrame title="게시물 관리">
+      <p className="dg-label mb-4">제목 · 종류 · 초안/공개 · 수정일</p>
+      <form className="dg-panel mb-4 grid gap-3 p-5" onSubmit={onCreate}>
         <label htmlFor="entry-title">제목</label>
-        <input id="entry-title" value={title} onChange={(event) => setTitle(event.target.value)} />
+        <input className="dg-input" id="entry-title" value={title} onChange={(event) => setTitle(event.target.value)} />
         <label htmlFor="entry-slug">슬러그</label>
-        <input id="entry-slug" value={slug} onChange={(event) => setSlug(event.target.value)} />
+        <input className="dg-input" id="entry-slug" value={slug} onChange={(event) => setSlug(event.target.value)} />
         <label htmlFor="entry-kind">종류</label>
-        <select id="entry-kind" value={kind} onChange={(event) => setKind(event.target.value)}>
+        <select className="dg-input" id="entry-kind" value={kind} onChange={(event) => setKind(event.target.value)}>
           <option value="note">노트</option>
           <option value="paper">논문</option>
           <option value="news">소식</option>
           <option value="log">프로젝트 로그</option>
         </select>
-        <button type="submit" disabled={pending}>
-          작성하기
+        <button className="dg-btn" type="submit" disabled={pending}>
+          새 항목
         </button>
       </form>
-      {message ? <p role="alert">{message}</p> : null}
-      {entries === null ? <p>목록을 불러오는 중이다.</p> : null}
-      {entries && entries.length === 0 ? <p>글이 없다.</p> : null}
+      {message ? <p className="dg-item px-4 py-3" role="alert">{message}</p> : null}
+      {entries === null && !message ? <p>목록을 불러오는 중이다.</p> : null}
+      {entries && entries.length === 0 ? <p className="dg-item px-4 py-3">글이 없다.</p> : null}
       {entries && entries.length > 0 ? (
-        <ul>
+        <ul className="m-0 grid list-none gap-3 p-0">
           {entries.map((entry) => (
-            <li key={entry.id}>
+            <li key={entry.id} className="dg-item flex flex-wrap items-center justify-between gap-3 px-4 py-3">
               <a href={`/admin/entries/${entry.id}/edit`}>{entry.title}</a>
-              <span>
-                {' '}
-                {entry.kind} · {entry.published ? '공개 수정본 있음' : '초안'} · {entry.updatedAt}
+              <span className="dg-chip">
+                {{ note: '노트', paper: '논문 리뷰', news: '뉴스 정리', log: '과정 기록' }[entry.kind] ?? entry.kind}
+                {' · '}
+                {entry.published ? '공개' : '초안'}
+                {' · '}
+                {entry.updatedAt}
+                {' · 편집'}
               </span>
             </li>
           ))}
         </ul>
       ) : null}
-    </main>
+    </AdminFrame>
   )
 }

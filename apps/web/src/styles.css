@@ -1,36 +1,13 @@
 /*
  * 개념: 공개 웹의 Tailwind 테마와 공통 배치.
- * 목적: 기존 색 토큰을 유틸리티로 쓰고, 좁은 화면의 표와 코드가 페이지 안에서만 스크롤되게 한다.
+ * 목적: 자수정 글래스 테마(theme.css)를 유틸리티로 쓰고, 좁은 화면의 표와 코드가 페이지 안에서만 스크롤되게 한다.
  * 사용처: apps/web/src/boot.ts 가 빌드에 포함하고, 정적 HTML은 이 결과를 style로 넣는다.
+ * 색·그림자·dg-* 조합 클래스는 packages/design-tokens/theme.css 에서 정한다.
  */
 @import "tailwindcss";
-@import "@datagrizzly/design-tokens/tokens.css";
-
-@theme inline {
-  --color-canvas: var(--color-bg);
-  --color-paper: var(--color-surface);
-  --color-ink: var(--color-text);
-  --color-quiet: var(--color-muted);
-  --color-rule: var(--color-line);
-  --color-mark: var(--color-accent);
-  --color-ring: var(--color-focus);
-  --font-sans: var(--font-body);
-}
+@import "@datagrizzly/design-tokens/theme.css";
 
 @layer base {
-  html {
-    background: var(--color-bg);
-  }
-
-  body {
-    margin: 0;
-    color: var(--color-text);
-    background: var(--color-bg);
-    font-family: var(--font-body);
-    font-size: var(--font-size-body);
-    line-height: var(--line-height-body);
-  }
-
   h1,
   h2,
   h3,
@@ -38,6 +15,13 @@
   a,
   li {
     overflow-wrap: anywhere;
+  }
+
+  h1,
+  h2,
+  h3 {
+    color: var(--dg-ink-strong);
+    letter-spacing: -0.02em;
   }
 
   img,
@@ -58,9 +42,55 @@
     white-space: pre;
   }
 
+  .code-block {
+    padding: 1rem;
+    border-radius: var(--dg-radius-item);
+    font-family: var(--font-code);
+    font-size: 0.875rem;
+    color: #bfd0ff;
+    background: rgba(4, 4, 20, 0.78);
+    border: 1px solid rgba(196, 170, 255, 0.18);
+  }
+
+  .site-nav a,
+  .site-nav li,
+  .keep-ko {
+    overflow-wrap: normal;
+    word-break: keep-all;
+  }
+
+  .site-nav a,
+  .site-nav li {
+    white-space: nowrap;
+  }
+
   .site-nav a[aria-current='page'],
   .project-tabs a[aria-current='page'] {
-    text-decoration: underline;
-    text-underline-offset: 0.35rem;
+    border-radius: var(--dg-radius-control);
+    color: #ffffff;
+    background: var(--dg-gradient-nav-active);
+    box-shadow: var(--dg-shadow-nav-active);
+    text-decoration: none;
+  }
+
+  .project-tabs a {
+    border-radius: var(--dg-radius-control);
+    padding: 0.375rem 0.75rem;
+  }
+}
+
+/* 닫힌 details는 내용 너비를 0으로 계산한다. 넓은 화면에서는 내용 칸을 펼쳐 메뉴가 헤더 안에 남게 한다. */
+@media (min-width: 48rem) {
+  #site-menu {
+    display: flex;
+    flex: none;
+    align-items: center;
+    width: max-content;
+    max-width: 100%;
+  }
+
+  #site-menu::details-content {
+    display: block;
+    width: max-content;
   }
 }

@@ -54,3 +54,12 @@ PNG64개는기존디자인참고로보존합니다. P12질문패널·A11모델�
 ## v5.0 자료 워크플로 반영
 
 기존 PNG 64개는 보존합니다. v5 신규 관리자 화면 [[A13]]~[[A15]]는 명세만 추가했으며 새 이미지 파일은 아직 없습니다.
+
+## 자수정 글래스 리디자인 (ui_neon)
+
+- ui_neon/: 공개15개+관리자12개 =27개 PNG, 원본과 같은 번호(P01~P15, A01~A12). 폭 1440, 관리자는 1440×1040, 공개 화면 중 내용이 긴 6개(P01·P02·P04·P06·P08·P12)는 세로가 더 길다.
+- ui_neon/mobile/: 모바일6개 PNG(MB01~MB06), 390×844.
+- ui_neon/ui_neon_overview.png, ui_neon/mobile_neon_overview.png: 모아 보기 이미지2개.
+- 색·그림자·모양 값은 packages/design-tokens/tokens.css, Tailwind 연결과 dg-* 클래스는 packages/design-tokens/theme.css 에 있다.
+- 기존 wireframes/, ui/, mobile/ PNG는 그대로 보존한다. P12·A11·MB04는 v5.0 기준에 맞춰 질문 패널과 모델 상태 없이 검색 전용으로 그렸다.
+- 캐릭터 이미지(연구원 가운 불곰)는 P01·P02·P15·A01·A12에 쓰였다.

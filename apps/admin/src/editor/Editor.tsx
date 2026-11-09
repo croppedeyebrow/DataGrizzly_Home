@@ -4,6 +4,7 @@
  * 사용처: /admin/entries/{id}/edit.
  */
 import { useEffect, useState } from 'react'
+import { AdminFrame } from '../AdminFrame'
 import { clearOwnerSession, draftKey, readCsrf } from '../session'
 import { canAutosave, reduceSave, type SaveState } from './autosave'
 import { blankBlock, blockLines, type Block, type EntryDocument } from './blocks'
@@ -211,49 +212,43 @@ export default function Editor({ entryId }: { entryId: string }) {
 
   if (!csrf) {
     return (
-      <main>
-        <h1>블록 편집</h1>
-        <p role="alert">로그인이 필요하다.</p>
+      <AdminFrame title="블록 편집기">
+        <p className="dg-item px-4 py-3" role="alert">로그인이 필요하다.</p>
         <p>
-          <a href="/admin/login">소유자 로그인</a>
+          <a className="dg-btn" href="/admin/login">소유자 로그인</a>
         </p>
-      </main>
+      </AdminFrame>
     )
   }
   if (loadError) {
     return (
-      <main>
-        <h1>블록 편집</h1>
-        <p role="alert">{loadError}</p>
+      <AdminFrame title="블록 편집기">
+        <p className="dg-item px-4 py-3" role="alert">{loadError}</p>
         <p>
           <a href="/admin/entries">게시물 목록</a>
         </p>
-      </main>
+      </AdminFrame>
     )
   }
   if (!entry) {
     return (
-      <main>
-        <h1>블록 편집</h1>
+      <AdminFrame title="블록 편집기">
         <p>글을 불러오는 중이다.</p>
-      </main>
+      </AdminFrame>
     )
   }
 
   return (
-    <main>
-      <p>
-        <a href="/admin/entries">게시물 목록</a>
-      </p>
-      <h1>블록 편집</h1>
-      <p>{statusText(saveState.status)}</p>
+    <AdminFrame title="블록 편집기">
+      <p className="dg-chip mb-4">{statusText(saveState.status)}</p>
       <p>
         종류 {entry.kind}. 주제는 아직 없다. 연결된 프로젝트는 {entry.projectId ?? '없다'}. 공개 수정본은{' '}
         {entry.publishedRevisionId ? '있다' : '없다'}.
       </p>
-      <label htmlFor="draft-title">제목</label>
+      <label htmlFor="draft-title">글 제목을 입력하세요</label>
       <input
         id="draft-title"
+        placeholder="글 제목을 입력하세요"
         value={title}
         onChange={(event) => {
           setTitle(event.target.value)
@@ -279,7 +274,7 @@ export default function Editor({ entryId }: { entryId: string }) {
           />
         ))}
       </section>
-      <label htmlFor="block-type">블록 추가</label>
+      <label htmlFor="block-type">+ 블록 추가</label>
       <select
         id="block-type"
         defaultValue="paragraph"
@@ -299,8 +294,8 @@ export default function Editor({ entryId }: { entryId: string }) {
         <option value="callout">콜아웃</option>
         <option value="related">관련 글</option>
       </select>
-      <button type="button" onClick={() => void sendDraft('explicit')} disabled={saveState.status === 'saving' || saveState.status === 'conflict'}>
-        저장
+      <button className="dg-btn" type="button" onClick={() => void sendDraft('explicit')} disabled={saveState.status === 'saving' || saveState.status === 'conflict'}>
+        초안 저장
       </button>
       {saveState.status === 'conflict' ? (
         <section>
@@ -311,16 +306,16 @@ export default function Editor({ entryId }: { entryId: string }) {
               <li key={line}>{line}</li>
             ))}
           </ul>
-          <button type="button" onClick={acceptConflict}>
+          <button className="dg-btn" type="button" onClick={acceptConflict}>
             서버 버전을 기준으로 내 내용을 저장할 준비
           </button>
-          <button type="button" onClick={restoreServer}>
+          <button className="dg-btn-ghost" type="button" onClick={restoreServer}>
             서버 저장본으로 되돌리기
           </button>
         </section>
       ) : null}
-      {message ? <p role="alert">{message}</p> : null}
-    </main>
+      {message ? <p className="dg-item mt-4 px-4 py-3" role="alert">{message}</p> : null}
+    </AdminFrame>
   )
 }
 
@@ -343,7 +338,7 @@ function BlockEditor({
     return typeof block[key] === 'string' ? String(block[key]) : ''
   }
   return (
-    <fieldset>
+    <fieldset className="dg-item">
       <legend>{type}</legend>
       {type === 'paragraph' || type === 'quote' || type === 'callout' || type === 'code' || type === 'math' ? (
         <textarea
@@ -475,7 +470,7 @@ function tableFrom(value: string): { header: string[]; rows: string[][] } {
  */
 function statusText(status: SaveState['status']): string {
   if (status === 'saving') return '저장 중이다.'
-  if (status === 'saved') return '저장되었다.'
+  if (status === 'saved') return '저장 완료 · 공개본은 변경되지 않았습니다'
   if (status === 'failed') return '저장에 실패했다.'
   if (status === 'conflict') return '저장이 충돌했다.'
   if (status === 'invalid') return '형식이 맞지 않아 저장하지 않았다.'
