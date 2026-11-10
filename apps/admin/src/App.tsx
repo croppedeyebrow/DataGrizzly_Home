@@ -6,8 +6,18 @@
 import Editor from './editor/Editor'
 import EntryList from './entries/EntryList'
 import Login from './Login'
+import MediaLibrary from './media/MediaLibrary'
+import { ProjectEditor, ProjectList } from './projects/Projects'
+import Taxonomies from './taxonomies/Taxonomies'
 
-type AdminRoute = { name: 'login' } | { name: 'entries' } | { name: 'edit'; id: string }
+type AdminRoute =
+  | { name: 'login' }
+  | { name: 'entries' }
+  | { name: 'edit'; id: string }
+  | { name: 'projects' }
+  | { name: 'project'; id: string }
+  | { name: 'taxonomies' }
+  | { name: 'media' }
 
 /**
  * 개념: 주소에서 관리 화면을 고른다.
@@ -19,6 +29,11 @@ function parseRoute(pathname: string): AdminRoute {
   if (path === '/admin/entries') return { name: 'entries' }
   const edit = /^\/admin\/entries\/([0-9a-f-]{36})\/edit$/.exec(path)
   if (edit) return { name: 'edit', id: edit[1] }
+  if (path === '/admin/projects') return { name: 'projects' }
+  const project = /^\/admin\/projects\/([0-9a-f-]{36})$/.exec(path)
+  if (project) return { name: 'project', id: project[1] }
+  if (path === '/admin/taxonomies') return { name: 'taxonomies' }
+  if (path === '/admin/media') return { name: 'media' }
   return { name: 'login' }
 }
 
@@ -31,5 +46,9 @@ export default function App() {
   const route = parseRoute(window.location.pathname)
   if (route.name === 'entries') return <EntryList />
   if (route.name === 'edit') return <Editor entryId={route.id} />
+  if (route.name === 'projects') return <ProjectList />
+  if (route.name === 'project') return <ProjectEditor projectId={route.id} />
+  if (route.name === 'taxonomies') return <Taxonomies />
+  if (route.name === 'media') return <MediaLibrary />
   return <Login />
 }

@@ -4,8 +4,12 @@
 
 mod admin;
 mod auth;
+mod catalog;
 mod content;
 mod db;
+mod media;
+mod project;
+mod taxonomy;
 
 use axum::extract::State;
 use axum::http::StatusCode;
@@ -23,6 +27,7 @@ pub fn app(pool: PgPool) -> Router {
         .route("/actuator/health", get(health))
         .route("/api/status", get(status))
         .merge(admin::router())
+        .merge(catalog::router())
         .fallback(not_found)
         .with_state(pool)
 }

@@ -36,9 +36,9 @@ struct CreateEntry {
     kind: String,
 }
 
-struct Principal {
-    session_id: Uuid,
-    owner_id: Uuid,
+pub(crate) struct Principal {
+    pub(crate) session_id: Uuid,
+    pub(crate) owner_id: Uuid,
 }
 
 #[derive(sqlx::FromRow)]
@@ -444,7 +444,7 @@ async fn issue_session(pool: &PgPool, owner_id: Uuid) -> Result<(String, String)
     Ok((token, csrf))
 }
 
-async fn authorize(pool: &PgPool, headers: &HeaderMap) -> Result<Principal, Response> {
+pub(crate) async fn authorize(pool: &PgPool, headers: &HeaderMap) -> Result<Principal, Response> {
     let Some(token) = cookie_value(
         headers.get("cookie").and_then(|value| value.to_str().ok()),
         "dg_session",
@@ -486,7 +486,7 @@ async fn authorize(pool: &PgPool, headers: &HeaderMap) -> Result<Principal, Resp
     })
 }
 
-async fn audit(pool: &PgPool, owner_id: Option<Uuid>, action: &str) -> Result<(), sqlx::Error> {
+pub(crate) async fn audit(pool: &PgPool, owner_id: Option<Uuid>, action: &str) -> Result<(), sqlx::Error> {
     sqlx::query("INSERT INTO audit_event (owner_id, action) VALUES ($1, $2)")
         .bind(owner_id)
         .bind(action)
@@ -495,7 +495,7 @@ async fn audit(pool: &PgPool, owner_id: Option<Uuid>, action: &str) -> Result<()
         .map(|_| ())
 }
 
-fn valid_slug(slug: &str) -> bool {
+pub(crate) fn valid_slug(slug: &str) -> bool {
     let bytes = slug.as_bytes();
     if bytes.is_empty() || bytes.len() > 80 || bytes[0] == b'-' || bytes[bytes.len() - 1] == b'-' {
         return false;
@@ -511,7 +511,7 @@ fn valid_slug(slug: &str) -> bool {
     true
 }
 
-fn is_unique(error: &sqlx::Error) -> bool {
+pub(crate) fn is_unique(error: &sqlx::Error) -> bool {
     error
         .as_database_error()
         .and_then(|database| database.code())
@@ -522,7 +522,7 @@ fn json_string(value: &str) -> String {
     serde_json::to_string(value).unwrap_or_else(|_| "\"\"".to_string())
 }
 
-fn json_response(status: StatusCode, body: String, cookie: Option<String>) -> Response {
+pub(crate) fn json_response(status: StatusCode, body: String, cookie: Option<String>) -> Response {
     let mut builder = Response::builder()
         .status(status)
         .header("content-type", "application/json; charset=utf-8");
@@ -532,7 +532,7 @@ fn json_response(status: StatusCode, body: String, cookie: Option<String>) -> Re
     builder.body(Body::from(body)).expect("response body")
 }
 
-fn unauthorized() -> Response {
+pub(crate) fn unauthorized() -> Response {
     json_response(
         StatusCode::UNAUTHORIZED,
         r#"{"error":"unauthorized"}"#.to_string(),
@@ -540,7 +540,7 @@ fn unauthorized() -> Response {
     )
 }
 
-fn forbidden() -> Response {
+pub(crate) fn forbidden() -> Response {
     json_response(
         StatusCode::FORBIDDEN,
         r#"{"error":"forbidden"}"#.to_string(),
@@ -548,7 +548,7 @@ fn forbidden() -> Response {
     )
 }
 
-fn not_found() -> Response {
+pub(crate) fn not_found() -> Response {
     json_response(
         StatusCode::NOT_FOUND,
         r#"{"error":"not_found"}"#.to_string(),
@@ -556,7 +556,7 @@ fn not_found() -> Response {
     )
 }
 
-fn invalid() -> Response {
+pub(crate) fn invalid() -> Response {
     json_response(
         StatusCode::UNPROCESSABLE_ENTITY,
         r#"{"error":"invalid"}"#.to_string(),
@@ -564,7 +564,7 @@ fn invalid() -> Response {
     )
 }
 
-fn conflict() -> Response {
+pub(crate) fn conflict() -> Response {
     json_response(
         StatusCode::CONFLICT,
         r#"{"error":"conflict"}"#.to_string(),
@@ -572,7 +572,7 @@ fn conflict() -> Response {
     )
 }
 
-fn unavailable() -> Response {
+pub(crate) fn unavailable() -> Response {
     json_response(
         StatusCode::SERVICE_UNAVAILABLE,
         r#"{"error":"unavailable"}"#.to_string(),
@@ -635,6 +635,11 @@ mod tests {
         assert_eq!(name, "datagrizzly_m2");
         crate::db::migrate(&pool).await.expect("isolated migration");
         for table in [
+            "revision_media",
+            "series_entry",
+            "entry_taxonomy",
+            "media",
+            "taxonomy",
             "project_log",
             "revision",
             "entry",
