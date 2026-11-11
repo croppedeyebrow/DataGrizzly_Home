@@ -16,6 +16,7 @@ type LoadedEntry = {
   kind: string
   version: number
   projectId: string | null
+  draftRevisionId: string | null
   publishedRevisionId: string | null
   document: EntryDocument | null
 }
@@ -49,6 +50,7 @@ export default function Editor({ entryId }: { entryId: string }) {
   const [saveState, setSaveState] = useState<SaveState>(INITIAL_SAVE)
   const [serverCopy, setServerCopy] = useState<LocalDraft | null>(null)
   const [message, setMessage] = useState('')
+  const [publishNote, setPublishNote] = useState('')
   const [loadError, setLoadError] = useState('')
 
   useEffect(() => {
@@ -167,8 +169,11 @@ export default function Editor({ entryId }: { entryId: string }) {
         setMessage('저장하지 못했다. 입력은 그대로 두었다.')
         return
       }
-      const body = (await response.json()) as { version?: number }
+      const body = (await response.json()) as { version?: number; draftRevisionId?: string }
       const version = body.version ?? saveState.expectedVersion
+      if (body.draftRevisionId) {
+        setEntry((current) => (current ? { ...current, draftRevisionId: body.draftRevisionId ?? null, version } : current))
+      }
       setSaveState((current) => reduceSave(current, { type: 'saved', generation, version }))
       setSaveState((current) => {
         if (current.status === 'saved' && current.generation === generation) {
@@ -238,14 +243,55 @@ export default function Editor({ entryId }: { entryId: string }) {
     )
   }
 
+  // 저장이 끝난 초안만 접수한다. 같은 수정본의 반복 클릭은 같은 키를 다시 보낸다.
+  async function onAccept() {
+    if (!entry?.draftRevisionId || saveState.status !== 'saved') return
+    const storageKey = `dg-publish:${entry.id}:${entry.draftRevisionId}`
+    let key = sessionStorage.getItem(storageKey) ?? ''
+    if (!/^[A-Za-z0-9._:-]{8,80}$/.test(key)) {
+      key = `edit.${crypto.randomUUID()}`
+      sessionStorage.setItem(storageKey, key)
+    }
+    setPublishNote('')
+    try {
+      const response = await fetch(`/api/admin/entries/${entry.id}/publications`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'content-type': 'application/json', 'x-csrf-token': csrf },
+        body: JSON.stringify({ schemaVersion: 1, revisionId: entry.draftRevisionId, idempotencyKey: key }),
+      })
+      if (response.status === 202) {
+        setPublishNote('접수했다. 공개본은 바뀌지 않았다.')
+        return
+      }
+      if (response.status === 409) {
+        setPublishNote('같은 접수 키에 다른 수정본이 있다.')
+        return
+      }
+      setPublishNote('발행 작업으로 접수하지 못했다.')
+    } catch {
+      setPublishNote('서버에 연결하지 못했다.')
+    }
+  }
+
   return (
     <AdminFrame title="블록 편집기">
       <p className="dg-chip mb-4">{statusText(saveState.status)}</p>
-      {/* 글을 불러온 뒤에만 미리보기와 이력으로 이동한다. 발행 버튼은 여기 두지 않는다. */}
+      {/* 글을 불러온 뒤에만 미리보기, 이력, 발행 접수로 이동한다. 접수는 공개 완료가 아니다. */}
       <p className="mb-4 flex flex-wrap gap-2">
         <a className="dg-btn-ghost" href={`/admin/entries/${entry.id}/preview`}>미리보기</a>
         <a className="dg-btn-ghost" href={`/admin/entries/${entry.id}/revisions`}>수정 이력</a>
+        <button className="dg-btn" type="button" onClick={() => void onAccept()} disabled={saveState.status !== 'saved' || !entry.draftRevisionId}>
+          이 초안을 발행 작업으로 접수
+        </button>
       </p>
+      {saveState.status !== 'saved' ? <p className="text-sm text-quiet">저장되지 않은 편집은 접수하지 않는다.</p> : null}
+      {publishNote ? (
+        <p className="dg-item mb-4 px-4 py-3" role="status">
+          {publishNote}{' '}
+          <a href="/admin/publications">발행 작업 보기</a>
+        </p>
+      ) : null}
       <p>
         종류 {entry.kind}. 주제는 아직 없다. 연결된 프로젝트는 {entry.projectId ?? '없다'}. 공개 수정본은{' '}
         {entry.publishedRevisionId ? '있다' : '없다'}.

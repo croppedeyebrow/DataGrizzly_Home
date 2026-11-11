@@ -1,6 +1,6 @@
 /**
  * 개념: 관리자 화면의 경로 선택.
- * 목적: 로그인, 글 목록, 블록 편집, 초안 미리보기, 수정 이력을 각각의 주소에 연결한다.
+ * 목적: 로그인, 글 목록, 블록 편집, 초안 미리보기, 수정 이력, 발행 작업을 각각의 주소에 연결한다.
  * 사용처: apps/admin/src/main.tsx.
  */
 import Editor from './editor/Editor'
@@ -8,6 +8,7 @@ import EntryList from './entries/EntryList'
 import Login from './Login'
 import MediaLibrary from './media/MediaLibrary'
 import Preview from './preview/Preview'
+import Publications from './publications/Publications'
 import { ProjectEditor, ProjectList } from './projects/Projects'
 import Revisions from './revisions/Revisions'
 import Taxonomies from './taxonomies/Taxonomies'
@@ -22,6 +23,7 @@ type AdminRoute =
   | { name: 'project'; id: string }
   | { name: 'taxonomies' }
   | { name: 'media' }
+  | { name: 'publications' }
 
 /**
  * 개념: 주소에서 관리 화면을 고른다.
@@ -43,6 +45,7 @@ function parseRoute(pathname: string): AdminRoute {
   if (project) return { name: 'project', id: project[1] }
   if (path === '/admin/taxonomies') return { name: 'taxonomies' }
   if (path === '/admin/media') return { name: 'media' }
+  if (path === '/admin/publications') return { name: 'publications' }
   return { name: 'login' }
 }
 
@@ -62,5 +65,6 @@ export default function App() {
   if (route.name === 'project') return <ProjectEditor projectId={route.id} />
   if (route.name === 'taxonomies') return <Taxonomies />
   if (route.name === 'media') return <MediaLibrary />
+  if (route.name === 'publications') return <Publications />
   return <Login />
 }

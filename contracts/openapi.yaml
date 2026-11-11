@@ -392,9 +392,14 @@ components:
         schemaVersion:
           const: 1
         state:
-          enum: [queued, running, succeeded, failed]
+          enum: [queued, building, deploying, succeeded, failed, canceled]
         releaseId:
           $ref: ./content.schema.json#/$defs/uuid
+        failureCode:
+          type: string
+          minLength: 1
+          maxLength: 40
+          pattern: "^[a-z0-9_]+$"
         error:
           $ref: "#/components/schemas/Error"
     SearchResult:

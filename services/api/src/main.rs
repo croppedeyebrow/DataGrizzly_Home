@@ -9,6 +9,7 @@ mod content;
 mod db;
 mod media;
 mod project;
+mod publication;
 mod revisions;
 mod taxonomy;
 
@@ -31,6 +32,8 @@ pub fn app(pool: PgPool) -> Router {
         .merge(catalog::router())
         // 초안 미리보기, 수정 이력, 새 초안 복원.
         .merge(revisions::router())
+        // 발행 접수, 작업 목록, 임대 회수. 공개 파일 배포는 여기서 하지 않는다.
+        .merge(publication::router())
         .fallback(not_found)
         .with_state(pool)
 }

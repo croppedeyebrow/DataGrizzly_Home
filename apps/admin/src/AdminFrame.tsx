@@ -6,18 +6,19 @@
 import type { ReactNode } from 'react'
 import { clearOwnerSession, readCsrf } from './session'
 
-type AdminSection = 'entries' | 'projects' | 'taxonomies' | 'media'
+type AdminSection = 'entries' | 'projects' | 'taxonomies' | 'media' | 'publications'
 
 const links: { id: AdminSection; href: string; label: string }[] = [
   { id: 'entries', href: '/admin/entries', label: '게시물' },
   { id: 'projects', href: '/admin/projects', label: '프로젝트' },
   { id: 'taxonomies', href: '/admin/taxonomies', label: '분류 · 시리즈' },
   { id: 'media', href: '/admin/media', label: '미디어' },
+  { id: 'publications', href: '/admin/publications', label: '발행 작업' },
 ]
 
 /**
  * 개념: 왼쪽 메뉴와 본문.
- * 목적: 이번 태스크에서 동작하는 메뉴만 이동하게 하고, 아직 없는 화면은 글자로만 둔다.
+ * 목적: 동작하는 메뉴만 이동하게 하고, 아직 없는 화면은 글자로만 둔다.
  * 사용처: 게시물, 프로젝트, 분류, 미디어, 블록 편집.
  */
 export function AdminFrame({
@@ -71,7 +72,6 @@ export function AdminFrame({
             {item.label}
           </a>
         ))}
-        <span className="px-3 py-2 text-sm text-quiet">발행 작업</span>
         <span className="px-3 py-2 text-sm text-quiet">검색 상태</span>
         <span className="px-3 py-2 text-sm text-quiet">사이트 설정</span>
         {csrf ? (
