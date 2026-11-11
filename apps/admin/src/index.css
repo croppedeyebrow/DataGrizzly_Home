@@ -59,4 +59,31 @@
   ul {
     padding-left: 1.2rem;
   }
+
+  /*
+   * 개념: 공개 페이지와 같은 코드·수식·표 가로 스크롤.
+   * 목적: 관리자 미리보기가 공개 BlockList를 써도 긴 코드가 칸 밖으로 넘치지 않게 한다.
+   * 사용처: apps/web/src/site/blocks.tsx 를 관리자에서 그릴 때.
+   */
+  .table-scroll,
+  .code-block,
+  .math-block {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .code-block,
+  .math-block {
+    white-space: pre;
+  }
+
+  .code-block {
+    padding: 1rem;
+    border-radius: var(--dg-radius-item);
+    font-family: var(--font-code);
+    font-size: 0.875rem;
+    color: #bfd0ff;
+    background: rgba(4, 4, 20, 0.78);
+    border: 1px solid rgba(196, 170, 255, 0.18);
+  }
 }

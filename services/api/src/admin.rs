@@ -233,7 +233,7 @@ async fn create_entry(State(pool): State<PgPool>, headers: HeaderMap, body: Stri
         return invalid();
     }
 
-    let id = match insert_entry(&pool, &input.slug, title, &input.kind).await {
+    let id = match insert_entry(&pool, &input.slug, title, &input.kind, principal.owner_id).await {
         Ok(id) => id,
         Err(response) => return response,
     };
@@ -246,9 +246,9 @@ async fn create_entry(State(pool): State<PgPool>, headers: HeaderMap, body: Stri
 }
 
 /// 개념: 글과 첫 수정본을 함께 만든다.
-/// 목적: 빈 객체가 아니라 schemaVersion 1 문서를 초안으로 연결한다.
+/// 목적: 빈 객체가 아니라 schemaVersion 1 문서를 초안으로 연결한다. 첫 수정본의 작성자는 글을 만든 소유자다.
 /// 사용처: `create_entry`.
-async fn insert_entry(pool: &PgPool, slug: &str, title: &str, kind: &str) -> Result<Uuid, Response> {
+async fn insert_entry(pool: &PgPool, slug: &str, title: &str, kind: &str, owner_id: Uuid) -> Result<Uuid, Response> {
     let revision_id = Uuid::new_v4();
     let entry_id = Uuid::new_v4();
     let document = content::revision_document(
@@ -273,10 +273,12 @@ async fn insert_entry(pool: &PgPool, slug: &str, title: &str, kind: &str) -> Res
             .execute(tx.as_mut())
             .await
             .map_err(|error| if is_unique(&error) { conflict() } else { unavailable() })?;
-        sqlx::query("INSERT INTO revision (id, entry_id, version, body) VALUES ($1, $2, 1, $3::jsonb)")
+        // created_by는 이 글을 만든 소유자다. 표시 이름은 없고 이력에는 '소유자'로 나온다.
+        sqlx::query("INSERT INTO revision (id, entry_id, version, body, created_by) VALUES ($1, $2, 1, $3::jsonb, $4)")
             .bind(revision_id)
             .bind(entry_id)
             .bind(&body)
+            .bind(owner_id)
             .execute(tx.as_mut())
             .await
             .map_err(|_| unavailable())?;
@@ -304,12 +306,13 @@ async fn insert_entry(pool: &PgPool, slug: &str, title: &str, kind: &str) -> Res
 }
 
 /// 개념: 초안 저장.
-/// 목적: expectedVersion이 현재 버전과 같을 때만 새 수정본을 남긴다.
+/// 목적: expectedVersion이 현재 버전과 같을 때만 새 수정본을 남긴다. 작성자는 로그인한 소유자고, 공개 포인터는 바꾸지 않는다.
 /// 사용처: PUT /api/admin/entries/{id}.
 async fn save_entry(State(pool): State<PgPool>, headers: HeaderMap, Path(id): Path<String>, body: String) -> Response {
-    if let Err(response) = authorize(&pool, &headers).await {
-        return response;
-    }
+    let principal = match authorize(&pool, &headers).await {
+        Ok(principal) => principal,
+        Err(response) => return response,
+    };
     let Ok(id) = Uuid::parse_str(&id) else {
         return not_found();
     };
@@ -343,8 +346,8 @@ async fn save_entry(State(pool): State<PgPool>, headers: HeaderMap, Path(id): Pa
             SELECT id, version FROM entry WHERE id = $2 FOR UPDATE
          ),
          inserted AS (
-            INSERT INTO revision (id, entry_id, version, body)
-            SELECT $1, id, version + 1, $4::jsonb
+            INSERT INTO revision (id, entry_id, version, body, created_by)
+            SELECT $1, id, version + 1, $4::jsonb, $7 -- $7은 저장한 소유자. 공개 포인터는 이 저장에서 바꾸지 않는다.
             FROM locked
             WHERE version = $3
             RETURNING id, entry_id, version
@@ -372,6 +375,7 @@ async fn save_entry(State(pool): State<PgPool>, headers: HeaderMap, Path(id): Pa
     .bind(document.to_string())
     .bind(&input.title)
     .bind(&input.summary)
+    .bind(principal.owner_id)
     .fetch_one(&pool)
     .await;
     let Ok((entry_id, current_version, saved_version, draft_id)) = saved else {

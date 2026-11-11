@@ -1,19 +1,23 @@
 /**
  * 개념: 관리자 화면의 경로 선택.
- * 목적: 로그인, 글 목록, 블록 편집을 각각의 주소에 연결한다.
+ * 목적: 로그인, 글 목록, 블록 편집, 초안 미리보기, 수정 이력을 각각의 주소에 연결한다.
  * 사용처: apps/admin/src/main.tsx.
  */
 import Editor from './editor/Editor'
 import EntryList from './entries/EntryList'
 import Login from './Login'
 import MediaLibrary from './media/MediaLibrary'
+import Preview from './preview/Preview'
 import { ProjectEditor, ProjectList } from './projects/Projects'
+import Revisions from './revisions/Revisions'
 import Taxonomies from './taxonomies/Taxonomies'
 
 type AdminRoute =
   | { name: 'login' }
   | { name: 'entries' }
   | { name: 'edit'; id: string }
+  | { name: 'preview'; id: string }
+  | { name: 'revisions'; id: string }
   | { name: 'projects' }
   | { name: 'project'; id: string }
   | { name: 'taxonomies' }
@@ -29,6 +33,11 @@ function parseRoute(pathname: string): AdminRoute {
   if (path === '/admin/entries') return { name: 'entries' }
   const edit = /^\/admin\/entries\/([0-9a-f-]{36})\/edit$/.exec(path)
   if (edit) return { name: 'edit', id: edit[1] }
+  // 편집 주소와 끝이 다르므로 미리보기와 이력이 편집 화면으로 겹치지 않는다.
+  const preview = /^\/admin\/entries\/([0-9a-f-]{36})\/preview$/.exec(path)
+  if (preview) return { name: 'preview', id: preview[1] }
+  const revisions = /^\/admin\/entries\/([0-9a-f-]{36})\/revisions$/.exec(path)
+  if (revisions) return { name: 'revisions', id: revisions[1] }
   if (path === '/admin/projects') return { name: 'projects' }
   const project = /^\/admin\/projects\/([0-9a-f-]{36})$/.exec(path)
   if (project) return { name: 'project', id: project[1] }
@@ -46,6 +55,9 @@ export default function App() {
   const route = parseRoute(window.location.pathname)
   if (route.name === 'entries') return <EntryList />
   if (route.name === 'edit') return <Editor entryId={route.id} />
+  // 미리보기와 이력은 글 목록과 같은 게시물 메뉴에 속한다.
+  if (route.name === 'preview') return <Preview entryId={route.id} />
+  if (route.name === 'revisions') return <Revisions entryId={route.id} />
   if (route.name === 'projects') return <ProjectList />
   if (route.name === 'project') return <ProjectEditor projectId={route.id} />
   if (route.name === 'taxonomies') return <Taxonomies />

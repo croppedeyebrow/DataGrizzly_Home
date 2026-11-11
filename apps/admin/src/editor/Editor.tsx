@@ -241,6 +241,11 @@ export default function Editor({ entryId }: { entryId: string }) {
   return (
     <AdminFrame title="블록 편집기">
       <p className="dg-chip mb-4">{statusText(saveState.status)}</p>
+      {/* 글을 불러온 뒤에만 미리보기와 이력으로 이동한다. 발행 버튼은 여기 두지 않는다. */}
+      <p className="mb-4 flex flex-wrap gap-2">
+        <a className="dg-btn-ghost" href={`/admin/entries/${entry.id}/preview`}>미리보기</a>
+        <a className="dg-btn-ghost" href={`/admin/entries/${entry.id}/revisions`}>수정 이력</a>
+      </p>
       <p>
         종류 {entry.kind}. 주제는 아직 없다. 연결된 프로젝트는 {entry.projectId ?? '없다'}. 공개 수정본은{' '}
         {entry.publishedRevisionId ? '있다' : '없다'}.

@@ -9,6 +9,7 @@ mod content;
 mod db;
 mod media;
 mod project;
+mod revisions;
 mod taxonomy;
 
 use axum::extract::State;
@@ -28,6 +29,8 @@ pub fn app(pool: PgPool) -> Router {
         .route("/api/status", get(status))
         .merge(admin::router())
         .merge(catalog::router())
+        // 초안 미리보기, 수정 이력, 새 초안 복원.
+        .merge(revisions::router())
         .fallback(not_found)
         .with_state(pool)
 }

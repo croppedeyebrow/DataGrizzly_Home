@@ -22,6 +22,11 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
+  "include": [
+    "src",
+    /* 미리보기가 공개 렌더러와 블록 타입을 그대로 쓰도록 관리자 타입 검사에 포함한다. */
+    "../web/src/site/blocks.tsx",
+    "../web/src/scripts/research-types.ts"
+  ],
   "exclude": ["src/**/*.test.ts"]
 }
