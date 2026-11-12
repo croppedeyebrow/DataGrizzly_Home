@@ -3,6 +3,7 @@
 //! 사용처: `POST /api/admin/publication-jobs/{id}/release`, 빌드 토큰의 스냅샷 조회.
 
 use crate::admin::{authorize, conflict, json_response, not_found, unavailable};
+use crate::withdrawal::{activation_decision, entry_is_denied, rollback_decision};
 use crate::auth::{random_token, sha256_hex};
 use crate::publication::JobState;
 use axum::extract::{Path, State};
@@ -122,7 +123,15 @@ async fn release_job(State(pool): State<PgPool>, headers: HeaderMap, Path(id): P
     }
     match commit_success(&pool, job_id, prepared.release_id, prepared.entry_id, prepared.revision_id).await {
         Ok(()) => release_body("succeeded", true, None),
-        Err(_) => release_body("deploying", false, Some("db_confirm_failed")),
+        Err(ConfirmError::Stale) => {
+            restore_pointer(&root, previous);
+            release_body("failed", false, Some("stale_generation"))
+        }
+        Err(ConfirmError::Withdrawn) => {
+            restore_pointer(&root, previous);
+            release_body("failed", false, Some("withdrawn_entry"))
+        }
+        Err(ConfirmError::Database) => release_body("deploying", false, Some("db_confirm_failed")),
     }
 }
 
@@ -160,12 +169,29 @@ async fn reconcile_releases(State(pool): State<PgPool>, headers: HeaderMap) -> R
             };
             match commit_success(&pool, job_id, release_id, entry_id, revision_id).await {
                 Ok(()) => json_response(StatusCode::OK, json!({"schemaVersion": 1, "action": "record_success", "succeeded": true}).to_string(), None),
-                Err(_) => unavailable(),
+                Err(ConfirmError::Stale) | Err(ConfirmError::Withdrawn) => {
+                    json_response(StatusCode::OK, json!({"schemaVersion": 1, "action": "withheld", "succeeded": false}).to_string(), None)
+                }
+                Err(ConfirmError::Database) => unavailable(),
             }
         }
         Reconcile::RestorePrevious => {
             let previous = pointer_previous(&root);
             if let Some(previous_id) = previous {
+                let entry_id: Result<Option<Uuid>, _> = sqlx::query_scalar("SELECT entry_id FROM site_release WHERE id = $1")
+                    .bind(previous_id)
+                    .fetch_optional(&pool)
+                    .await;
+                let Ok(Some(entry_id)) = entry_id else {
+                    return json_response(StatusCode::OK, json!({"schemaVersion": 1, "action": "held", "succeeded": false}).to_string(), None);
+                };
+                let denied = match entry_is_denied(&pool, entry_id).await {
+                    Ok(denied) => denied,
+                    Err(()) => return unavailable(),
+                };
+                if rollback_decision(denied) == "refuse" {
+                    return json_response(StatusCode::OK, json!({"schemaVersion": 1, "action": "held", "succeeded": false}).to_string(), None);
+                }
                 let _ = swap_pointer(&root, previous_id, pointer);
             } else {
                 let _ = fs::remove_file(root.join("current"));
@@ -289,30 +315,79 @@ async fn prepare_snapshot(pool: &PgPool, job_id: Uuid, root: &FsPath) -> Result<
     Ok(Prepared { release_id, entry_id, revision_id, dir: root.join(prefix), snapshot, token: Some(token) })
 }
 
-async fn commit_success(pool: &PgPool, job_id: Uuid, release_id: Uuid, entry_id: Uuid, revision_id: Uuid) -> Result<(), ()> {
-    let mut tx = pool.begin().await.map_err(|_| ())?;
+enum ConfirmError {
+    Database,
+    Stale,
+    Withdrawn,
+}
+
+async fn commit_success(pool: &PgPool, job_id: Uuid, release_id: Uuid, entry_id: Uuid, revision_id: Uuid) -> Result<(), ConfirmError> {
+    let mut tx = pool.begin().await.map_err(|_| ConfirmError::Database)?;
+    let _locked: i64 = sqlx::query_scalar("SELECT sequence FROM site_generation WHERE id = 1 FOR UPDATE")
+        .fetch_one(tx.as_mut())
+        .await
+        .map_err(|_| ConfirmError::Database)?;
+    let denied: Option<i32> = sqlx::query_scalar("SELECT 1 FROM entry_denylist WHERE entry_id = $1")
+        .bind(entry_id)
+        .fetch_optional(tx.as_mut())
+        .await
+        .map_err(|_| ConfirmError::Database)?;
+    let newer: bool = sqlx::query_scalar(
+        "SELECT EXISTS (
+            SELECT 1 FROM site_release
+            WHERE phase = 'active'
+              AND confirmed_at > (SELECT created_at FROM publication_job WHERE id = $1)
+        )",
+    )
+    .bind(job_id)
+    .fetch_one(tx.as_mut())
+    .await
+    .map_err(|_| ConfirmError::Database)?;
+    match activation_decision(newer, denied.is_some()) {
+        "withheld" => {
+            let _ = tx.rollback().await;
+            let _ = mark_failed(pool, job_id, release_id, "withdrawn_entry").await;
+            return Err(ConfirmError::Withdrawn);
+        }
+        "stale" => {
+            let _ = tx.rollback().await;
+            let _ = mark_failed(pool, job_id, release_id, "stale_generation").await;
+            return Err(ConfirmError::Stale);
+        }
+        _ => {}
+    }
+    let sequence: i64 = sqlx::query_scalar("UPDATE site_generation SET sequence = sequence + 1 WHERE id = 1 RETURNING sequence")
+        .fetch_one(tx.as_mut())
+        .await
+        .map_err(|_| ConfirmError::Database)?;
     let updated = sqlx::query("UPDATE publication_job SET state = 'succeeded', release_id = $2, failure_code = NULL, updated_at = now() WHERE id = $1 AND state = 'deploying'")
         .bind(job_id)
         .bind(release_id)
         .execute(tx.as_mut())
         .await
-        .map_err(|_| ())?;
+        .map_err(|_| ConfirmError::Database)?;
     if updated.rows_affected() != 1 {
         let _ = tx.rollback().await;
-        return Err(());
+        return Err(ConfirmError::Database);
     }
-    sqlx::query("UPDATE entry SET published_revision_id = $2, updated_at = now() WHERE id = $1")
+    sqlx::query("UPDATE site_release SET phase = 'superseded' WHERE phase = 'active' AND id <> $1")
+        .bind(release_id)
+        .execute(tx.as_mut())
+        .await
+        .map_err(|_| ConfirmError::Database)?;
+    sqlx::query("UPDATE entry SET published_revision_id = $2, updated_at = now() WHERE id = $1 AND NOT EXISTS (SELECT 1 FROM entry_denylist WHERE entry_denylist.entry_id = entry.id)")
         .bind(entry_id)
         .bind(revision_id)
         .execute(tx.as_mut())
         .await
-        .map_err(|_| ())?;
-    sqlx::query("UPDATE site_release SET phase = 'active', confirmed_at = now(), failure_code = NULL WHERE id = $1")
+        .map_err(|_| ConfirmError::Database)?;
+    sqlx::query("UPDATE site_release SET phase = 'active', release_sequence = $2, confirmed_at = now(), failure_code = NULL WHERE id = $1")
         .bind(release_id)
+        .bind(sequence)
         .execute(tx.as_mut())
         .await
-        .map_err(|_| ())?;
-    tx.commit().await.map_err(|_| ())
+        .map_err(|_| ConfirmError::Database)?;
+    tx.commit().await.map_err(|_| ConfirmError::Database)
 }
 
 async fn mark_failed(pool: &PgPool, job_id: Uuid, release_id: Uuid, code: &str) -> Result<(), ()> {
@@ -617,7 +692,7 @@ mod tests {
         std::env::set_var("RELEASE_ROOT", &root);
         let pool = crate::db::connect_database("datagrizzly_m2").await.expect("isolated database");
         crate::db::migrate(&pool).await.expect("migrate");
-        for table in ["site_release", "publication_upload", "publication_request", "publication_job", "revision_media", "series_entry", "entry_taxonomy", "media", "taxonomy", "project_log", "revision", "entry", "project", "audit_event", "admin_session", "owner"] {
+        for table in ["site_release", "publication_upload", "publication_request", "publication_job", "withdrawal", "entry_denylist", "revision_media", "series_entry", "entry_taxonomy", "media", "taxonomy", "project_log", "revision", "entry", "project", "audit_event", "admin_session", "owner"] {
             sqlx::query(&format!("DELETE FROM {table}")).execute(&pool).await.expect("clear");
         }
         let password = crate::auth::random_token();

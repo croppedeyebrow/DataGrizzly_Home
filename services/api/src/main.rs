@@ -12,6 +12,7 @@ mod project;
 mod publication;
 mod revisions;
 mod snapshot;
+mod withdrawal;
 mod taxonomy;
 
 use axum::extract::State;
@@ -37,6 +38,8 @@ pub fn app(pool: PgPool) -> Router {
         .merge(publication::router())
         // 스냅샷 고정, 후보 확인, 포인터와 DB 재조정.
         .merge(snapshot::router())
+        // 철회 목록, 세대 복구. 외부 캐시 삭제를 성공으로 기록하지 않는다.
+        .merge(withdrawal::router())
         .fallback(not_found)
         .with_state(pool)
 }

@@ -431,6 +431,12 @@ async fn public_file(State(pool): State<PgPool>, Path(id): Path<String>) -> Resp
     let Some(id) = parse_id(&id) else {
         return not_found();
     };
+    // 철회된 글에 연결된 첨부는 공개 주소로 돌려주지 않는다. 검색 색인보다 이 조회가 먼저다.
+    match crate::withdrawal::media_is_withdrawn(&pool, id).await {
+        Ok(true) => return not_found(),
+        Ok(false) => {}
+        Err(()) => return unavailable(),
+    }
     read_stored(&pool, id, true).await
 }
 
@@ -1302,6 +1308,8 @@ mod tests {
             "publication_upload",
             "publication_request",
             "publication_job",
+            "withdrawal",
+            "entry_denylist",
             "revision_media",
             "series_entry",
             "entry_taxonomy",

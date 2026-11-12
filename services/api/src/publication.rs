@@ -714,6 +714,8 @@ mod tests {
             "publication_upload",
             "publication_request",
             "publication_job",
+            "withdrawal",
+            "entry_denylist",
             "revision_media",
             "series_entry",
             "entry_taxonomy",

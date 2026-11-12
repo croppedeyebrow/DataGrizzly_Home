@@ -19,6 +19,14 @@ type JobRow = {
   retryable: boolean
 }
 
+type WithdrawalRow = {
+  id: string
+  entryId: string
+  state: string
+  retryable: boolean
+  memo: string
+}
+
 const STEPS = ['대기', '빌드', '배포', '확인']
 
 function stepIndex(state: string): number {
@@ -50,6 +58,8 @@ function memo(job: JobRow): string {
   if (job.failureCode === 'marker_mismatch') return '공개 표시가 달라 성공으로 기록하지 않았다'
   if (job.failureCode === 'db_confirm_failed') return '포인터는 바뀌었고 DB 성공 기록은 아직이다'
   if (job.failureCode === 'build_failed' || job.failureCode === 'candidate_write_failed' || job.failureCode === 'pointer_failed') return '후보를 만들지 못해 기존 공개본을 유지했다'
+  if (job.failureCode === 'stale_generation') return '더 나중에 확인된 세대가 있어 이 작업은 덮지 않았다'
+  if (job.failureCode === 'withdrawn_entry') return '철회된 글이라 공개 포인터를 바꾸지 않았다'
   if (job.state === 'canceled') return '접수 취소'
   if (job.state === 'succeeded' && job.releaseId) return `공개 세대 ${job.releaseId}`
   if (job.state === 'succeeded') return '공개 표시를 확인했다'
@@ -70,6 +80,7 @@ function clock(date: Date): string {
 export default function Publications() {
   const csrf = readCsrf()
   const [jobs, setJobs] = useState<JobRow[] | null>(null)
+  const [withdrawals, setWithdrawals] = useState<WithdrawalRow[] | null>(null)
   const [selectedId, setSelectedId] = useState('')
   const [message, setMessage] = useState('')
   const [refreshed, setRefreshed] = useState('')
@@ -83,6 +94,8 @@ export default function Publications() {
       return
     }
     setJobs(result.body.jobs)
+    const withdrawn = await adminJson<{ withdrawals?: WithdrawalRow[] }>('/api/admin/withdrawals')
+    setWithdrawals(withdrawn.status === 200 ? withdrawn.body?.withdrawals ?? [] : null)
     setMessage('')
     setRefreshed(clock(new Date()))
     setSelectedId((current) => current || result.body?.jobs?.[0]?.id || '')
@@ -125,6 +138,20 @@ export default function Publications() {
       setMessage('후보를 확인하지 못했다.')
     }
     await load()
+  }
+
+  async function onRetryWithdrawal(id: string) {
+    setPending(true)
+    const result = await adminJson<{ state?: string }>(`/api/admin/withdrawals/${id}/retry`, { method: 'POST' })
+    setPending(false)
+    await load()
+    if (result.body?.state === 'blocked') {
+      setMessage('로컬 회수 표시를 다시 썼다. 외부 캐시 삭제는 보장하지 않는다.')
+    } else if (result.status === 409) {
+      setMessage('회수에 실패한 철회만 다시 시도한다.')
+    } else {
+      setMessage('회수 표시를 쓰지 못했다. 공개 API 차단은 유지된다.')
+    }
   }
 
   async function onCancel(id: string) {
@@ -187,6 +214,24 @@ export default function Publications() {
           <p className="mb-0 mt-3 text-sm">확인 단계에 도달하지 않았다.</p>
         ) : null}
       </section>
+      {withdrawals && withdrawals.length > 0 ? (
+        <section className="dg-panel mb-4 p-4">
+          <h2 className="mb-3 text-lg">철회</h2>
+          <ul className="m-0 grid list-none gap-2 p-0">
+            {withdrawals.map((item) => (
+              <li key={item.id} className="flex flex-wrap items-center justify-between gap-2">
+                <span>{item.memo}</span>
+                {item.retryable ? (
+                  <button className="dg-btn-ghost" type="button" disabled={pending} onClick={() => void onRetryWithdrawal(item.id)}>
+                    회수 재시도
+                  </button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+      {withdrawals && withdrawals.length === 0 ? <p className="dg-item mb-4 px-4 py-3">철회된 글이 없다.</p> : null}
       {jobs === null && !message ? <p>발행 작업을 불러오는 중이다.</p> : null}
       {jobs && jobs.length === 0 ? <p className="dg-item px-4 py-3">발행 작업이 없다.</p> : null}
       {jobs && jobs.length > 0 ? (

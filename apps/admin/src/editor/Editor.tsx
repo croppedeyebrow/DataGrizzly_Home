@@ -274,6 +274,31 @@ export default function Editor({ entryId }: { entryId: string }) {
     }
   }
 
+  // 공개 포인터를 바로 비운다. 202는 외부 캐시가 지워졌다는 뜻이 아니다.
+  async function onWithdraw() {
+    if (!csrf || !entry) return
+    try {
+      const response = await fetch(`/api/admin/entries/${entry.id}/unpublish`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'content-type': 'application/json', 'x-csrf-token': csrf },
+        body: JSON.stringify({ schemaVersion: 1, expectedVersion: entry.version }),
+      })
+      if (response.status === 202) {
+        setEntry((current) => (current ? { ...current, publishedRevisionId: null } : current))
+        setPublishNote('철회를 접수했다. 공개 포인터는 비웠다. 외부 캐시 삭제는 보장하지 않는다.')
+        return
+      }
+      if (response.status === 409) {
+        setPublishNote('다른 수정이 먼저 저장되었다.')
+        return
+      }
+      setPublishNote('철회하지 못했다.')
+    } catch {
+      setPublishNote('서버에 연결하지 못했다.')
+    }
+  }
+
   return (
     <AdminFrame title="블록 편집기">
       <p className="dg-chip mb-4">{statusText(saveState.status)}</p>
@@ -284,6 +309,11 @@ export default function Editor({ entryId }: { entryId: string }) {
         <button className="dg-btn" type="button" onClick={() => void onAccept()} disabled={saveState.status !== 'saved' || !entry.draftRevisionId}>
           이 초안을 발행 작업으로 접수
         </button>
+        {entry.publishedRevisionId ? (
+          <button className="dg-btn-ghost" type="button" onClick={() => void onWithdraw()}>
+            이 글을 철회
+          </button>
+        ) : null}
       </p>
       {saveState.status !== 'saved' ? <p className="text-sm text-quiet">저장되지 않은 편집은 접수하지 않는다.</p> : null}
       {publishNote ? (
