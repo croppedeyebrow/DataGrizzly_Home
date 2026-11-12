@@ -1298,6 +1298,7 @@ mod tests {
             .expect("isolated database");
         crate::db::migrate(&pool).await.expect("migrate");
         for table in [
+            "site_release",
             "publication_upload",
             "publication_request",
             "publication_job",

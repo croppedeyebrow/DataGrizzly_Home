@@ -11,6 +11,7 @@ mod media;
 mod project;
 mod publication;
 mod revisions;
+mod snapshot;
 mod taxonomy;
 
 use axum::extract::State;
@@ -34,6 +35,8 @@ pub fn app(pool: PgPool) -> Router {
         .merge(revisions::router())
         // 발행 접수, 작업 목록, 임대 회수. 공개 파일 배포는 여기서 하지 않는다.
         .merge(publication::router())
+        // 스냅샷 고정, 후보 확인, 포인터와 DB 재조정.
+        .merge(snapshot::router())
         .fallback(not_found)
         .with_state(pool)
 }

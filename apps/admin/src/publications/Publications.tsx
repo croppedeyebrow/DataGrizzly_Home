@@ -45,9 +45,14 @@ function stateLabel(state: string): string {
  */
 function memo(job: JobRow): string {
   if (job.failureCode === 'retry_exhausted') return '자동 재시도 횟수를 모두 썼다'
+  if (job.failureCode === 'draft_included') return '초안 표시가 있어 배포하지 않았다'
+  if (job.failureCode === 'missing_asset' || job.failureCode === 'missing_sitemap') return '후보 파일이 없어 배포하지 않았다'
+  if (job.failureCode === 'marker_mismatch') return '공개 표시가 달라 성공으로 기록하지 않았다'
+  if (job.failureCode === 'db_confirm_failed') return '포인터는 바뀌었고 DB 성공 기록은 아직이다'
+  if (job.failureCode === 'build_failed' || job.failureCode === 'candidate_write_failed' || job.failureCode === 'pointer_failed') return '후보를 만들지 못해 기존 공개본을 유지했다'
   if (job.state === 'canceled') return '접수 취소'
   if (job.state === 'succeeded' && job.releaseId) return `공개 세대 ${job.releaseId}`
-  if (job.state === 'succeeded') return '공개 확인 전'
+  if (job.state === 'succeeded') return '공개 표시를 확인했다'
   if (job.state === 'deploying') return '공개 확인 전'
   return '진행 중'
 }
@@ -102,6 +107,23 @@ export default function Publications() {
       return
     }
     setMessage('대기열로 되돌렸다. 공개본은 바뀌지 않았다.')
+    await load()
+  }
+
+  // 배포 대기 작업을 확인하고, 릴리스 표시가 맞을 때만 성공 응답을 받는다.
+  async function onConfirm(id: string) {
+    setPending(true)
+    const result = await adminJson<{ succeeded?: boolean; failureCode?: string | null }>(`/api/admin/publication-jobs/${id}/release`, { method: 'POST' })
+    setPending(false)
+    if (result.body?.succeeded) {
+      setMessage('공개 표시를 확인한 뒤 성공으로 기록했다.')
+    } else if (result.body?.failureCode) {
+      setMessage('확인 전에는 성공으로 기록하지 않았다.')
+    } else if (result.status === 409) {
+      setMessage('배포 대기 작업만 확인할 수 있다.')
+    } else {
+      setMessage('후보를 확인하지 못했다.')
+    }
     await load()
   }
 
@@ -191,7 +213,11 @@ export default function Publications() {
                   <td className="px-2 py-2"><span className="dg-chip">{stateLabel(job.state)}</span></td>
                   <td className="px-2 py-2">{memo(job)}</td>
                   <td className="px-2 py-2">
-                    {job.retryable ? (
+                    {job.state === 'deploying' ? (
+                      <button className="dg-btn-ghost" type="button" disabled={pending} onClick={() => void onConfirm(job.id)}>
+                        표시 확인
+                      </button>
+                    ) : job.retryable ? (
                       <button className="dg-btn-ghost" type="button" disabled={pending} onClick={() => void onRetry(job.id)}>
                         재시도
                       </button>

@@ -710,6 +710,7 @@ mod tests {
         let pool = crate::db::connect_database("datagrizzly_m2").await.expect("isolated database");
         crate::db::migrate(&pool).await.expect("migrate");
         for table in [
+            "site_release",
             "publication_upload",
             "publication_request",
             "publication_job",
