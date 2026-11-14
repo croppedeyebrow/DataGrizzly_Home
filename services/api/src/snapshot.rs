@@ -465,9 +465,11 @@ pub fn write_candidate(dir: &FsPath, release_id: Uuid, snapshot: &Value) -> Resu
     );
     fs::write(dir.join("index.html"), html).map_err(|_| "candidate_write_failed")?;
     fs::write(dir.join("assets").join("site.css"), "/* release */\n").map_err(|_| "candidate_write_failed")?;
-    let loc = public_path(snapshot.get("kind").and_then(Value::as_str).unwrap_or("note"), snapshot.get("slug").and_then(Value::as_str).unwrap_or(""));
-    let sitemap = format!("<?xml version=\"1.0\"?><urlset><url><loc>{loc}</loc></url></urlset>");
+    let (sitemap, rss, canonical, hook) = crate::seo_sync::snapshot_feed(snapshot);
     fs::write(dir.join("sitemap.xml"), sitemap).map_err(|_| "candidate_write_failed")?;
+    fs::write(dir.join("rss.xml"), rss).map_err(|_| "candidate_write_failed")?;
+    fs::write(dir.join("canonical.txt"), format!("{canonical}\n")).map_err(|_| "candidate_write_failed")?;
+    let _ = hook;
     fs::write(dir.join("release.txt"), format!("{release_id}\n")).map_err(|_| "candidate_write_failed")?;
     fs::write(dir.join("snapshot.json"), snapshot.to_string()).map_err(|_| "candidate_write_failed")?;
     let manifest = json!({
@@ -475,6 +477,7 @@ pub fn write_candidate(dir: &FsPath, release_id: Uuid, snapshot: &Value) -> Resu
         "releaseId": release_id.to_string(),
         "snapshotHash": sha256_hex(&snapshot.to_string()),
         "builder": "snapshot-html",
+        "indexHook": crate::seo_sync::index_hook(),
     })
     .to_string();
     let manifest_hash = sha256_hex(&manifest);
@@ -562,15 +565,6 @@ fn read_marker(root: &FsPath) -> Result<Option<Uuid>, ()> {
     };
     let text = fs::read_to_string(root.join(release_id.to_string()).join("release.txt")).map_err(|_| ())?;
     Ok(parse_id(text.trim()))
-}
-
-fn public_path(kind: &str, slug: &str) -> String {
-    let section = match kind {
-        "log" => "logs",
-        "paper" | "news" => "research",
-        _ => "notes",
-    };
-    format!("/{section}/{slug}")
 }
 
 fn escape_html(value: &str) -> String {
@@ -692,7 +686,7 @@ mod tests {
         std::env::set_var("RELEASE_ROOT", &root);
         let pool = crate::db::connect_database("datagrizzly_m2").await.expect("isolated database");
         crate::db::migrate(&pool).await.expect("migrate");
-        for table in ["site_release", "publication_upload", "publication_request", "publication_job", "withdrawal", "entry_denylist", "revision_media", "series_entry", "entry_taxonomy", "media", "taxonomy", "project_log", "revision", "entry", "project", "audit_event", "admin_session", "owner"] {
+        for table in ["site_release", "publication_upload", "publication_request", "publication_schedule", "publication_job", "entry_redirect", "withdrawal", "entry_denylist", "revision_media", "series_entry", "entry_taxonomy", "media", "taxonomy", "project_log", "revision", "entry", "project", "audit_event", "admin_session", "owner"] {
             sqlx::query(&format!("DELETE FROM {table}")).execute(&pool).await.expect("clear");
         }
         let password = crate::auth::random_token();

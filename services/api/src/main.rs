@@ -11,6 +11,8 @@ mod media;
 mod project;
 mod publication;
 mod revisions;
+mod schedule;
+mod seo_sync;
 mod snapshot;
 mod withdrawal;
 mod taxonomy;
@@ -40,6 +42,8 @@ pub fn app(pool: PgPool) -> Router {
         .merge(snapshot::router())
         // 철회 목록, 세대 복구. 외부 캐시 삭제를 성공으로 기록하지 않는다.
         .merge(withdrawal::router())
+        // 예약은 대기 작업만 만든다. 검색 서비스는 호출하지 않는다.
+        .merge(schedule::router())
         .fallback(not_found)
         .with_state(pool)
 }

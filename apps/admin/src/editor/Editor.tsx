@@ -51,6 +51,7 @@ export default function Editor({ entryId }: { entryId: string }) {
   const [serverCopy, setServerCopy] = useState<LocalDraft | null>(null)
   const [message, setMessage] = useState('')
   const [publishNote, setPublishNote] = useState('')
+  const [scheduleAt, setScheduleAt] = useState('')
   const [loadError, setLoadError] = useState('')
 
   useEffect(() => {
@@ -299,6 +300,32 @@ export default function Editor({ entryId }: { entryId: string }) {
     }
   }
 
+  // 입력은 서울 시간이다. 서버는 +09:00을 붙여 UTC로 저장하고, 표시 시간을 다시 돌려준다.
+  async function onSchedule() {
+    if (!csrf || !entry?.draftRevisionId || saveState.status !== 'saved' || scheduleAt.length < 16) return
+    const scheduledAt = `${scheduleAt.length === 16 ? `${scheduleAt}:00` : scheduleAt}+09:00`
+    try {
+      const response = await fetch(`/api/admin/entries/${entry.id}/schedule`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'content-type': 'application/json', 'x-csrf-token': csrf },
+        body: JSON.stringify({ schemaVersion: 1, revisionId: entry.draftRevisionId, scheduledAt }),
+      })
+      const body = (await response.json().catch(() => null)) as { displayAt?: string } | null
+      if (response.status === 200 && body?.displayAt) {
+        setPublishNote(`예약했다. 서울 시간 ${body.displayAt}. 공개본은 바뀌지 않았다.`)
+        return
+      }
+      if (response.status === 409) {
+        setPublishNote('이미 진행 중인 예약이 있다.')
+        return
+      }
+      setPublishNote('예약을 저장하지 못했다.')
+    } catch {
+      setPublishNote('서버에 연결하지 못했다.')
+    }
+  }
+
   return (
     <AdminFrame title="블록 편집기">
       <p className="dg-chip mb-4">{statusText(saveState.status)}</p>
@@ -314,6 +341,13 @@ export default function Editor({ entryId }: { entryId: string }) {
             이 글을 철회
           </button>
         ) : null}
+      </p>
+      <p className="mb-4 flex flex-wrap items-center gap-2">
+        <label htmlFor="schedule-at">서울 시간으로 예약</label>
+        <input id="schedule-at" type="datetime-local" value={scheduleAt} onChange={(event) => setScheduleAt(event.target.value)} />
+        <button className="dg-btn-ghost" type="button" onClick={() => void onSchedule()} disabled={saveState.status !== 'saved' || !entry.draftRevisionId || scheduleAt.length < 16}>
+          이 시각에 발행을 예약
+        </button>
       </p>
       {saveState.status !== 'saved' ? <p className="text-sm text-quiet">저장되지 않은 편집은 접수하지 않는다.</p> : null}
       {publishNote ? (

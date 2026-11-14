@@ -19,6 +19,15 @@ type JobRow = {
   retryable: boolean
 }
 
+type ScheduleRow = {
+  id: string
+  displayAt: string
+  runAt: string
+  version: number
+  state: string
+  cancelable: boolean
+}
+
 type WithdrawalRow = {
   id: string
   entryId: string
@@ -81,6 +90,7 @@ export default function Publications() {
   const csrf = readCsrf()
   const [jobs, setJobs] = useState<JobRow[] | null>(null)
   const [withdrawals, setWithdrawals] = useState<WithdrawalRow[] | null>(null)
+  const [schedules, setSchedules] = useState<ScheduleRow[] | null>(null)
   const [selectedId, setSelectedId] = useState('')
   const [message, setMessage] = useState('')
   const [refreshed, setRefreshed] = useState('')
@@ -96,6 +106,8 @@ export default function Publications() {
     setJobs(result.body.jobs)
     const withdrawn = await adminJson<{ withdrawals?: WithdrawalRow[] }>('/api/admin/withdrawals')
     setWithdrawals(withdrawn.status === 200 ? withdrawn.body?.withdrawals ?? [] : null)
+    const scheduled = await adminJson<{ schedules?: ScheduleRow[] }>('/api/admin/schedules')
+    setSchedules(scheduled.status === 200 ? scheduled.body?.schedules ?? [] : null)
     setMessage('')
     setRefreshed(clock(new Date()))
     setSelectedId((current) => current || result.body?.jobs?.[0]?.id || '')
@@ -154,6 +166,35 @@ export default function Publications() {
     }
   }
 
+  async function onRunDue() {
+    setPending(true)
+    const result = await adminJson<{ enqueued?: boolean }>('/api/admin/schedules/run', { method: 'POST' })
+    setPending(false)
+    await load()
+    if (result.body?.enqueued) {
+      setMessage('놓친 예약을 대기열에 넣었다. 공개본은 바뀌지 않았다.')
+    } else if (result.status === 200) {
+      setMessage('실행할 예약이 없다.')
+    } else {
+      setMessage('예약을 확인하지 못했다.')
+    }
+  }
+
+  async function onCancelSchedule(id: string, version: number) {
+    setPending(true)
+    const result = await adminJson<{ state?: string }>(`/api/admin/schedules/${id}/cancel`, {
+      method: 'POST',
+      body: JSON.stringify({ schemaVersion: 1, expectedVersion: version }),
+    })
+    setPending(false)
+    await load()
+    if (result.body?.state === 'canceled') {
+      setMessage('예약을 취소했다. 공개본은 바뀌지 않았다.')
+    } else {
+      setMessage('실행 전 예약만 취소할 수 있다.')
+    }
+  }
+
   async function onCancel(id: string) {
     setPending(true)
     const result = await adminJson(`/api/admin/publication-jobs/${id}/cancel`, { method: 'POST' })
@@ -197,6 +238,30 @@ export default function Publications() {
       }
     >
       <p className="dg-item mb-4 px-4 py-3">접수는 공개 완료가 아닙니다. 확인 전에는 공개본이 바뀌지 않습니다.</p>
+      <section className="dg-panel mb-4 p-4">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="mb-0 text-lg">예약</h2>
+          <button className="dg-btn-ghost" type="button" disabled={pending} onClick={() => void onRunDue()}>
+            놓친 예약 실행
+          </button>
+        </div>
+        <p className="mb-3 text-sm">놓친 예약은 서버가 다시 확인하는 즉시 대기열에 넣는다. 같은 예약은 한 번만 작업을 만든다. 예약 실행은 공개 완료가 아니다.</p>
+        {schedules && schedules.length === 0 ? <p className="mb-0">예약이 없다.</p> : null}
+        {schedules && schedules.length > 0 ? (
+          <ul className="m-0 grid list-none gap-2 p-0">
+            {schedules.map((item) => (
+              <li key={item.id} className="flex flex-wrap items-center justify-between gap-2">
+                <span>서울 {item.displayAt} · UTC {item.runAt} · {item.state}</span>
+                {item.cancelable ? (
+                  <button className="dg-btn-ghost" type="button" disabled={pending} onClick={() => void onCancelSchedule(item.id, item.version)}>
+                    예약 취소
+                  </button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
       {message ? <p className="dg-item mb-4 px-4 py-3" role="status">{message}</p> : null}
       <section className="dg-panel mb-4 p-4">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
