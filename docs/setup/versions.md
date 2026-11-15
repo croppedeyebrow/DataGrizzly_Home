@@ -45,7 +45,7 @@ PostgreSQL 16은 현재 지원되는 메이저 버전이다. 설치된 16.10은 
 | 구성 | 현재 버전 | S05 결정 |
 |---|---:|---|
 | Rust / Cargo | 1.92.0 Windows MSVC | 로컬 API에 사용. Linux 검증은 운영 전에 따로 한다 |
-| Python | Anaconda Python 3.11.5 | 설치 상태만 기록; S20에서 별도 환경과 프로젝트 버전 결정 |
+| Python | 프로젝트는 uv CPython **3.12.11**. Anaconda Python 3.11.5는 그대로 둔다 | `workers/document-workflow` |
 | Docker Desktop / CLI | 4.43.2 / 28.3.2 | 재설치하지 않음; S08에서 엔진·Compose 검증 |
 | Go | 미설치 | M6에서 반복되는 배포 도구 필요가 입증될 때만 도입 |
 | C++ / CMake | CMake 미설치 | 범위 제외 |

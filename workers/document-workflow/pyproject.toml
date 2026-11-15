@@ -1,0 +1,33 @@
+[project]
+name = "document-workflow"
+version = "0.1.0"
+description = "문서 워커가 올라갈 Python 환경. 접수와 그래프 실행은 아직 없다."
+authors = [
+    { name = "Croppedeyebrow", email = "142734435+croppedeyebrow@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28.1",
+    "langchain-core>=1.8.0",
+    "langgraph>=1.2.22",
+    "pydantic>=2.14.3",
+    "pypdf>=7.1.0",
+]
+
+[project.scripts]
+dg-workflow = "dg_workflow.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.9.1,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "dg_workflow"
+module-root = "src"
+
+[dependency-groups]
+dev = [
+    "mypy>=2.4.1",
+    "pytest>=9.2.0",
+    "ruff>=0.17.5",
+]
