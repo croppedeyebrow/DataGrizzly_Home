@@ -7,6 +7,7 @@ mod auth;
 mod catalog;
 mod content;
 mod db;
+mod discovery;
 mod media;
 mod project;
 mod publication;

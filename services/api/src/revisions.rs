@@ -403,6 +403,9 @@ mod tests {
             .expect("isolated database");
         crate::db::migrate(&pool).await.expect("migrate");
         for table in [
+            "public_search_section",
+            "public_search_document",
+            "public_search_load",
             "site_release",
             "publication_upload",
             "publication_request",

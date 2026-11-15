@@ -387,6 +387,13 @@ async fn commit_success(pool: &PgPool, job_id: Uuid, release_id: Uuid, entry_id:
         .execute(tx.as_mut())
         .await
         .map_err(|_| ConfirmError::Database)?;
+    // 기능: 확정된 스냅샷만 검색 후보로 저장한다.
+    // 목적: 적재가 실패하면 발행 확정과 함께 롤백되어 이전 공개 릴리스가 남는다.
+    // 연관: discovery::load_release, public_search_load.
+    if crate::discovery::load_release(&mut tx, release_id).await.is_err() {
+        let _ = tx.rollback().await;
+        return Err(ConfirmError::Database);
+    }
     tx.commit().await.map_err(|_| ConfirmError::Database)
 }
 
@@ -686,7 +693,7 @@ mod tests {
         std::env::set_var("RELEASE_ROOT", &root);
         let pool = crate::db::connect_database("datagrizzly_m2").await.expect("isolated database");
         crate::db::migrate(&pool).await.expect("migrate");
-        for table in ["site_release", "publication_upload", "publication_request", "publication_schedule", "publication_job", "entry_redirect", "withdrawal", "entry_denylist", "revision_media", "series_entry", "entry_taxonomy", "media", "taxonomy", "project_log", "revision", "entry", "project", "audit_event", "admin_session", "owner"] {
+        for table in ["public_search_section", "public_search_document", "public_search_load", "site_release", "publication_upload", "publication_request", "publication_schedule", "publication_job", "entry_redirect", "withdrawal", "entry_denylist", "revision_media", "series_entry", "entry_taxonomy", "media", "taxonomy", "project_log", "revision", "entry", "project", "audit_event", "admin_session", "owner"] {
             sqlx::query(&format!("DELETE FROM {table}")).execute(&pool).await.expect("clear");
         }
         let password = crate::auth::random_token();
