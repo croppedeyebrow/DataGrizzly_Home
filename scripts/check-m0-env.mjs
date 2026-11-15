@@ -65,9 +65,20 @@ if (!config.includes('127.0.0.1') || !config.includes('4321')) {
 }
 console.log('PASS web server is 127.0.0.1:4321');
 
-const proxyHit = sourceFiles.find((path) => /^\s*proxy\s*:/m.test(readFileSync(path, 'utf8')));
-if (proxyHit) fail('public web has an API proxy before the API exists');
-console.log('PASS no public-web API proxy');
+// 기능: 공개 웹 개발 서버의 API 전달을 검사한다.
+// 목적: 탐색 화면의 GET /api/search 는 로컬 Axum 으로만 넘기고, 다른 주소는 막는다.
+// 연관: apps/web/vite.config.ts, apps/web/src/scripts/explore.ts, services/api.
+const allowedProxy = "proxy: { '/api': 'http://127.0.0.1:8080' }";
+const proxyFiles = sourceFiles.filter((path) => /^\s*proxy\s*:/m.test(readFileSync(path, 'utf8')));
+const configPath = join(webRoot, 'vite.config.ts');
+const proxyLines = (config.match(/^\s*proxy\s*:/gm) ?? []).length;
+if (proxyFiles.length === 0) {
+  console.log('PASS no public-web API proxy');
+} else if (proxyFiles.length !== 1 || proxyFiles[0] !== configPath || proxyLines !== 1 || !config.includes(allowedProxy)) {
+  fail('public web API proxy must be only /api to http://127.0.0.1:8080');
+} else {
+  console.log('PASS public web API proxy is loopback 8080');
+}
 
 function present(path) {
   try {
