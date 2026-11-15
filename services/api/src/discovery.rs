@@ -183,6 +183,108 @@ pub fn restored_search_release<'a>(previous: &'a str, restoring: &'a str, entry_
     if entry_denied { previous } else { restoring }
 }
 
+/// 기능: fixture에서 계산한 검색 품질.
+/// 목적: Recall@5와 결과 없음 오탐을 문항 수로 남긴다.
+/// 연관: `evaluations/search/m5-01.json`, `evaluations/search/m5-04.json`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct QualityScore {
+    pub questions: usize,
+    pub sections: usize,
+    pub recall_per_mille: u32,
+    pub false_empty: usize,
+    pub unexpected_hit: usize,
+}
+
+/// 기능: 출시 목표.
+/// 목적: p95 1초와 Recall 80%를 목표로만 두고, 측정 전에는 달성으로 보지 않는다.
+/// 연관: `goal_met`.
+pub const RECALL_TARGET_PER_MILLE: u32 = 800;
+pub const P95_TARGET_MS: u32 = 1000;
+
+/// 기능: 30문항의 Recall@5.
+/// 목적: 기대 글이 상위 5개에 들어왔는지와, 있어야 할 결과가 빈 목록이 됐는지를 센다.
+/// 연관: `search_hits`. 형태소 분석은 하지 않는다.
+pub fn score_search(sections: &[SearchSection], questions: &[Value], active_release: &str) -> QualityScore {
+    let mut recall_sum = 0u32;
+    let mut relevant_questions = 0u32;
+    let mut false_empty = 0usize;
+    let mut unexpected_hit = 0usize;
+    for question in questions {
+        let query = question.get("query").and_then(Value::as_str).unwrap_or("");
+        let denied = question.get("denied").and_then(Value::as_array).map(|items| items.iter().filter_map(|item| item.as_str().map(str::to_string)).collect::<Vec<_>>()).unwrap_or_default();
+        let expect = unique_ids(question.get("expect").and_then(Value::as_array));
+        let found_values: Vec<Value> = search_hits(sections, query, active_release, &denied).into_iter().map(|hit| Value::String(hit.entry_id.clone())).collect();
+        let found = unique_ids(Some(&found_values));
+        if expect.is_empty() {
+            if !found.is_empty() {
+                unexpected_hit += 1;
+            }
+            continue;
+        }
+        relevant_questions += 1;
+        let overlap = expect.iter().filter(|entry| found.iter().any(|hit| hit == *entry)).count();
+        if overlap == 0 {
+            false_empty += 1;
+        }
+        recall_sum += (overlap as u32 * 1000) / expect.len() as u32;
+    }
+    QualityScore {
+        questions: questions.len(),
+        sections: sections.len(),
+        recall_per_mille: if relevant_questions == 0 { 0 } else { recall_sum / relevant_questions },
+        false_empty,
+        unexpected_hit,
+    }
+}
+
+/// 기능: 측정된 지연의 백분위.
+/// 목적: 표본이 없으면 값을 만들지 않는다.
+/// 연관: `evaluations/search/m5-04.json`의 live 항목.
+pub fn percentile(samples: &[u32], percent: u32) -> Option<u32> {
+    if samples.is_empty() || percent > 100 {
+        return None;
+    }
+    let mut sorted = samples.to_vec();
+    sorted.sort_unstable();
+    let rank = (percent as usize * sorted.len() + 99) / 100;
+    let index = rank.saturating_sub(1).min(sorted.len() - 1);
+    Some(sorted[index])
+}
+
+/// 기능: 목표 달성 여부.
+/// 목적: 지연 표본이 없으면 Recall만으로 목표를 달성했다고 하지 않는다.
+/// 연관: `RECALL_TARGET_PER_MILLE`, `P95_TARGET_MS`.
+pub fn goal_met(recall_per_mille: u32, p95_ms: Option<u32>) -> bool {
+    match p95_ms {
+        Some(p95) => recall_per_mille >= RECALL_TARGET_PER_MILLE && p95 <= P95_TARGET_MS,
+        None => false,
+    }
+}
+
+/// 기능: 검색이 막히거나 다시 보이는 상태.
+/// 목적: 데이터베이스 중단과 시간 초과는 결과 없음이 아니고, 철회가 풀린 뒤에만 문장을 다시 보여 준다.
+/// 연관: `GET /api/search`의 503, `restored_search_release`.
+pub fn snippet_after_recovery(db_up: bool, timed_out: bool, denied: bool, release_visible: bool) -> &'static str {
+    if !db_up || timed_out {
+        "unavailable"
+    } else if denied || !release_visible {
+        "hidden"
+    } else {
+        "visible"
+    }
+}
+
+fn unique_ids(values: Option<&Vec<Value>>) -> Vec<String> {
+    let mut ids = Vec::new();
+    for value in values.into_iter().flatten() {
+        let Some(id) = value.as_str() else { continue };
+        if !ids.iter().any(|seen| seen == id) {
+            ids.push(id.to_string());
+        }
+    }
+    ids
+}
+
 /// 기능: 한 주소에서 받을 검색 횟수.
 /// 목적: 짧은 시간에 같은 조회가 반복되면 429로 거절한다.
 /// 연관: `allow_hit`, `GET /api/search`.
@@ -483,7 +585,7 @@ fn cells(values: &Vec<Value>) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{active_search_release, allow_hit, like_pattern, prepare_query, project_filter, restored_search_release, result_url, search_hits, search_type, sections_from_snapshot, snippet, QueryError, SearchSection, ACTIVE_RELEASE_SQL, SEARCH_SQL, STATEMENT_TIMEOUT_MS, TIMEOUT_SQL, TOP_K};
+    use super::{active_search_release, allow_hit, goal_met, like_pattern, percentile, prepare_query, project_filter, restored_search_release, result_url, score_search, search_hits, search_type, sections_from_snapshot, snippet, snippet_after_recovery, QueryError, SearchSection, ACTIVE_RELEASE_SQL, P95_TARGET_MS, RECALL_TARGET_PER_MILLE, SEARCH_SQL, STATEMENT_TIMEOUT_MS, TIMEOUT_SQL, TOP_K};
     use serde_json::Value;
 
     /// 기능: 30문항과 거절 규칙.
@@ -504,6 +606,39 @@ mod tests {
             let expect: Vec<&str> = question["expect"].as_array().unwrap().iter().filter_map(|item| item.as_str()).collect();
             assert_eq!(found, expect, "{}", question["id"]);
         }
+    }
+
+    /// 기능: 품질 기록과 실패 후 재노출.
+    /// 목적: fixture의 Recall@5를 계산하고, 측정하지 않은 지연은 목표 달성으로 세지 않는다.
+    /// 연관: `evaluations/search/m5-04.json`.
+    #[test]
+    fn quality_record_keeps_unmeasured_latency_empty() {
+        let fixture: Value = serde_json::from_str(include_str!("../../../evaluations/search/m5-01.json")).unwrap();
+        let report: Value = serde_json::from_str(include_str!("../../../evaluations/search/m5-04.json")).unwrap();
+        let active = fixture["activeRelease"].as_str().unwrap();
+        let sections = fixture["sections"].as_array().unwrap().iter().map(section_from_json).collect::<Vec<_>>();
+        let score = score_search(&sections, fixture["questions"].as_array().unwrap(), active);
+        assert_eq!(score.questions, 30);
+        assert_eq!(score.sections, 6);
+        assert_eq!(score.recall_per_mille, report["fixture"]["recallPerMille"].as_u64().unwrap() as u32);
+        assert_eq!(score.false_empty, report["fixture"]["falseEmpty"].as_u64().unwrap() as usize);
+        assert_eq!(score.unexpected_hit, report["fixture"]["unexpectedHit"].as_u64().unwrap() as usize);
+        assert!(report["live"]["p50Ms"].is_null());
+        assert!(report["live"]["p95Ms"].is_null());
+        assert!(report["live"]["ramBytes"].is_null());
+        assert!(report["live"]["diskBytes"].is_null());
+        assert_eq!(report["live"]["ran"].as_bool(), Some(false));
+        assert_eq!(percentile(&[], 95), None);
+        assert_eq!(percentile(&[10, 20, 30, 40, 100], 50), Some(30));
+        assert_eq!(percentile(&[10, 20, 30, 40, 100], 95), Some(100));
+        assert!(!goal_met(score.recall_per_mille, None));
+        assert!(goal_met(RECALL_TARGET_PER_MILLE, Some(P95_TARGET_MS)));
+        assert_eq!(snippet_after_recovery(false, false, false, true), "unavailable");
+        assert_eq!(snippet_after_recovery(true, true, false, true), "unavailable");
+        assert_eq!(snippet_after_recovery(true, false, true, true), "hidden");
+        assert_eq!(snippet_after_recovery(true, false, false, false), "hidden");
+        assert_eq!(snippet_after_recovery(true, false, false, true), "visible");
+        assert!(!SEARCH_SQL.to_lowercase().contains("embedding"));
     }
 
     /// 기능: 스냅샷 절 추출과 와일드카드.

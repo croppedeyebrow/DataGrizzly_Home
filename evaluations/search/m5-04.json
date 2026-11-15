@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "fixture": {
+    "questions": 30,
+    "sections": 6,
+    "recallPerMille": 1000,
+    "falseEmpty": 0,
+    "unexpectedHit": 0,
+    "koreanLimit": "부분 문자열 일치만 한다. 한국어 형태소 분석은 하지 않는다.",
+    "environment": "Windows rustc 테스트. 검색 행 6개 fixture. PostgreSQL은 실행하지 않았다."
+  },
+  "targets": {
+    "recallPerMille": 800,
+    "p95Ms": 1000,
+    "met": false
+  },
+  "live": {
+    "ran": false,
+    "reason": "DB, API, 화면을 함께 띄워 p50, p95, 오류율, RAM, 디스크를 측정하지 않았다.",
+    "p50Ms": null,
+    "p95Ms": null,
+    "errorRatePerMille": null,
+    "ramBytes": null,
+    "diskBytes": null,
+    "explain": "미실행"
+  }
+}
