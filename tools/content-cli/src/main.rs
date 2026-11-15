@@ -1,5 +1,5 @@
 //! 개념: 본문 검사 명령.
-//! 실행: `dg-content validate <file>`, `extract <file>`, `chunk <file> <out>`, `export <file> <outDir>`.
+//! 실행: `dg-content contract`, `validate <file|->`, `extract <file>`, `chunk <file> <out>`, `export <file> <outDir>`.
 //! 목적: 오류가 있으면 JSON을 stderr에 쓰고 1로 끝낸다. 그 경우 출력 파일을 바꾸지 않는다.
 //! 관련: `tools/content-core`, `infra/publish/content-gate.mjs`, `apps/admin/src/editor/Editor.tsx`.
 
@@ -8,6 +8,7 @@ use content_core::{
 };
 use std::env;
 use std::fs;
+use std::io::Read;
 use std::path::Path;
 use std::process::ExitCode;
 
@@ -24,6 +25,19 @@ fn main() -> ExitCode {
 
 fn run(args: Vec<String>) -> Result<(), u8> {
     let command = args.first().map(String::as_str).unwrap_or("");
+    // 개념: 계약 버전 출력과 표준입력 검사.
+    // 실행: `contract`는 schemaVersion 1을 쓰고, `validate -`는 stdin JSON을 검사한다.
+    // 목적: 워커가 파일 경로를 추정하지 않고 같은 계약을 확인하게 한다.
+    // 관련: `workers/document-workflow/src/dg_workflow/rust_adapter.py`.
+    if command == "contract" {
+        println!(r#"{{"schemaVersion":1}}"#);
+        return Ok(());
+    }
+    if command == "validate" && args.get(1).map(String::as_str) == Some("-") {
+        let mut input = String::new();
+        std::io::stdin().read_to_string(&mut input).map_err(|_| 1u8)?;
+        return finish(&check_document(&input));
+    }
     let input_path = args.get(1).ok_or_else(|| usage())?;
     let input = fs::read_to_string(input_path).map_err(|_| {
         write_errors(&[error_line("input", "invalid", "입력 파일을 읽지 못했다")]);
@@ -91,6 +105,6 @@ fn error_line(path: &str, code: &str, message: &str) -> ContentError {
 }
 
 fn usage() -> u8 {
-    eprintln!("usage: dg-content <validate|extract|chunk|export> <file> [out]");
+    eprintln!("usage: dg-content contract | <validate|extract|chunk|export> <file|-> [out]");
     2
 }

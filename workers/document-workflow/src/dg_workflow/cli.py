@@ -1,6 +1,6 @@
 """기능: `dg-workflow` 명령의 진입점.
-목적: 환경 확인, 체크포인트 setup, 저장, 읽기, CMS 권한 확인을 서로 다른 명령으로 나눈다.
-연관: `pyproject.toml`의 `project.scripts`, `checkpoint.py`, `redact.py`.
+목적: 환경 확인, 실행 골격, 체크포인트 setup, 저장, 읽기, CMS 권한 확인을 서로 다른 명령으로 나눈다.
+연관: `pyproject.toml`의 `project.scripts`, `shell.py`, `checkpoint.py`, `redact.py`.
 """
 
 import json
@@ -12,6 +12,10 @@ from dg_workflow.redact import redact
 
 
 def main() -> None:
+    if any(arg.startswith("-") for arg in sys.argv[1:]):
+        from dg_workflow.shell import run_shell
+
+        raise SystemExit(run_shell(sys.argv[1:]))
     command = sys.argv[1] if len(sys.argv) > 1 else ""
     try:
         if command == "":
@@ -45,3 +49,7 @@ def thread_id(argv: list[str]) -> str:
     if len(argv) < 3 or not argv[2]:
         raise RuntimeError("thread id is required")
     return argv[2]
+
+
+if __name__ == "__main__":
+    main()

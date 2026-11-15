@@ -1,0 +1,43 @@
+# 기능: 문서 워커 Python이 바뀔 때만 ruff, mypy, pytest를 실행한다.
+# 목적: lock 설치와 비밀 없는 fixture 검사만 하고, 워커를 상시 서비스로 올리지 않는다.
+# 연관: `workers/document-workflow`, `docs/06_bootstrap/S22.md`.
+
+name: document workflow
+
+on:
+  pull_request:
+    paths:
+      - "workers/document-workflow/**"
+      - ".github/workflows/document-workflow.yml"
+  push:
+    paths:
+      - "workers/document-workflow/**"
+      - ".github/workflows/document-workflow.yml"
+
+jobs:
+  python:
+    name: worker shell
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workers/document-workflow
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.9.1"
+
+      - name: Install from lock
+        run: uv sync --locked
+
+      - name: Ruff
+        run: uv run ruff check .
+
+      - name: Mypy
+        run: uv run mypy src
+
+      - name: Pytest
+        run: uv run pytest
