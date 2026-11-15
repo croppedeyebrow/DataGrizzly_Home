@@ -1,0 +1,11 @@
+# 기능: 이미지 빌드 컨텍스트에서 비밀과 생성물을 뺀다.
+# 목적: .env와 로컬 빌드 결과가 이미지 전송에 섞이지 않게 한다.
+# 연관: services/api/Dockerfile
+.git
+.env
+.env.*
+**/node_modules
+**/target
+**/dist
+**/var
+docs/08_ui_assets
