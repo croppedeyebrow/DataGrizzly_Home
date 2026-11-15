@@ -18,6 +18,7 @@ import {
 import { documentHtml, type FrameProps } from './site/layout'
 import {
   AboutPage,
+  AskGuidePage,
   ExplorePage,
   HomePage,
   LogPage,
@@ -51,6 +52,7 @@ function routes(): Route[] {
     { path: '/notes', element: NoteListPage({ notes: research.notes, loadError: research.loadError }) },
     { path: '/research', element: ResearchListPage({ articles: research.research, loadError: research.loadError }) },
     { path: '/explore', element: ExplorePage() },
+    { path: '/ask', element: AskGuidePage() },
     { path: '/404', element: MissingPage() },
   ]
   for (const project of projects.projects) {

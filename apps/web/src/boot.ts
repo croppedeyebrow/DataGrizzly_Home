@@ -4,6 +4,8 @@
  * 사용처: 개발 서버와 dist/menu.js.
  */
 import './styles.css'
+import { setupExplore } from './scripts/explore.ts'
 import { setupSiteMenu } from './scripts/site-menu.ts'
 
 setupSiteMenu(document.querySelector('#site-menu'))
+setupExplore(document.querySelector('#explore-form'))

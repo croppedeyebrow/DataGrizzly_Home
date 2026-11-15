@@ -47,7 +47,8 @@ function siteDev(): Plugin {
           path.startsWith('/node_modules') ||
           path.startsWith('/media') ||
           path.startsWith('/favicon') ||
-          path.startsWith('/robots')
+          path.startsWith('/robots') ||
+          path.startsWith('/api')
         ) {
           next()
           return
@@ -74,6 +75,7 @@ export default defineConfig({
     host: '127.0.0.1',
     port: 4321,
     strictPort: true,
+    proxy: { '/api': 'http://127.0.0.1:8080' },
     fs: { allow: ['../..'] },
   },
   preview: {

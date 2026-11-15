@@ -551,15 +551,51 @@ export function SeriesPage({ series }: { series: TaxonomyPage }) {
   )
 }
 
+/**
+ * 기능: 공개 검색 화면.
+ * 목적: 검색 전 상태만 보여 주고, 결과와 오류는 브라우저 스크립트가 응답 순서대로 바꾼다.
+ * 연관: `apps/web/src/scripts/explore.ts`, `GET /api/search`. 질문 패널은 두지 않는다.
+ */
 export function ExplorePage() {
   return (
     <Page title="탐색 · DataGrizzly" current="/explore" description="검색어를 입력하세요">
       <h1 className="mb-4 text-[length:var(--font-size-title)] leading-tight">무엇을 찾고 있나요?</h1>
-      <p className="dg-item mb-4 px-4 py-3">검색어를 입력하세요</p>
-      <p className="mb-4 text-quiet">전체 · 프로젝트 · 과정 기록 · 노트 · 리서치</p>
-      <h2 className="mb-3 text-[1.35rem]">검색 결과가 없어요</h2>
-      <p className="mb-4">다른 검색어를 쓰거나 유형 필터를 ‘전체’로 바꿔 보세요.</p>
-      <p className="dg-label">주제로 좁히기</p>
+      <form id="explore-form" className="mb-4" action="/explore" method="get">
+        <p className="mb-3 flex flex-wrap gap-2">
+          <label className="sr-only" htmlFor="explore-q">검색어</label>
+          <input id="explore-q" className="dg-item min-w-[16rem] flex-1 px-4 py-3" name="q" type="search" placeholder="검색어를 입력하세요" />
+          <button className="dg-btn" type="submit">검색</button>
+        </p>
+        <fieldset className="mb-3 flex flex-wrap gap-2 border-0 p-0">
+          <legend className="sr-only">유형</legend>
+          <label className="dg-chip"><input className="mr-1" type="radio" name="type" value="all" defaultChecked />전체</label>
+          <label className="dg-chip"><input className="mr-1" type="radio" name="type" value="project" />프로젝트</label>
+          <label className="dg-chip"><input className="mr-1" type="radio" name="type" value="log" />과정 기록</label>
+          <label className="dg-chip"><input className="mr-1" type="radio" name="type" value="note" />노트</label>
+          <label className="dg-chip"><input className="mr-1" type="radio" name="type" value="research" />리서치</label>
+        </fieldset>
+        <p className="mb-0">
+          <label htmlFor="explore-project">프로젝트</label>
+          <input id="explore-project" className="dg-item ml-2 px-3 py-2" name="project" type="text" placeholder="비우면 전체" />
+        </p>
+      </form>
+      <p id="explore-status" className="dg-item mb-4 px-4 py-3" role="status">검색어를 입력하세요</p>
+      <ul id="explore-results" className="m-0 grid list-none gap-4 p-0"></ul>
+    </Page>
+  )
+}
+
+/**
+ * 기능: 예전 질문 주소의 안내.
+ * 목적: 질문 입력란 없이 검색 화면으로 보낸다.
+ * 연관: `/explore`, `GET /api/ask`.
+ */
+export function AskGuidePage() {
+  return (
+    <Page title="검색 · DataGrizzly" current="/explore" description="검색은 탐색 화면에서 합니다." noindex={true}>
+      <h1 className="mb-4 text-[length:var(--font-size-title)] leading-tight">검색으로 안내합니다</h1>
+      <p className="mb-4">질문 기능은 없습니다. 공개된 글은 탐색 화면에서 찾습니다.</p>
+      <p className="mb-0"><a className="dg-btn" href="/explore">탐색으로 이동</a></p>
     </Page>
   )
 }

@@ -3,8 +3,19 @@
 //! 연관: `migrations/0010_public_search.sql`, `snapshot.rs`의 `commit_success`, `evaluations/search/m5-01.json`.
 //! 검색 서버나 언어 모델을 호출하지 않는다. 활성 릴리스 선택은 M5-02에서 이 조회에 붙인다.
 
-use serde_json::Value;
-use sqlx::{Postgres, Transaction};
+use crate::admin::json_response;
+use crate::seo_sync::canonical_path;
+use axum::extract::{Query, State};
+use axum::http::{HeaderMap, StatusCode};
+use axum::response::Response;
+use axum::routing::get;
+use axum::Router;
+use serde::Deserialize;
+use serde_json::{json, Value};
+use sqlx::{PgPool, Postgres, Transaction};
+use std::collections::HashMap;
+use std::sync::{LazyLock, Mutex};
+use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 
 /// 기능: 한 번에 돌려주는 검색 절의 최대 개수.
@@ -156,7 +167,7 @@ pub const TIMEOUT_SQL: &str = "SET LOCAL statement_timeout = '1500ms'";
 /// 기능: 공개 검색 SQL.
 /// 목적: 활성 릴리스, 공개 수정본, 철회 목록을 조건에 포함하고 검색어와 개수만 바인딩한다.
 /// 연관: M5-03의 `GET /api/search`. 정렬 컬럼은 이 문자열에 고정되어 있다.
-pub const SEARCH_SQL: &str = "SELECT d.entry_id, d.revision_id, d.release_id, d.title, s.heading, s.anchor, s.body FROM public_search_section s JOIN public_search_document d ON d.id = s.document_id JOIN site_release r ON r.id = d.release_id AND r.phase = 'active' JOIN entry e ON e.id = d.entry_id AND e.published_revision_id = d.revision_id WHERE NOT EXISTS (SELECT 1 FROM entry_denylist deny WHERE deny.entry_id = d.entry_id) AND (d.title ILIKE $1 ESCAPE '\\' OR s.heading ILIKE $1 ESCAPE '\\' OR s.body ILIKE $1 ESCAPE '\\' OR d.taxonomy ILIKE $1 ESCAPE '\\') ORDER BY d.entry_id, s.position, s.anchor LIMIT $2";
+pub const SEARCH_SQL: &str = "SELECT d.entry_id, d.revision_id, d.release_id, d.title, d.kind, e.slug, s.heading, s.anchor, s.body FROM public_search_section s JOIN public_search_document d ON d.id = s.document_id JOIN site_release r ON r.id = d.release_id AND r.phase = 'active' JOIN entry e ON e.id = d.entry_id AND e.published_revision_id = d.revision_id WHERE NOT EXISTS (SELECT 1 FROM entry_denylist deny WHERE deny.entry_id = d.entry_id) AND ($3 = '' OR d.kind = $3 OR ($3 = 'research' AND d.kind IN ('paper', 'news')) OR ($3 = 'project' AND d.project_slug <> '')) AND ($4 = '' OR d.project_slug = $4) AND (d.title ILIKE $1 ESCAPE '\\' OR s.heading ILIKE $1 ESCAPE '\\' OR s.body ILIKE $1 ESCAPE '\\' OR d.taxonomy ILIKE $1 ESCAPE '\\') ORDER BY d.entry_id, s.position, s.anchor LIMIT $2";
 
 /// 기능: 검색이 볼 릴리스.
 /// 목적: 후보 적재가 실패하거나 더 새로운 릴리스가 이미 활성이면 이전 릴리스를 유지한다.
@@ -170,6 +181,169 @@ pub fn active_search_release<'a>(previous: &'a str, incoming: &'a str, load_ok: 
 /// 연관: `withdrawal::rollback_decision`.
 pub fn restored_search_release<'a>(previous: &'a str, restoring: &'a str, entry_denied: bool) -> &'a str {
     if entry_denied { previous } else { restoring }
+}
+
+/// 기능: 한 주소에서 받을 검색 횟수.
+/// 목적: 짧은 시간에 같은 조회가 반복되면 429로 거절한다.
+/// 연관: `allow_hit`, `GET /api/search`.
+pub const RATE_LIMIT: usize = 30;
+
+/// 기능: 검색 횟수를 세는 시간.
+/// 목적: 60초가 지난 요청은 제한에서 뺀다.
+/// 연관: `allow_hit`.
+pub const RATE_WINDOW_SECS: u64 = 60;
+
+/// 기능: 검색 유형.
+/// 목적: 전체, 노트, 리서치, 과정 기록, 프로젝트 밖에는 조회 조건으로 받지 않는다.
+/// 연관: 탐색 화면의 유형 선택, `SEARCH_SQL`의 `$3`.
+pub fn search_type(raw: &str) -> Result<String, ()> {
+    match raw {
+        "" | "all" => Ok(String::new()),
+        "note" | "log" | "research" | "project" => Ok(raw.to_string()),
+        _ => Err(()),
+    }
+}
+
+/// 기능: 프로젝트 슬러그.
+/// 목적: 빈 값은 전체이고, 그 외에는 소문자 슬러그만 받는다.
+/// 연관: `SEARCH_SQL`의 `$4`.
+pub fn project_filter(raw: &str) -> Result<String, ()> {
+    if raw.is_empty() {
+        return Ok(String::new());
+    }
+    if raw.len() > 80 || !raw.bytes().all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'-') {
+        return Err(());
+    }
+    Ok(raw.to_string())
+}
+
+/// 기능: 검색 결과의 공개 주소.
+/// 목적: 서버의 canonical 경로와 절 앵커만 링크에 쓴다.
+/// 연관: `seo_sync::canonical_path`, 탐색 화면의 결과 링크.
+pub fn result_url(kind: &str, slug: &str, anchor: &str) -> String {
+    let path = canonical_path(kind, slug);
+    if anchor.is_empty() { path } else { format!("{path}#{anchor}") }
+}
+
+/// 기능: 검색어 주변의 짧은 문장.
+/// 목적: 결과 목록에 절 전체를 넣지 않고, 맞는 부분만 보여 준다.
+/// 연관: `GET /api/search`의 snippet.
+pub fn snippet(body: &str, query: &str) -> String {
+    let lower = body.to_lowercase();
+    let needle = query.to_lowercase();
+    let Some(index) = lower.find(&needle) else {
+        return body.chars().take(80).collect();
+    };
+    let start = body.floor_char_boundary(index.saturating_sub(12));
+    let end = body.ceil_char_boundary((index + needle.len() + 24).min(body.len()));
+    body[start..end].to_string()
+}
+
+/// 기능: 제한 시간 안의 요청을 통과시킨다.
+/// 목적: 제한을 넘기면 데이터베이스를 조회하지 않는다.
+/// 연관: `RATE_LIMIT`.
+pub fn allow_hit(hits: &mut Vec<u64>, now: u64, window: u64, limit: usize) -> bool {
+    hits.retain(|time| now.saturating_sub(*time) < window);
+    if hits.len() >= limit {
+        return false;
+    }
+    hits.push(now);
+    true
+}
+
+fn under_limit(key: &str, now: u64) -> bool {
+    static HITS: LazyLock<Mutex<HashMap<String, Vec<u64>>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
+    HITS.lock().map(|mut hits| allow_hit(hits.entry(key.to_string()).or_default(), now, RATE_WINDOW_SECS, RATE_LIMIT)).unwrap_or(false)
+}
+
+/// 기능: 공개 검색 라우터.
+/// 목적: `GET /api/search`만 검색을 실행하고, `/api/ask`는 검색 화면으로 안내한다.
+/// 연관: `apps/web/src/site/pages.tsx`의 탐색 페이지, `apps/web/src/scripts/explore.ts`.
+pub fn router() -> Router<PgPool> {
+    Router::new().route("/api/search", get(search)).route("/api/ask", get(ask_removed))
+}
+
+#[derive(Deserialize)]
+struct SearchParams {
+    q: Option<String>,
+    #[serde(rename = "type")]
+    kind: Option<String>,
+    project: Option<String>,
+}
+
+/// 기능: 공개 검색.
+/// 목적: 활성 릴리스의 문장만 JSON으로 돌려주고, 데이터베이스가 없으면 503을 준다.
+/// 연관: `SEARCH_SQL`, `TIMEOUT_SQL`, 탐색 화면.
+async fn search(State(pool): State<PgPool>, headers: HeaderMap, Query(params): Query<SearchParams>) -> Response {
+    let key = headers.get("x-forwarded-for").and_then(|value| value.to_str().ok()).unwrap_or("local").split(',').next().unwrap_or("local").trim().to_string();
+    let now = SystemTime::now().duration_since(UNIX_EPOCH).map(|duration| duration.as_secs()).unwrap_or(0);
+    let allowed = under_limit(&key, now);
+    if !allowed {
+        return json_response(StatusCode::TOO_MANY_REQUESTS, r#"{"error":"too_many"}"#.to_string(), None);
+    }
+    let query = match prepare_query(params.q.unwrap_or_default().as_str()) {
+        Ok(query) => query,
+        Err(QueryError::Empty) => return field_error("q", "empty"),
+        Err(QueryError::TooLong) => return field_error("q", "too_long"),
+    };
+    let kind = match search_type(params.kind.unwrap_or_default().trim()) {
+        Ok(kind) => kind,
+        Err(()) => return field_error("type", "invalid"),
+    };
+    let project = match project_filter(params.project.unwrap_or_default().trim()) {
+        Ok(project) => project,
+        Err(()) => return field_error("project", "invalid"),
+    };
+    let mut tx = match pool.begin().await {
+        Ok(tx) => tx,
+        Err(_) => return unavailable_search(),
+    };
+    if sqlx::query(TIMEOUT_SQL).execute(tx.as_mut()).await.is_err() {
+        let _ = tx.rollback().await;
+        return unavailable_search();
+    }
+    let rows: Result<Vec<(Uuid, Uuid, Uuid, String, String, String, String, String, String)>, sqlx::Error> = sqlx::query_as(SEARCH_SQL)
+        .bind(like_pattern(&query))
+        .bind(TOP_K as i64)
+        .bind(&kind)
+        .bind(&project)
+        .fetch_all(tx.as_mut())
+        .await;
+    let rows = match rows {
+        Ok(rows) => rows,
+        Err(_) => {
+            let _ = tx.rollback().await;
+            return unavailable_search();
+        }
+    };
+    let _ = tx.commit().await;
+    let results: Vec<_> = rows
+        .into_iter()
+        .map(|(_, _, _, title, kind, slug, _heading, anchor, body)| {
+            json!({
+                "title": title,
+                "kind": kind,
+                "snippet": snippet(&body, &query),
+                "url": result_url(&kind, &slug, &anchor),
+            })
+        })
+        .collect();
+    json_response(StatusCode::OK, json!({"schemaVersion": 1, "results": results}).to_string(), None)
+}
+
+/// 기능: 없어진 질문 주소.
+/// 목적: 질문을 실행하지 않고 검색 화면 주소를 알려 준다.
+/// 연관: `/explore`, `GET /api/search`.
+async fn ask_removed() -> Response {
+    json_response(StatusCode::NOT_FOUND, r#"{"error":"not_found","search":"/explore"}"#.to_string(), None)
+}
+
+fn field_error(path: &str, code: &str) -> Response {
+    json_response(StatusCode::UNPROCESSABLE_ENTITY, json!({"error": "invalid", "fieldErrors": [{"path": path, "code": code}]}).to_string(), None)
+}
+
+fn unavailable_search() -> Response {
+    json_response(StatusCode::SERVICE_UNAVAILABLE, r#"{"error":"unavailable"}"#.to_string(), None)
 }
 
 /// 기능: 발행이 확정된 릴리스의 스냅샷을 검색 후보로 저장한다.
@@ -309,7 +483,7 @@ fn cells(values: &Vec<Value>) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{active_search_release, like_pattern, prepare_query, restored_search_release, search_hits, sections_from_snapshot, QueryError, SearchSection, ACTIVE_RELEASE_SQL, SEARCH_SQL, STATEMENT_TIMEOUT_MS, TIMEOUT_SQL, TOP_K};
+    use super::{active_search_release, allow_hit, like_pattern, prepare_query, project_filter, restored_search_release, result_url, search_hits, search_type, sections_from_snapshot, snippet, QueryError, SearchSection, ACTIVE_RELEASE_SQL, SEARCH_SQL, STATEMENT_TIMEOUT_MS, TIMEOUT_SQL, TOP_K};
     use serde_json::Value;
 
     /// 기능: 30문항과 거절 규칙.
@@ -357,15 +531,23 @@ mod tests {
         assert_eq!(prepare_query("   "), Err(QueryError::Empty));
         assert_eq!(prepare_query(&"가".repeat(81)), Err(QueryError::TooLong));
         assert_eq!(like_pattern("%_"), "%\\%\\_%");
-        assert!(SEARCH_SQL.contains("$1") && SEARCH_SQL.contains("$2"));
+        assert!(SEARCH_SQL.contains("$1") && SEARCH_SQL.contains("$4"));
         assert!(SEARCH_SQL.contains("phase = 'active'"));
         assert!(SEARCH_SQL.contains("entry_denylist"));
         assert!(SEARCH_SQL.contains("published_revision_id"));
-        assert!(!SEARCH_SQL.contains("$3"));
+        assert!(!SEARCH_SQL.contains("ORDER BY $"));
         assert!(ACTIVE_RELEASE_SQL.contains("phase = 'active'"));
         assert_eq!(STATEMENT_TIMEOUT_MS, 1500);
         assert_eq!(TIMEOUT_SQL, "SET LOCAL statement_timeout = '1500ms'");
         assert!(TOP_K >= 1);
+        assert_eq!(search_type("research").unwrap(), "research");
+        assert!(search_type("ask").is_err());
+        assert!(project_filter("Bad").is_err());
+        assert_eq!(result_url("paper", "attention", "claim"), "/research/attention#claim");
+        assert_eq!(snippet("앞 문장 데이터에서 뒤 문장", "데이터에서").contains("데이터에서"), true);
+        let mut hits = Vec::new();
+        assert!(allow_hit(&mut hits, 10, 60, 1));
+        assert!(!allow_hit(&mut hits, 11, 60, 1));
     }
 
     /// 기능: 검색 세대와 스니펫 노출.

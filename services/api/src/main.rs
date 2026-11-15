@@ -45,6 +45,8 @@ pub fn app(pool: PgPool) -> Router {
         .merge(withdrawal::router())
         // 예약은 대기 작업만 만든다. 검색 서비스는 호출하지 않는다.
         .merge(schedule::router())
+        // 공개 검색. 질문 API는 만들지 않는다.
+        .merge(discovery::router())
         .fallback(not_found)
         .with_state(pool)
 }
