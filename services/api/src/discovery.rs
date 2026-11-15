@@ -41,6 +41,8 @@ pub struct SearchSection {
     pub body: String,
     pub taxonomy: String,
     pub position: i32,
+    pub revision_id: String,
+    pub published_revision: String,
 }
 
 /// 기능: 검색어 검사 결과.
@@ -54,7 +56,7 @@ pub enum QueryError {
 
 /// 기능: 파라미터로 넘길 부분 일치 조건.
 /// 목적: 사용자가 입력한 `%`와 `_`가 모든 행을 가리키지 않게 한다.
-/// 연관: `SEARCH_SQL`의 `$3`.
+/// 연관: `SEARCH_SQL`의 `$1`.
 pub fn like_pattern(query: &str) -> String {
     let mut pattern = String::from("%");
     for character in query.chars() {
@@ -124,6 +126,7 @@ pub fn search_hits<'a>(sections: &'a [SearchSection], query: &str, active_releas
         .iter()
         .filter(|section| section.source == "release")
         .filter(|section| section.release_id == active_release)
+        .filter(|section| section.revision_id == section.published_revision)
         .filter(|section| !denied.iter().any(|entry| entry == &section.entry_id))
         .filter(|section| {
             let haystack = format!("{} {} {} {} {}", section.title, section.heading, section.body, section.anchor, section.taxonomy).to_lowercase();
@@ -135,10 +138,39 @@ pub fn search_hits<'a>(sections: &'a [SearchSection], query: &str, active_releas
     hits
 }
 
+/// 기능: 지금 공개 중인 릴리스를 고르는 조회.
+/// 목적: 검색어나 요청 경로로 릴리스를 고르지 않고, DB에 활성으로 표시된 행만 쓴다.
+/// 연관: `site_release.phase`, `snapshot::plan_reconcile`.
+pub const ACTIVE_RELEASE_SQL: &str = "SELECT id FROM site_release WHERE phase = 'active' ORDER BY release_sequence DESC NULLS LAST LIMIT 1";
+
+/// 기능: 한 검색 요청의 최대 시간.
+/// 목적: 긴 조회가 연결을 붙잡지 않게 한다. 사용자 입력으로 이 값을 바꾸지 않는다.
+/// 연관: `TIMEOUT_SQL`, M5-04의 지연 측정.
+pub const STATEMENT_TIMEOUT_MS: i32 = 1500;
+
+/// 기능: 검색 트랜잭션에만 적용하는 시간 제한.
+/// 목적: 문장을 고정해 두고, 요청 값으로 제한 시간을 조립하지 않는다.
+/// 연관: `STATEMENT_TIMEOUT_MS`.
+pub const TIMEOUT_SQL: &str = "SET LOCAL statement_timeout = '1500ms'";
+
 /// 기능: 공개 검색 SQL.
-/// 목적: 검색어, 릴리스, 철회 목록, 개수 제한을 자리표시자로만 넘긴다.
-/// 연관: M5-03의 `GET /api/search`. 이 태스크에서는 실행 함수만 두고 HTTP는 열지 않는다.
-pub const SEARCH_SQL: &str = "SELECT d.entry_id, d.revision_id, d.release_id, d.title, s.heading, s.anchor, s.body FROM public_search_section s JOIN public_search_document d ON d.id = s.document_id WHERE d.release_id = $1 AND NOT (d.entry_id = ANY($2)) AND (d.title ILIKE $3 ESCAPE '\\' OR s.heading ILIKE $3 ESCAPE '\\' OR s.body ILIKE $3 ESCAPE '\\' OR d.taxonomy ILIKE $3 ESCAPE '\\') ORDER BY d.entry_id, s.position, s.anchor LIMIT $4";
+/// 목적: 활성 릴리스, 공개 수정본, 철회 목록을 조건에 포함하고 검색어와 개수만 바인딩한다.
+/// 연관: M5-03의 `GET /api/search`. 정렬 컬럼은 이 문자열에 고정되어 있다.
+pub const SEARCH_SQL: &str = "SELECT d.entry_id, d.revision_id, d.release_id, d.title, s.heading, s.anchor, s.body FROM public_search_section s JOIN public_search_document d ON d.id = s.document_id JOIN site_release r ON r.id = d.release_id AND r.phase = 'active' JOIN entry e ON e.id = d.entry_id AND e.published_revision_id = d.revision_id WHERE NOT EXISTS (SELECT 1 FROM entry_denylist deny WHERE deny.entry_id = d.entry_id) AND (d.title ILIKE $1 ESCAPE '\\' OR s.heading ILIKE $1 ESCAPE '\\' OR s.body ILIKE $1 ESCAPE '\\' OR d.taxonomy ILIKE $1 ESCAPE '\\') ORDER BY d.entry_id, s.position, s.anchor LIMIT $2";
+
+/// 기능: 검색이 볼 릴리스.
+/// 목적: 후보 적재가 실패하거나 더 새로운 릴리스가 이미 활성이면 이전 릴리스를 유지한다.
+/// 연관: `snapshot::commit_success`, `withdrawal::activation_decision`.
+pub fn active_search_release<'a>(previous: &'a str, incoming: &'a str, load_ok: bool, newer_already_active: bool) -> &'a str {
+    if !load_ok || newer_already_active { previous } else { incoming }
+}
+
+/// 기능: 복구 요청이 검색 릴리스를 바꿀 수 있는지.
+/// 목적: 철회된 글이 들어 있는 예전 릴리스는 검색의 현재 릴리스가 되지 않는다.
+/// 연관: `withdrawal::rollback_decision`.
+pub fn restored_search_release<'a>(previous: &'a str, restoring: &'a str, entry_denied: bool) -> &'a str {
+    if entry_denied { previous } else { restoring }
+}
 
 /// 기능: 발행이 확정된 릴리스의 스냅샷을 검색 후보로 저장한다.
 /// 목적: 검색 적재가 실패하면 이 트랜잭션의 발행 확정도 함께 롤백되어 이전 릴리스가 남는다.
@@ -242,6 +274,8 @@ fn push_section(sections: &mut Vec<SearchSection>, title: &str, release_id: &str
         body: body.to_string(),
         taxonomy: taxonomy.to_string(),
         position: *position,
+        revision_id: String::new(),
+        published_revision: String::new(),
     });
     *position += 1;
 }
@@ -275,7 +309,7 @@ fn cells(values: &Vec<Value>) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{like_pattern, prepare_query, search_hits, sections_from_snapshot, QueryError, SearchSection, SEARCH_SQL, TOP_K};
+    use super::{active_search_release, like_pattern, prepare_query, restored_search_release, search_hits, sections_from_snapshot, QueryError, SearchSection, ACTIVE_RELEASE_SQL, SEARCH_SQL, STATEMENT_TIMEOUT_MS, TIMEOUT_SQL, TOP_K};
     use serde_json::Value;
 
     /// 기능: 30문항과 거절 규칙.
@@ -323,9 +357,47 @@ mod tests {
         assert_eq!(prepare_query("   "), Err(QueryError::Empty));
         assert_eq!(prepare_query(&"가".repeat(81)), Err(QueryError::TooLong));
         assert_eq!(like_pattern("%_"), "%\\%\\_%");
-        assert!(SEARCH_SQL.contains("$1") && SEARCH_SQL.contains("$4"));
-        assert!(!SEARCH_SQL.contains("ORDER BY $"));
+        assert!(SEARCH_SQL.contains("$1") && SEARCH_SQL.contains("$2"));
+        assert!(SEARCH_SQL.contains("phase = 'active'"));
+        assert!(SEARCH_SQL.contains("entry_denylist"));
+        assert!(SEARCH_SQL.contains("published_revision_id"));
+        assert!(!SEARCH_SQL.contains("$3"));
+        assert!(ACTIVE_RELEASE_SQL.contains("phase = 'active'"));
+        assert_eq!(STATEMENT_TIMEOUT_MS, 1500);
+        assert_eq!(TIMEOUT_SQL, "SET LOCAL statement_timeout = '1500ms'");
         assert!(TOP_K >= 1);
+    }
+
+    /// 기능: 검색 세대와 스니펫 노출.
+    /// 목적: 적재 실패, 활성화 역전, 철회, 복구가 이전 릴리스나 숨김으로 끝나는지 본다.
+    /// 연관: `evaluations/search/m5-02.json`, `withdrawal::rollback_decision`.
+    #[test]
+    fn generation_keeps_the_previous_release_and_hides_stale_text() {
+        let fixture: Value = serde_json::from_str(include_str!("../../../evaluations/search/m5-02.json")).unwrap();
+        for case in fixture["generations"].as_array().unwrap() {
+            let previous = case["previous"].as_str().unwrap();
+            let incoming = case["incoming"].as_str().unwrap();
+            let found = if case["kind"].as_str() == Some("restore") {
+                restored_search_release(previous, incoming, case["denied"].as_bool().unwrap())
+            } else {
+                active_search_release(previous, incoming, case["loadOk"].as_bool().unwrap(), case["newerActive"].as_bool().unwrap())
+            };
+            assert_eq!(found, case["expect"].as_str().unwrap(), "{}", case["name"]);
+        }
+        let stale = SearchSection {
+            source: "release".to_string(),
+            release_id: "rel-active".to_string(),
+            entry_id: "entry-1".to_string(),
+            title: "현장 메모".to_string(),
+            heading: "측정".to_string(),
+            anchor: "measure".to_string(),
+            body: "오래된 수정본의 문장".to_string(),
+            taxonomy: String::new(),
+            position: 0,
+            revision_id: "rev-old".to_string(),
+            published_revision: "rev-new".to_string(),
+        };
+        assert!(search_hits(&[stale], "오래된", "rel-active", &[]).is_empty());
     }
 
     fn section_from_json(value: &Value) -> SearchSection {
@@ -339,6 +411,8 @@ mod tests {
             body: value["body"].as_str().unwrap().to_string(),
             taxonomy: value["taxonomy"].as_str().unwrap().to_string(),
             position: value["position"].as_i64().unwrap() as i32,
+            revision_id: value.get("revisionId").and_then(Value::as_str).unwrap_or("").to_string(),
+            published_revision: value.get("publishedRevision").and_then(Value::as_str).unwrap_or("").to_string(),
         }
     }
 }

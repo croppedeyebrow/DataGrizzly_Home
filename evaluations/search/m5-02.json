@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "generations": [
+    {
+      "name": "load_failure",
+      "kind": "publish",
+      "previous": "rel-old",
+      "incoming": "rel-new",
+      "loadOk": false,
+      "newerActive": false,
+      "expect": "rel-old"
+    },
+    {
+      "name": "activation_reversal",
+      "kind": "publish",
+      "previous": "rel-current",
+      "incoming": "rel-stale",
+      "loadOk": true,
+      "newerActive": true,
+      "expect": "rel-current"
+    },
+    {
+      "name": "publish_ok",
+      "kind": "publish",
+      "previous": "rel-old",
+      "incoming": "rel-new",
+      "loadOk": true,
+      "newerActive": false,
+      "expect": "rel-new"
+    },
+    {
+      "name": "restore_denied",
+      "kind": "restore",
+      "previous": "rel-current",
+      "incoming": "rel-old",
+      "denied": true,
+      "expect": "rel-current"
+    },
+    {
+      "name": "restore_allowed",
+      "kind": "restore",
+      "previous": "rel-current",
+      "incoming": "rel-old",
+      "denied": false,
+      "expect": "rel-old"
+    }
+  ]
+}
