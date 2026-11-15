@@ -1,7 +1,7 @@
 # F12 Rust 검증 청킹 내보내기
 
 > v5.0 기준: [[SCOPE_v5]] 적용. 주력 React·TypeScript·Tailwind·Rust·PostgreSQL. LLM·C++ 제외, Go는 국소 배포 도구로 필요할 때만 사용합니다. 로컬 자원은 [[02_RESOURCE_BUDGET]] 참조.
-상태: 설계 / 구현 전. 기준: DataGrizzly v2.0. 세부 보완은 본 문서 세트 v2.1에서 제안합니다.
+상태: M4-01부터 M4-03의 라이브러리, CLI, 내보내기, 빌드 게이트를 `feat/m4-rust`에 넣었다. 같은 입력의 청크 재현과 한글·코드 경계, 검사 실패 시 기존 파일 유지를 테스트했다. WASM 브라우저 모듈은 wasm32 타깃이 없어 미실행이고, 편집기 저장은 서버 검사를 유지한다. React 후보 빌드 전체와 디스크 가득 주입은 미실행이다. 기준: DataGrizzly v2.0.
 
 ## 사용자와 범위
 

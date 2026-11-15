@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datagrizzly.local/schemas/chunks.schema.json",
+  "title": "Content chunk line",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["chunkId", "anchor", "order", "text"],
+  "properties": {
+    "chunkId": { "type": "string", "minLength": 64, "maxLength": 64 },
+    "anchor": { "type": "string", "minLength": 1 },
+    "order": { "type": "integer", "minimum": 0 },
+    "text": { "type": "string" }
+  }
+}

@@ -1,13 +1,15 @@
 /**
  * 개념: 블록 편집 화면.
  * 목적: 계약된 블록을 자동 저장하고, 충돌과 실패 때 로컬 내용을 유지한다.
- * 사용처: /admin/entries/{id}/edit.
+ * 실행: 자동 저장은 항상 서버의 블록 검사를 지난다. 브라우저 모듈은 열릴 때 한 번만 시도하고, 없거나 늦으면 저장을 막지 않는다.
+ * 사용처: /admin/entries/{id}/edit. 관련: services/api/src/content.rs, tools/content-core, wasm-check.ts.
  */
 import { useEffect, useState } from 'react'
 import { AdminFrame } from '../AdminFrame'
 import { clearOwnerSession, draftKey, readCsrf } from '../session'
 import { canAutosave, reduceSave, type SaveState } from './autosave'
 import { blankBlock, blockLines, type Block, type EntryDocument } from './blocks'
+import { loadOptionalCheck } from './wasm-check'
 
 type LoadedEntry = {
   id: string
@@ -53,6 +55,7 @@ export default function Editor({ entryId }: { entryId: string }) {
   const [publishNote, setPublishNote] = useState('')
   const [scheduleAt, setScheduleAt] = useState('')
   const [loadError, setLoadError] = useState('')
+  const [browserCheck, setBrowserCheck] = useState<'server' | 'browser'>('server')
 
   useEffect(() => {
     if (!csrf) return
@@ -117,6 +120,22 @@ export default function Editor({ entryId }: { entryId: string }) {
     }, 800)
     return () => window.clearTimeout(timer)
   }, [saveState, title, summary, blocks, entry])
+
+  useEffect(() => {
+    let cancelled = false
+    void loadOptionalCheck(
+      () => fetch('/admin/wasm/content.js').then((response) => {
+        if (!response.ok) throw new Error('missing')
+        return response
+      }),
+      1500,
+    ).then((loaded) => {
+      if (!cancelled) setBrowserCheck(loaded ? 'browser' : 'server')
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     function onLeave(event: BeforeUnloadEvent) {
@@ -328,7 +347,7 @@ export default function Editor({ entryId }: { entryId: string }) {
 
   return (
     <AdminFrame title="블록 편집기">
-      <p className="dg-chip mb-4">{statusText(saveState.status)}</p>
+      <p className="dg-chip mb-4" data-content-check={browserCheck}>{statusText(saveState.status)}</p>
       {/* 글을 불러온 뒤에만 미리보기, 이력, 발행 접수로 이동한다. 접수는 공개 완료가 아니다. */}
       <p className="mb-4 flex flex-wrap gap-2">
         <a className="dg-btn-ghost" href={`/admin/entries/${entry.id}/preview`}>미리보기</a>

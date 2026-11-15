@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "revisionId": "11111111-1111-4111-8111-111111111111",
+  "entryId": "22222222-2222-4222-8222-222222222222",
+  "createdAt": "2026-11-14T00:00:00Z",
+  "title": "현장 메모",
+  "summary": "저장한 요약",
+  "canonicalUrl": "https://datagrizzly.local/notes/field-note",
+  "blocks": [
+    {
+      "id": "33333333-3333-4333-8333-333333333333",
+      "type": "heading",
+      "level": 2,
+      "text": "현장 메모",
+      "anchor": "field-note"
+    },
+    {
+      "id": "44444444-4444-4444-8444-444444444444",
+      "type": "paragraph",
+      "text": "저장한 문장"
+    },
+    {
+      "id": "55555555-5555-4555-8555-555555555555",
+      "type": "code",
+      "language": "rust",
+      "text": "fn main() {}"
+    },
+    {
+      "id": "66666666-6666-4666-8666-666666666666",
+      "type": "math",
+      "tex": "E=mc^2"
+    },
+    {
+      "id": "77777777-7777-4777-8777-777777777777",
+      "type": "image",
+      "alt": "표지",
+      "url": "https://datagrizzly.local/a.png"
+    },
+    {
+      "id": "88888888-8888-4888-8888-888888888888",
+      "type": "list",
+      "ordered": false,
+      "items": ["가", "나", "다"]
+    }
+  ],
+  "metadata": { "type": "note" }
+}

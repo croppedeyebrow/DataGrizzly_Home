@@ -1,5 +1,8 @@
 node_modules/
 services/api/target/
+tools/content-core/target/
+tools/content-cli/target/
+tools/content-wasm/target/
 services/api/var/
 dist/
 .astro/

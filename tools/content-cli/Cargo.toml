@@ -1,0 +1,18 @@
+[package]
+name = "content-cli"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# 개념: dg-content 명령.
+# 목적: content-core의 검사 결과를 종료 코드와 파일로 바꾼다.
+# 사용처: `dg-content validate|extract|chunk|export`.
+# 관련: `tools/content-core`, `infra/publish/build-candidate.mjs`.
+
+[[bin]]
+name = "dg-content"
+path = "src/main.rs"
+
+[dependencies]
+content-core = { path = "../content-core" }
+serde_json = "1"
