@@ -76,3 +76,32 @@ fn contract_version_and_stdin_validate() {
     let accepted = accepted.wait_with_output().unwrap();
     assert!(accepted.status.success(), "{}", String::from_utf8_lossy(&accepted.stderr));
 }
+
+/// 개념: 추출 JSON의 정규화.
+/// 실행: `normalize -`는 stdin JSON의 공백을 줄이고 같은 절 ID를 다시 낸다.
+/// 목적: Python이 절 ID 알고리즘을 따로 갖지 않게 한다.
+/// 관련: `tools/content-core/src/normalize.rs`.
+#[test]
+fn normalize_stdin_is_stable() {
+    let binary = std::env::current_exe().unwrap().parent().unwrap().parent().unwrap().join("dg-content.exe");
+    let payload = br#"{"schemaVersion":1,"sourceId":"source-1","sourceHash":"abc","kind":"pdf","title":"Field","authors":[],"parts":[{"page":1,"text":"Field   note"}]}"#;
+    let once = normalize_stdin(&binary, payload);
+    let twice = normalize_stdin(&binary, payload);
+    assert_eq!(once, twice);
+    assert!(once.contains("Field note"));
+    assert!(once.contains("\"page\":1"));
+}
+
+fn normalize_stdin(binary: &std::path::Path, payload: &[u8]) -> String {
+    let mut child = Command::new(binary)
+        .args(["normalize", "-"])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .unwrap();
+    child.stdin.take().unwrap().write_all(payload).unwrap();
+    let result = child.wait_with_output().unwrap();
+    assert!(result.status.success(), "{}", String::from_utf8_lossy(&result.stderr));
+    String::from_utf8(result.stdout).unwrap()
+}

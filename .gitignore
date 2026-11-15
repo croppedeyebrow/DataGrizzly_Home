@@ -13,6 +13,7 @@ dist/
 !.env.example
 .venv/
 workers/document-workflow/checkpoints/
+workers/document-workflow/var/
 workers/document-workflow/private/
 workers/document-workflow/.langgraph/
 *.log

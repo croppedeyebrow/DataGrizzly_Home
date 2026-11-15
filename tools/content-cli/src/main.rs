@@ -4,7 +4,8 @@
 //! 관련: `tools/content-core`, `infra/publish/content-gate.mjs`, `apps/admin/src/editor/Editor.tsx`.
 
 use content_core::{
-    canonical_jsonl, check_document, chunk_document, exit_code, export_document, extract_sections, write_atomic, ContentError,
+    canonical_jsonl, check_document, chunk_document, exit_code, export_document, extract_sections, normalize_document, write_atomic,
+    ContentError,
 };
 use std::env;
 use std::fs;
@@ -32,6 +33,20 @@ fn run(args: Vec<String>) -> Result<(), u8> {
     if command == "contract" {
         println!(r#"{{"schemaVersion":1}}"#);
         return Ok(());
+    }
+    if command == "normalize" && args.get(1).map(String::as_str) == Some("-") {
+        let mut input = String::new();
+        std::io::stdin().read_to_string(&mut input).map_err(|_| 1u8)?;
+        return match normalize_document(&input) {
+            Ok(value) => {
+                println!("{value}");
+                Ok(())
+            }
+            Err(code) => {
+                eprintln!(r#"{{"code":"{code}"}}"#);
+                Err(1)
+            }
+        };
     }
     if command == "validate" && args.get(1).map(String::as_str) == Some("-") {
         let mut input = String::new();
@@ -105,6 +120,6 @@ fn error_line(path: &str, code: &str, message: &str) -> ContentError {
 }
 
 fn usage() -> u8 {
-    eprintln!("usage: dg-content contract | <validate|extract|chunk|export> <file|-> [out]");
+    eprintln!("usage: dg-content contract | normalize - | <validate|extract|chunk|export> <file|-> [out]");
     2
 }

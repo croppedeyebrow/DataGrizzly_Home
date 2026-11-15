@@ -5,11 +5,13 @@
 
 mod chunk;
 mod export;
+mod normalize;
 mod validate;
 mod walk;
 
 pub use chunk::{canonical_jsonl, chunk_document, write_atomic, Chunk, CHUNK_CHARS};
 pub use export::{export_document, safe_relative, ExportFile};
+pub use normalize::normalize_document;
 pub use validate::{check_document, ContentError};
 pub use walk::{extract_sections, walk_blocks, Section, WalkedBlock};
 
