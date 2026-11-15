@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datagrizzly.local/contracts/ingestion/import-request.schema.json",
+  "title": "ImportRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["requestId"],
+  "properties": {
+    "requestId": { "type": "string", "format": "uuid", "description": "같은 접수 요청을 다시 보내도 작업을 늘리지 않는 키." },
+    "sourceId": { "type": "string", "format": "uuid", "description": "기존 미디어 API가 발급한 비공개 업로드 ID. 로컬 경로나 object key가 아니다." },
+    "url": { "type": "string", "description": "주소 수집은 이 단계에서 받지 않는다." }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datagrizzly.local/contracts/ingestion/import-response.schema.json",
+  "title": "ImportAccepted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["jobId", "sourceId", "status", "version", "duplicate"],
+  "properties": {
+    "jobId": { "type": "string", "format": "uuid" },
+    "sourceId": { "type": "string", "format": "uuid" },
+    "status": { "$ref": "job-status.schema.json" },
+    "version": { "type": "integer", "minimum": 1, "description": "업무 행의 낙관 잠금 번호. reviewVersion이 아니다." },
+    "duplicate": { "type": "boolean" }
+  }
+}

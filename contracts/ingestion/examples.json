@@ -1,0 +1,14 @@
+{
+  "sourceId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  "jobId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+  "commandId": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+  "reviewVersion": 3,
+  "jobVersion": 1,
+  "meanings": {
+    "sourceId": "관리자가 이미 올린 비공개 파일의 미디어 ID",
+    "jobId": "그 파일을 접수한 뒤 생기는 작업 ID",
+    "commandId": "검토 화면에서 승인하거나 거절하는 명령 ID",
+    "reviewVersion": "그 검토 화면의 번호. 작업 행의 version과 다르다",
+    "jobVersion": "작업 행을 바꿀 때 보내는 낙관 잠금 번호"
+  }
+}

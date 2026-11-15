@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datagrizzly.local/contracts/ingestion/import-error.schema.json",
+  "title": "ImportError",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["error"],
+  "properties": {
+    "error": { "type": "string", "enum": ["unauthorized", "forbidden", "not_found", "invalid", "conflict", "unavailable"] },
+    "code": {
+      "type": "string",
+      "enum": [
+        "url_not_accepted",
+        "source_required",
+        "private_source",
+        "source_not_ready",
+        "payload_conflict",
+        "stale_version",
+        "illegal_transition",
+        "invalid_status"
+      ]
+    },
+    "jobId": { "type": "string", "format": "uuid" },
+    "version": { "type": "integer", "minimum": 1 },
+    "status": { "$ref": "job-status.schema.json" }
+  }
+}

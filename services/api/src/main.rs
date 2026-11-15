@@ -8,6 +8,7 @@ mod catalog;
 mod content;
 mod db;
 mod discovery;
+mod ingestion;
 mod media;
 mod project;
 mod publication;
@@ -47,6 +48,8 @@ pub fn app(pool: PgPool) -> Router {
         .merge(schedule::router())
         // 공개 검색. 질문 API는 만들지 않는다.
         .merge(discovery::router())
+        // 문서 접수. 그래프 실행과 모델 호출은 하지 않는다.
+        .merge(ingestion::router())
         .fallback(not_found)
         .with_state(pool)
 }

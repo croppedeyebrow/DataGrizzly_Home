@@ -639,6 +639,13 @@ mod tests {
         assert_eq!(name, "datagrizzly_m2");
         crate::db::migrate(&pool).await.expect("isolated migration");
         for table in [
+            "ingestion_requests",
+            "ingestion_draft_receipts",
+            "ingestion_events",
+            "ingestion_commands",
+            "ingestion_artifacts",
+            "ingestion_jobs",
+            "ingestion_sources",
             "public_search_section",
             "public_search_document",
             "public_search_load",
