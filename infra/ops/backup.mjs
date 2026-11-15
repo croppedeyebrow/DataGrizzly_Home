@@ -10,7 +10,7 @@
  * 연관: `missingMedia`.
  */
 export function backupTargets() {
-  return ['database', 'media', 'entry_denylist', 'release_manifest']
+  return ['database', 'media', 'entry_denylist', 'release_manifest', 'workflow_checkpoint']
 }
 
 /**

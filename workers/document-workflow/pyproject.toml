@@ -10,6 +10,8 @@ dependencies = [
     "httpx>=0.28.1",
     "langchain-core>=1.8.0",
     "langgraph>=1.2.22",
+    "langgraph-checkpoint-postgres>=3.2.1",
+    "psycopg[binary,pool]>=3.3.9",
     "pydantic>=2.14.3",
     "pypdf>=7.1.0",
 ]

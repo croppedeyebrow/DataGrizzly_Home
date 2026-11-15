@@ -53,7 +53,7 @@ test('schema rollback stays manual and the database port stays on loopback', asy
 })
 
 test('restore refuses the production database and keeps the denylist in scope', () => {
-  assert.deepEqual(backupTargets(), ['database', 'media', 'entry_denylist', 'release_manifest'])
+  assert.deepEqual(backupTargets(), ['database', 'media', 'entry_denylist', 'release_manifest', 'workflow_checkpoint'])
   assert.equal(restoreAllowed({ sourceDb: 'datagrizzly', targetDb: 'datagrizzly', sourceRoot: 'D:/backup', targetRoot: 'E:/restore' }).code, 'same_database')
   assert.equal(restoreAllowed({ sourceDb: 'datagrizzly', targetDb: 'datagrizzly_restore', sourceRoot: 'D:/data', targetRoot: 'D:/data' }).code, 'same_disk')
   assert.equal(restoreAllowed({ sourceDb: 'datagrizzly', targetDb: 'datagrizzly_restore', sourceRoot: 'D:/data', targetRoot: 'E:/restore' }).ok, true)
