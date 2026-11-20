@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "publicResult": {
+    "entryId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+    "revisionId": "cccccccc-cccc-4ccc-8ccc-ccccccccccc1",
+    "title": "현장 메모",
+    "kind": "note",
+    "snippet": "현장의 데이터에서",
+    "url": "/notes/field-note#measure"
+  },
+  "hidden": [
+    {"kind": "draft", "text": "이 초안 문장은 검색되면 안 된다"},
+    {"kind": "withdrawn", "text": "철회된 문장은 검색되면 안 된다"},
+    {"kind": "previousRelease", "text": "오래된 문장만 있는 릴리스"}
+  ]
+}

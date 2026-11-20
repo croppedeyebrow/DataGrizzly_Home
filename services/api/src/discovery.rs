@@ -327,6 +327,20 @@ pub fn result_url(kind: &str, slug: &str, anchor: &str) -> String {
     if anchor.is_empty() { path } else { format!("{path}#{anchor}") }
 }
 
+/// 기능: 공개 검색 결과 한 건.
+/// 목적: 관련 글은 응답의 entryId, revisionId, url, snippet만 쓰고 절 전체는 넣지 않는다.
+/// 연관: `GET /api/search`, 워커 `PublicSearchRetriever`. 이 함수는 워커 프로세스를 부르지 않는다.
+pub fn public_hit(entry_id: &str, revision_id: &str, title: &str, kind: &str, snippet_text: &str, url: &str) -> Value {
+    json!({
+        "entryId": entry_id,
+        "revisionId": revision_id,
+        "title": title,
+        "kind": kind,
+        "snippet": snippet_text,
+        "url": url,
+    })
+}
+
 /// 기능: 검색어 주변의 짧은 문장.
 /// 목적: 결과 목록에 절 전체를 넣지 않고, 맞는 부분만 보여 준다.
 /// 연관: `GET /api/search`의 snippet.
@@ -421,13 +435,8 @@ async fn search(State(pool): State<PgPool>, headers: HeaderMap, Query(params): Q
     let _ = tx.commit().await;
     let results: Vec<_> = rows
         .into_iter()
-        .map(|(_, _, _, title, kind, slug, _heading, anchor, body)| {
-            json!({
-                "title": title,
-                "kind": kind,
-                "snippet": snippet(&body, &query),
-                "url": result_url(&kind, &slug, &anchor),
-            })
+        .map(|(entry_id, revision_id, _, title, kind, slug, _heading, anchor, body)| {
+            public_hit(&entry_id.to_string(), &revision_id.to_string(), &title, &kind, &snippet(&body, &query), &result_url(&kind, &slug, &anchor))
         })
         .collect();
     json_response(StatusCode::OK, json!({"schemaVersion": 1, "results": results}).to_string(), None)
@@ -585,7 +594,7 @@ fn cells(values: &Vec<Value>) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{active_search_release, allow_hit, goal_met, like_pattern, percentile, prepare_query, project_filter, restored_search_release, result_url, score_search, search_hits, search_type, sections_from_snapshot, snippet, snippet_after_recovery, QueryError, SearchSection, ACTIVE_RELEASE_SQL, P95_TARGET_MS, RECALL_TARGET_PER_MILLE, SEARCH_SQL, STATEMENT_TIMEOUT_MS, TIMEOUT_SQL, TOP_K};
+    use super::{active_search_release, allow_hit, goal_met, like_pattern, percentile, prepare_query, project_filter, public_hit, restored_search_release, result_url, score_search, search_hits, search_type, sections_from_snapshot, snippet, snippet_after_recovery, QueryError, SearchSection, ACTIVE_RELEASE_SQL, P95_TARGET_MS, RECALL_TARGET_PER_MILLE, SEARCH_SQL, STATEMENT_TIMEOUT_MS, TIMEOUT_SQL, TOP_K};
     use serde_json::Value;
 
     /// 기능: 30문항과 거절 규칙.
@@ -715,6 +724,38 @@ mod tests {
             published_revision: "rev-new".to_string(),
         };
         assert!(search_hits(&[stale], "오래된", "rel-active", &[]).is_empty());
+    }
+
+    /// 기능: 공개 검색 응답과 숨긴 문장.
+    /// 목적: 초안, 철회, 이전 릴리스, 이전 수정본은 결과와 snippet에 없고, 검색은 워커를 부르지 않는다.
+    /// 연관: `evaluations/search/m5-01.json`, `public_hit`, W14, W16.
+    #[test]
+    fn public_hit_keeps_hidden_text_out() {
+        let source = include_str!("discovery.rs");
+        let worker = ["dg", "workflow"].join("-");
+        let command = ["Command", "new"].join("::");
+        assert!(!source.contains(&worker));
+        assert!(!source.contains(&command));
+        let fixture: Value = serde_json::from_str(include_str!("../../../evaluations/search/m5-01.json")).unwrap();
+        let active = fixture["activeRelease"].as_str().unwrap();
+        let sections = fixture["sections"].as_array().unwrap().iter().map(section_from_json).collect::<Vec<_>>();
+        let hidden = ["이 초안 문장은 검색되면 안 된다", "오래된 문장만 있는 릴리스", "Rust 검증기를 발행 작업에 연결한다"];
+        assert!(search_hits(&sections, "비밀", active, &[]).is_empty());
+        assert!(search_hits(&sections, "오래된", active, &[]).is_empty());
+        let denied = vec!["bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb3".to_string()];
+        assert!(search_hits(&sections, "Rust", active, &denied).is_empty());
+        let hits = search_hits(&sections, "현장", active, &[]);
+        assert!(!hits.is_empty());
+        let hit = hits[0];
+        let value = public_hit(hit.entry_id.as_str(), "cccccccc-cccc-4ccc-8ccc-ccccccccccc1", hit.title.as_str(), "note", &snippet(&hit.body, "현장"), &result_url("note", "field-note", hit.anchor.as_str()));
+        assert_eq!(value["entryId"], hit.entry_id);
+        assert_eq!(value["revisionId"], "cccccccc-cccc-4ccc-8ccc-ccccccccccc1");
+        assert!(value["url"].as_str().unwrap().starts_with('/'));
+        assert!(value.get("body").is_none());
+        let encoded = value.to_string();
+        for secret in hidden {
+            assert!(!encoded.contains(secret), "{secret}");
+        }
     }
 
     fn section_from_json(value: &Value) -> SearchSection {
